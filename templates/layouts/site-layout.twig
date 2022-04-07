@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css"/>
+        <title>{% block title %}{% endblock %} - Katr</title>
+        <base href="{{ baseUrl }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="Katr">
+        <meta name="author" content="digivisible.cz">
+
+        <link rel="stylesheet" href="bundle/root.css" />
+        <script defer src="bundle/index.js"></script>
+    </head>
+    <body>
+        <div id="content">
+          {% block content %}{% endblock %}
+        </div>
+        <div id="footer">
+            {% block footer %}
+                &copy; Copyright 2011 by <a href="http://domain.invalid/">you</a>.
+            {% endblock %}
+        </div>
+    </body>
+</html>
