@@ -1,39 +1,48 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        {# Info #}
-        <title>
-            {{ block('seoTitle') }}- Katr s.r.o.
-        </title>
-        <base href="{{ baseUrl }}" />
+    {# Info #}
+    <title>
+      {{ block('seoTitle') }}- Katr s.r.o.
+    </title>
+    <base href="{{ baseUrl }}" />
 
-        {# SEO #}
-        <meta name="description" content="Katr" />
-        <meta name="author" content="digivisible.cz" />
+    {# SEO #}
+    <meta name="description" content="Katr" />
+    <meta name="author" content="digivisible.cz" />
 
-        {# Bundle files #}
-        <link rel="stylesheet" href="bundle/root.css" />
-        <script defer src="bundle/index.js"></script>
+    {# Bundle files #}
+    <link rel="stylesheet" href="bundle/root.css" />
+    <script defer src="bundle/index.js"></script>
 
-        {# Fonts #}
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Poppins:600,500,400,300,700,800,200&display=swap" />
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Bebas+Neue:400&display=swap" />
-    </head>
-    <body>
-        {% include 'layouts/header.twig' with {
-            title: block('title'),
+    {# Fonts #}
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:600,500,400,300,700,800,200&display=swap" />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Bebas+Neue:400&display=swap" />
+  </head>
+  <body>
+    {% if block('title') is defined %}
+      {% include 'layouts/header.twig' with {
+        title: block('title')
+      }|merge(
+        block('description') ?? false
+          ? {
             description: block('description')
-        } %}
-        <div id="content">
-            {{ block('content') }}
-        </div>
-        {% include 'layouts/footer.twig' %}
-    </body>
+          }
+          : {}
+      ) %}
+    {% else %}
+      {% include 'layouts/header.twig' %}
+    {% endif %}
+    <div id="content">
+      {{ block('content') }}
+    </div>
+    {% include 'layouts/footer.twig' %}
+  </body>
 </html>

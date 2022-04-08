@@ -1,0 +1,48 @@
+{% extends 'layouts/site-layout.twig' %}
+
+{% block seoTitle %}
+  Úvod
+{% endblock %}
+
+{% block title %}
+  Aktuality
+{% endblock %}
+
+{% block content %}
+  <div class="blog">
+    <div class="blog-content">
+      <a href="post.html">
+        <div class="blog-box">
+          <h3>
+            Nadpis prvního článku
+          </h3>
+          <span class="date-main">10.12.2021</span>
+          <button class="btn">
+            <img src="assets/images/icons/right-arrow-white.png" />
+          </button>
+        </div>
+      </a>
+      <a href="post.html">
+        <div class="blog-box">
+          <h3>
+            Trochu delší nadpis druhého článku
+          </h3>
+          <span class="date-main">10.12.2021</span>
+          <button class="btn">
+            <img src="assets/images/icons/right-arrow-white.png" />
+          </button>
+        </div>
+      </a><a href="post.html">
+        <div class="blog-box">
+          <h3>
+            Opravdu dlouhý nadpis třetího článku a posledního článku na hlavní
+            stránce
+          </h3><span class="date-main">10.12.2021</span>
+          <button class="btn">
+            <img src="assets/images/icons/right-arrow-white.png" />
+          </button>
+        </div>
+      </a>
+    </div>
+  </div>
+{% endblock %}

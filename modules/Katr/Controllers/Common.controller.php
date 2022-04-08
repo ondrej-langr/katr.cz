@@ -8,5 +8,10 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Common
 {
+  private $container;
 
+  public function __construct(Container $container)
+  {
+    $this->container = $container;
+  }
 }

@@ -1,12 +1,12 @@
 <ul>
-    <li x-on:mouseover="currrentSubmenu='dropdown-menu-1'" x-on:mouseleave="currrentSubmenu=false">
+    <li x-on:mouseover="currrentSubmenu='dropdown-menu-1'" x-on:mouseleave="currrentSubmenu=false" :class="{'active': currrentSubmenu=='dropdown-menu-1'}">
         <a  class="dropdown link" 
             href="!#" 
             x-on:click.prevent="currrentSubmenu='dropdown-menu-1'">
             O firmě <i class="fa-solid fa-plus"></i>
         </a>
     </li>
-    <li x-on:mouseover="currrentSubmenu='dropdown-menu-2'" x-on:mouseleave="currrentSubmenu=false">
+    <li x-on:mouseover="currrentSubmenu='dropdown-menu-2'" x-on:mouseleave="currrentSubmenu=false" :class="{'active': currrentSubmenu=='dropdown-menu-2'}">
         <a  class="dropdown link" 
             href="!#" 
             x-on:click.prevent="currrentSubmenu='dropdown-menu-2'">
