@@ -1,0 +1,18 @@
+<ul>
+    <li x-on:mouseover="currrentSubmenu='dropdown-menu-1'" x-on:mouseleave="currrentSubmenu=false">
+        <a  class="dropdown link" 
+            href="!#" 
+            x-on:click.prevent="currrentSubmenu='dropdown-menu-1'">
+            O firmě <i class="fa-solid fa-plus"></i>
+        </a>
+    </li>
+    <li x-on:mouseover="currrentSubmenu='dropdown-menu-2'" x-on:mouseleave="currrentSubmenu=false">
+        <a  class="dropdown link" 
+            href="!#" 
+            x-on:click.prevent="currrentSubmenu='dropdown-menu-2'">
+            Služby <i class="fa-solid fa-plus"></i>
+        </a>
+    </li>
+    <li x-on:mouseleave="currrentSubmenu=false"><a href="/kariera">Kariéra</a></li>
+    <li x-on:mouseleave="currrentSubmenu=false"><a href="/kontakt">Kontakt</a></li>
+</ul>

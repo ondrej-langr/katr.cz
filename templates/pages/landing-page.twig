@@ -1,10 +1,223 @@
-{% extends "layouts/site-layout.twig" %}
+{% extends 'layouts/site-layout.twig' %}
 
-{% block title %}Hlavní stránka{% endblock %}
+{% block seoTitle %}
+    Úvod
+{% endblock %}
+
+{% block title %}
+    Komplexní služby<br />v lesním hospodářství
+{% endblock %}
+
+{% block description %}
+    Dnes poskytujeme komplexní služby v lesním hospodářství od pěstební
+    činnosti, přes těžbu a odvoz dřeva, na které navazuje pilařský provoz s
+    produkcí širokého sortimentu omítaného i neomítaného řeziva a vedlejších
+    produktů (pilina, stěpka atd.). Vlastní dílenský provoz nabízí prodej PHM,
+    servis a opravy osobních i nákladních automobilů vč. nově otevřeného servisu
+    zahradní techniky.
+{% endblock %}
 
 {% block content %}
-    <h1>Index</h1>
-    <p class="important">
-        Welcome on my awesome homepage.hell yesassad
-    </p>
+    <div class="why" id="why">
+        <div class="why-content">
+            <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                <h2>
+                    Jsme opravdoví specialisté
+                </h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+            </div>
+            <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                <h2>
+                    S námi dlouho nečekáte
+                </h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+            </div>
+            <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                <h2>
+                    Ve všem vám poradíme
+                </h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="about">
+        <div class="about-content" id="services">
+            <div class="about-text col-12 col-lg-4 col-md-12 col-sm-12 col-xl-4 col-xxl-4">
+                <h2>
+                    7 základních<br />činností firmy
+                </h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Phasellus pulvinar faucibus neque, nec rhoncus nunc ultrices
+                    sit amet. Curabitur ac sagittis neque, vel egestas est.
+                    Aenean elementum, erat at aliquet hendrerit.
+                </p><a href="contact.html">
+                    <button class="btn">Kontaktujte nás</button>
+                </a>
+            </div>
+            <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service1.html">
+                        <span class="number">1</span> <h2>
+                            Lesnictví
+                        </h2> <p>
+                            V našich školkách pěstujeme široký sortiment
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service2.html">
+                        <span class="number">2</span> <h2>
+                            Dřevařská výroba
+                        </h2> <p>
+                            Provádíme odvoz kulatého dříví v délkách od 2 do 14m
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service3.html">
+                        <span class="number">3</span> <h2>
+                            Doprava
+                        </h2> <p>
+                            Provádíme odvoz kulatého dříví v délkách od 2 do 14m
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service4.html">
+                        <span class="number">4</span> <h2>
+                            Pohonné hmoty
+                        </h2> <p>
+                            Prodej a rozvoz pohonných hmot od prověřených
+                            dodavatelů
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service5.html">
+                        <span class="number">5</span> <h2>
+                            Servis
+                        </h2> <p>
+                            Poskytujeme servis osobních vozidel a zahradní
+                            techniky
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service6.html">
+                        <span class="number">6</span> <h2>
+                            Prodej produktů
+                        </h2> <p>
+                            Prodej různých druhů dřeva, briket, pilin a další
+                        </p>
+                    </a>
+                </div>
+                <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                    <a href="service7.html">
+                        <span class="number">7</span> <h2>
+                            Nákup
+                        </h2> <p>
+                            Odkoupíme od vás nejrůznější druhy dřeva
+                        </p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="blog-main">
+        <div class="blog-main-content">
+            <div class="blog-main-image col-lg-5 col-xl-5 col-xxl-5">
+                <img src="images/blog-main.jpg" />
+            </div>
+            <div class="blog-main-inner col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7">
+                <h2>
+                    Aktuálně se děje ..
+                </h2>
+                <a href="">
+                    <div class="blog-main-box">
+                        <span class="date-main">10.12.2021</span>
+                        <h3>
+                            Nadpis prvního článku
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a>
+                <a href="">
+                    <div class="blog-main-box">
+                        <span class="date-main">10.12.2021</span>
+                        <h3>
+                            Trochu delší nadpis druhého článku
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a>
+                <a href="">
+                    <div class="blog-main-box">
+                        <span class="date-main">10.12.2021</span>
+                        <h3>
+                            Opravdu dlouhý nadpis třetího článku a posledního
+                            článku na hlavní stránce
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a>
+                <a href="blog.html">
+                    <button class="btn light">Všechny články</button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="work-main">
+        <div class="work-main-content">
+            <div class="col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7 work-main-inner">
+                <h2>
+                    <small>S námi můžete růst</small>na těchto pozicích
+                </h2><a href="work.html#w1">
+                    <div class="work-main-box">
+                        <h3>
+                            Řidič odvozní soupravy
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a><a href="work.html#w2">
+                    <div class="work-main-box">
+                        <h3>
+                            Dělník pilařského provozu
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a><a href="work.html#w3">
+                    <div class="work-main-box">
+                        <h3>
+                            Opravář vozidel
+                        </h3>
+                        <button class="btn">
+                            <img src="images/icons/right-arrow-white.png" />
+                        </button>
+                    </div>
+                </a><a href="work.html">
+                    <button class="btn">Všechny pracovní pozice</button>
+                </a>
+            </div>
+            <div class="work-main-image col-lg-5 col-xl-5 col-xxl-5">
+                <img src="images/work-main.jpg" />
+            </div>
+        </div>
+    </div>
 {% endblock %}

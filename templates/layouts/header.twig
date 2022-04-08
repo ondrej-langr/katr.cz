@@ -1,0 +1,46 @@
+<header>
+    <nav>
+        <div class="nav-topper">
+            <div class="nav-topper-content">
+                <ul class="left">
+                    <li><a href="tel:+420554230811">+420 554 230 811</a></li>
+                    <li>
+                        <a href="mailto:sekretariat@katr.cz">
+                            sekretariat@katr.cz
+                        </a>
+                    </li>
+                </ul>
+                <ul class="right">
+                    <li>
+                        <a href="news.html">Aktuality</a>
+                        <a href="work.html">Kariéra</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav-content" x-data="{ currrentSubmenu: false }">
+            <a href="/" class="logo-wrap">
+                <img src="assets/images/katr-logo.svg" class="logo" />
+                <img src="assets/images/katr-logo-white.svg"
+                    class="logo white" />
+            </a>
+            {% include 'layouts/header/links-list.twig' %}
+            <div class="submenu toggled" @mouseleave="currrentSubmenu=false">
+                {% include 'layouts/header/dropdown-1.twig' %}
+                {% include 'layouts/header/dropdown-2.twig' %}
+            </div>
+        </div>
+    </nav>
+    <img src="assets/images/header-bg2.jpg" class="image" />
+    <div class="overlay"></div>
+    <div class="content">
+        <h1>
+            {{ title|raw }}
+        </h1>
+        {% if description is defined %}
+            <p>
+                {{ description|raw }}
+            </p>
+        {% endif %}
+    </div>
+</header>
