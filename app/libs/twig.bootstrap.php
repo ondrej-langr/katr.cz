@@ -13,6 +13,11 @@ if (!file_exists($templatesPath)) {
 }
 
 $twigLoader = new FilesystemLoader($templatesPath);
-$twig = new Environment($twigLoader, !$PROM_DEVELOPMENT_MODE ? [
-  'cache' => $cachePath,
-] : []);
+$twig = new Environment(
+  $twigLoader,
+  !$PROM_DEVELOPMENT_MODE
+    ? [
+      'cache' => $cachePath,
+    ]
+    : [],
+);
