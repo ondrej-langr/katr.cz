@@ -3,13 +3,13 @@
 use Illuminate\Database\Eloquent\Model;
 
 
-class Posts extends Model
+class Positions extends Model
 {
   
 
-  protected $table = 'posts';
-  protected $modelIcon = 'ArchiveIcon';
-  public $timestamps = true;
+  protected $table = 'positions';
+  protected $modelIcon = 'AcademicCapIcon';
+  public $timestamps = false;
   protected $hasSoftDeletes = false;
   protected $adminSettings = [
     "layout" => "post-like"
@@ -30,7 +30,7 @@ class Posts extends Model
           'title' => 'ID', 'type' => 'number', 'editable' => false, 'autoIncrement' => true
         ],
     
-       'description' => [
+       'descriptions' => [
           'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'Popisek'
         ],
     
@@ -50,7 +50,7 @@ class Posts extends Model
 
   
   protected $fillable = [
-    'id', 'description', 'seoDescription', 'title', 'content'
+    'id', 'descriptions', 'seoDescription', 'title', 'content'
   ];
 
   

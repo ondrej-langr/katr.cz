@@ -2,15 +2,19 @@
 
 use Illuminate\Database\Eloquent\Model;
 
+  use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Pages extends Model
 {
   
+    use SoftDeletes;
+  
 
   protected $table = 'pages';
   protected $modelIcon = 'BookOpenIcon';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
+  public $timestamps = true;
+  protected $hasSoftDeletes = true;
   protected $adminSettings = [
     "layout" => "post-like"
   ];
@@ -30,8 +34,12 @@ class Pages extends Model
           'title' => 'ID', 'type' => 'number', 'editable' => false, 'autoIncrement' => true
         ],
     
+       'descriptions' => [
+          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'Popisek'
+        ],
+    
        'seoDescription' => [
-          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'SEO Description'
+          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'SEO Popisek'
         ],
     
        'title' => [
@@ -46,7 +54,7 @@ class Pages extends Model
 
   
   protected $fillable = [
-    'id', 'seoDescription', 'title', 'content'
+    'id', 'descriptions', 'seoDescription', 'title', 'content'
   ];
 
   
