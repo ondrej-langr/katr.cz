@@ -64,7 +64,7 @@ if (!defined('PROM_CORE_DIR')) {
     'PROM_CORE_DIR',
     $PROM_ROOT_FOLDER .
       DIRECTORY_SEPARATOR .
-      implode(DIRECTORY_SEPARATOR, ['modules', 'Core'])
+      implode(DIRECTORY_SEPARATOR, ['modules', 'Core']),
   );
 }
 if (!defined('PROM_IS_API_REQUEST')) {
@@ -73,6 +73,6 @@ if (!defined('PROM_IS_API_REQUEST')) {
     (isset($_SERVER['REQUEST_URI']) &&
       strpos($_SERVER['REQUEST_URI'], PROM_URL_BASE . '/api/')) !== false
       ? 1
-      : 0
+      : 0,
   );
 }

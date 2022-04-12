@@ -3,12 +3,12 @@
 use Illuminate\Database\Eloquent\Model;
 
 
-class Positions extends Model
+class Services extends Model
 {
   
 
-  protected $table = 'positions';
-  protected $modelIcon = 'AcademicCapIcon';
+  protected $table = 'services';
+  protected $modelIcon = 'BriefcaseIcon';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
   protected $adminSettings = [

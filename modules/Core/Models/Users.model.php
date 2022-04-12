@@ -41,7 +41,7 @@ class Users extends Model
         ],
     
        'role' => [
-          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'title' => 'Role', 'type' => 'enum', 'enum' => ['Admin', 'Editor']
+          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'title' => 'Role', 'type' => 'enum', 'enum' => ['Admin', 'Maintainer', 'Editor']
         ],
     
   ];

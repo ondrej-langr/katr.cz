@@ -34,10 +34,6 @@ class Posts extends Model
           'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'Popisek'
         ],
     
-       'seoDescription' => [
-          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'SEO Popisek'
-        ],
-    
        'title' => [
           'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'title' => 'Title', 'type' => 'string'
         ],
@@ -50,7 +46,7 @@ class Posts extends Model
 
   
   protected $fillable = [
-    'id', 'description', 'seoDescription', 'title', 'content'
+    'id', 'description', 'title', 'content'
   ];
 
   

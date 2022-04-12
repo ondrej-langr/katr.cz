@@ -38,10 +38,6 @@ class Pages extends Model
           'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'Popisek'
         ],
     
-       'seoDescription' => [
-          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'longText', 'title' => 'SEO Popisek'
-        ],
-    
        'title' => [
           'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'title' => 'Title', 'type' => 'string'
         ],
@@ -54,7 +50,7 @@ class Pages extends Model
 
   
   protected $fillable = [
-    'id', 'descriptions', 'seoDescription', 'title', 'content'
+    'id', 'descriptions', 'title', 'content'
   ];
 
   
