@@ -41,7 +41,7 @@ class Contacts extends Model
         ],
     
        'second_telephone' => [
-          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Telefon'
+          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Druhý telefon'
         ],
     
        'email' => [

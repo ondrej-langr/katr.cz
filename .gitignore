@@ -3,3 +3,4 @@ cache
 vendor
 public/bundle
 .env
+backup
