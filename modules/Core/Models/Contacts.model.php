@@ -37,15 +37,15 @@ class Contacts extends Model
         ],
     
        'first_telephone' => [
-          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Telefon'
+          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Telefon'
         ],
     
        'second_telephone' => [
-          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Telefon'
+          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Telefon'
         ],
     
        'email' => [
-          'required' => true, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Email'
+          'required' => false, 'editable' => true, 'unique' => false, 'hide' => false, 'type' => 'string', 'title' => 'Email'
         ],
     
   ];
