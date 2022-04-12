@@ -30,7 +30,7 @@ class UserProfile
         'data' => \Users::where('id', $userId)
           ->get()
           ->firstOrFail(),
-      ]),
+      ])
     );
 
     return $response;
@@ -67,7 +67,7 @@ class UserProfile
           ->firstOrFail();
         $passwordIsValid = $passwordService->validate(
           $args['password'],
-          $user->password,
+          $user->password
         );
 
         if (!$passwordIsValid) {
@@ -112,7 +112,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $userId)->update($parsedBody['data']),
-      ]),
+      ])
     );
 
     return $response;
@@ -127,7 +127,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'result' => 'success',
-      ]),
+      ])
     );
 
     return $response;
@@ -167,7 +167,7 @@ class UserProfile
     try {
       $generatedEmailContent = $twigService->render(
         'email/password-reset',
-        $themePayload,
+        $themePayload
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
