@@ -26,5 +26,16 @@ services:
       - mysqldata:/var/lib/mysql
     ports:
       - 3306:3306
+
+  mysql_admin:
+    container_name: katr_prom_myadmin
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: 'mysql'
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
 volumes:
   mysqldata: {}
