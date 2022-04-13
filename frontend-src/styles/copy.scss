@@ -1515,25 +1515,33 @@ form h2 {
     max-width: 660px;
     width: 100%;
   }
-}
 
-.blog-post hr {
-  width: 20%;
-  max-width: 150px;
-  margin-top: 35px;
-  margin-bottom: 55px;
-}
+  iframe,
+  img.big-image {
+    width: 100%;
+    margin-top: 55px;
+    margin-bottom: 55px;
+  }
 
-.blog-post img {
-  width: 100%;
-  margin-top: 55px;
-  margin-bottom: 55px;
-}
+  hr {
+    width: 20%;
+    max-width: 150px;
+    margin-top: 35px;
+    margin-bottom: 55px;
+  }
 
-.blog-post iframe {
-  width: 100%;
-  margin-top: 55px;
-  margin-bottom: 55px;
+  .gallery {
+    display: grid;
+    width: 100%;
+    padding: 16px 0px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+
+    img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+  }
 }
 
 /* TABLET */
