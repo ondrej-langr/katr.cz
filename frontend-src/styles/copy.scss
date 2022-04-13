@@ -1507,9 +1507,14 @@ form h2 {
   margin-bottom: 0;
 }
 
-.blog-post h2 {
-  max-width: 660px;
-  width: 100%;
+.blog-post {
+  h2,
+  h3,
+  h4 {
+    margin-top: 2.5rem;
+    max-width: 660px;
+    width: 100%;
+  }
 }
 
 .blog-post hr {
