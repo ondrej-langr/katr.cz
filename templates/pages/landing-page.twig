@@ -135,40 +135,21 @@
         <h2>
           Aktuálně se děje ..
         </h2>
-        <a href="">
-          <div class="blog-main-box">
-            <span class="date-main">10.12.2021</span>
-            <h3>
-              Nadpis prvního článku
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a>
-        <a href="">
-          <div class="blog-main-box">
-            <span class="date-main">10.12.2021</span>
-            <h3>
-              Trochu delší nadpis druhého článku
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a>
-        <a href="">
-          <div class="blog-main-box">
-            <span class="date-main">10.12.2021</span>
-            <h3>
-              Opravdu dlouhý nadpis třetího článku a posledního článku na hlavní
-              stránce
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a>
+        {% for post in data.posts %}
+          <a href="/blog/{{ post.id }}">
+            <div class="blog-main-box">
+              <span class="date-main">
+                {{ post.created_at|date('d.m. Y') }}
+              </span>
+              <h3>
+                {{ post.title }}
+              </h3>
+              <button class="btn">
+                <img src="assets/images/icons/right-arrow-white.png" />
+              </button>
+            </div>
+          </a>
+        {% endfor %}
         <a href="blog"><button class="btn light">Všechny články</button></a>
       </div>
     </div>
@@ -178,34 +159,20 @@
       <div class="col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7 work-main-inner">
         <h2>
           <small>S námi můžete růst</small>na těchto pozicích
-        </h2><a href="kariera#w1">
-          <div class="work-main-box">
-            <h3>
-              Řidič odvozní soupravy
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a><a href="kariera#w2">
-          <div class="work-main-box">
-            <h3>
-              Dělník pilařského provozu
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a><a href="kariera#w3">
-          <div class="work-main-box">
-            <h3>
-              Opravář vozidel
-            </h3>
-            <button class="btn">
-              <img src="assets/images/icons/right-arrow-white.png" />
-            </button>
-          </div>
-        </a><a href="kariera">
+        </h2>
+        {% for opportunity in data.opportunities %}
+          <a href="kariera#w{{ opportunity.id }}">
+            <div class="work-main-box">
+              <h3>
+                {{ opportunity.title }}
+              </h3>
+              <button class="btn">
+                <img src="assets/images/icons/right-arrow-white.png" />
+              </button>
+            </div>
+          </a>
+        {% endfor %}
+        <a href="kariera">
           <button class="btn">Všechny pracovní pozice</button>
         </a>
       </div>

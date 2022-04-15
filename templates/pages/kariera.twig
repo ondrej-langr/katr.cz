@@ -11,84 +11,30 @@
 {% block content %}
   <div class="work">
     <div class="work-content">
-      <div class="work-box" id="w1">
-        <h3>
-          Řidič odvozní soupravy
-        </h3>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Požadujeme:</li>
-          <li>řidičský průkaz skupiny</li>
-          <li>profesní průkaz HR</li>
-          <li>čistý trestní rejstřík</li>
-          <li>spolehlivost</li>
-          <li>flexibilitu</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Nabízíme:</li>
-          <li>moderní odvozní soupravy</li>
-          <li>platové ohodnocení od - do</li>
-          <li>příjemný kolektiv</li>
-          <li>zaměstnanecké benefity</li>
-          <li>pevnou pracovní dobu</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Kontaktujte:</li>
-          <li><b class="green">Martin Nakládal</b></li>
-          <li><a href="tel:+420602788380">+420 602 788 380</a></li>
-          <li><a href="mailto:nakladal@katr.cz">nakladal@katr.cz</a></li>
-        </ul>
-      </div>
-      <div class="work-box" id="w2">
-        <h3>
-          Dělník pilařského provozu
-        </h3>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Požadujeme:</li>
-          <li>spolehlivost</li>
-          <li>flexibilitu</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Nabízíme:</li>
-          <li>příjemný kolektiv</li>
-          <li>zaměstnanecké benefity</li>
-          <li>práci v moderně vybavené provozvně</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Kontaktujte:</li>
-          <li><b class="green">Ondřej Šimko</b></li>
-          <li><a href="tel:+420602534049">+420 602 534 049</a></li>
-          <li>
-            <a href="mailto:pila.staraves@katr.cz">pila.staraves@katr.cz</a>
-          </li>
-        </ul>
-      </div>
-      <div class="work-box" id="w3">
-        <h3>
-          Opravář vozidel
-        </h3>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Požadujeme:</li>
-          <li>řidičský průkaz skupiny …</li>
-          <li>profesní průkaz …</li>
-          <li>čistý trestní rejstřík</li>
-          <li>spolehlivost</li>
-          <li>flexibilitu</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Nabízíme:</li>
-          <li>práci v nově vybavené provozvně</li>
-          <li>platové ohodnocení od -do</li>
-          <li>příjemný kolektiv</li>
-          <li>zaměstnanecké benefity</li>
-          <li>pevnou pracovní dobu</li>
-        </ul>
-        <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <li class="headline">Kontaktujte:</li>
-          <li><b class="green">Slavomír Šarman Bc.</b></li>
-          <li><a href="tel:+420602752138">+420 602 752 138</a></li>
-          <li><a href="mailto:dilny@katr.cz">dilny@katr.cz</a></li>
-        </ul>
-      </div>
+      {% for oppurtinity in data %}
+        <div class="work-box" id="w{{ oppurtinity.id }}">
+          <h3>
+            {{ oppurtinity.title }}
+          </h3>
+          {% for block in oppurtinity.content.blocks %}
+            {% if block.type == 'columns' %}
+              {% for col in block.data.itemContent %}
+                <ul class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+                  {% for colBlock in col.blocks %}
+                    {% if colBlock.type == 'header' %}
+                      <li class="headline">{{ colBlock.data.text|raw }}</li>
+                    {% elseif colBlock.type == 'list' %}
+                      {% for listItem in colBlock.data.items %}
+                        <li>{{ listItem|raw }}</li>
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
     </div>
   </div>
 {% endblock %}

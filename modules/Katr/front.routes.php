@@ -10,9 +10,22 @@ $router->get('/', function (
   ServerRequestInterface $request,
   ResponseInterface $response
 ) use ($container, $promBase) {
+  $posts = \Posts::orderByDesc('created_at')
+    ->limit(3)
+    ->get()
+    ->toArray();
+
+  $opportunities = \Positions::limit(3)
+    ->get()
+    ->toArray();
+
   $response->getBody()->write(
     $container->get('twig')->render('pages/landing-page.twig', [
       'baseUrl' => $promBase,
+      'data' => [
+        'posts' => $posts,
+        'opportunities' => $opportunities,
+      ],
     ])
   );
 
@@ -23,23 +36,35 @@ $router->get('/blog', function (
   ServerRequestInterface $request,
   ResponseInterface $response
 ) use ($container, $promBase) {
+  $posts = \Posts::orderByDesc('created_at')
+    ->get()
+    ->toArray();
+
   $response->getBody()->write(
     $container->get('twig')->render('pages/blog/index.twig', [
       'baseUrl' => $promBase,
+      'data' => [
+        'posts' => $posts,
+      ],
     ])
   );
 
   return $response;
 });
 
-$router->get('/blog/{post_slug}', function (
+$router->get('/blog/{post_id}', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
 ) use ($container, $promBase) {
+  $postData = \Posts::where('id', $args['post_id'])
+    ->first()
+    ->toArray();
+
   $response->getBody()->write(
     $container->get('twig')->render('pages/blog/[blog-slug].twig', [
       'baseUrl' => $promBase,
+      'data' => $postData,
     ])
   );
 
@@ -79,9 +104,25 @@ $router->get('/kariera', function (
   ResponseInterface $response,
   $args
 ) use ($container, $promBase) {
+  $opportunities = array_map(function ($opportu) {
+    if (is_string($opportu['content'])) {
+      return json_decode(
+        json_encode(
+          array_merge($opportu, [
+            'content' => json_decode($opportu['content']),
+          ])
+        ),
+        true
+      );
+    } else {
+      return $opportu;
+    }
+  }, \Positions::all()->toArray());
+
   $response->getBody()->write(
     $container->get('twig')->render('pages/kariera.twig', [
       'baseUrl' => $promBase,
+      'data' => $opportunities,
     ])
   );
 
@@ -107,9 +148,26 @@ $router->get('/kontakt', function (
   ResponseInterface $response,
   $args
 ) use ($container, $promBase) {
+  $contacts = \Contacts::all()->toArray();
+
+  $groupedContacts = [];
+
+  foreach ($contacts as $contact) {
+    $category = $contact['category'];
+
+    if (!isset($groupedContacts[$category]['label'])) {
+      $groupedContacts[$category]['label'] = $category;
+    }
+
+    $groupedContacts[$category]['contacts'][] = $contact;
+  }
+
   $response->getBody()->write(
     $container->get('twig')->render('pages/kontakt.twig', [
       'baseUrl' => $promBase,
+      'data' => [
+        'contactGroups' => $groupedContacts,
+      ],
     ])
   );
 
