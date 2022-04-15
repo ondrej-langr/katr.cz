@@ -6,7 +6,7 @@
  *
  */
 
-use Dotenv\Dotenv;
+use Symfony\Component\Dotenv\Dotenv;
 
 // Autoload vendor libs if they are not included already
 include_once __DIR__ . '/../../vendor/autoload.php';
@@ -17,9 +17,9 @@ $PROM_UPLOADS_ROOT = $PROM_ROOT_FOLDER . DIRECTORY_SEPARATOR . 'uploads';
 $PROM_LOCALES_ROOT = $PROM_ROOT_FOLDER . DIRECTORY_SEPARATOR . 'locales';
 
 // load .env file if exists
-$dotenv = Dotenv::createImmutable($PROM_ROOT_FOLDER);
-$dotenv->load();
-$dotenv->required(['APP_NAME', 'APP_URL', 'DB_CONNECTION', 'DB_DATABASE']);
+$dotenv = new Dotenv();
+$dotenv->load($PROM_ROOT_FOLDER . '/.env');
+// TODO: $dotenv->required(['APP_NAME', 'APP_URL', 'DB_CONNECTION', 'DB_DATABASE']);
 
 $PROM_BASE = $_ENV['APP_PREFIX'];
 $PROM_URL_BASE = strlen($PROM_BASE) ? "/{$PROM_BASE}" : $PROM_BASE;
@@ -64,7 +64,7 @@ if (!defined('PROM_CORE_DIR')) {
     'PROM_CORE_DIR',
     $PROM_ROOT_FOLDER .
       DIRECTORY_SEPARATOR .
-      implode(DIRECTORY_SEPARATOR, ['modules', 'Core']),
+      implode(DIRECTORY_SEPARATOR, ['modules', 'Core'])
   );
 }
 if (!defined('PROM_IS_API_REQUEST')) {
@@ -73,6 +73,6 @@ if (!defined('PROM_IS_API_REQUEST')) {
     (isset($_SERVER['REQUEST_URI']) &&
       strpos($_SERVER['REQUEST_URI'], PROM_URL_BASE . '/api/')) !== false
       ? 1
-      : 0,
+      : 0
   );
 }
