@@ -1,5 +1,5 @@
 {
-  "name": "katr/prom",
+  "name": "prom/core",
   "type": "project",
   "autoload": {
     "psr-4": {
