@@ -1,8 +1,0 @@
-{% extends 'layouts/site-layout.twig' %}
-
-{% block seoTitle %}
-{% endblock %}
-
-{% block content %}
-
-{% endblock %}
