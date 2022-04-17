@@ -5,7 +5,7 @@ namespace App\Services;
 use Firebase\JWT\JWT as JWTWorker;
 use Firebase\JWT\Key;
 
-class JWT 
+class JWT
 {
   public function generate($payload)
   {

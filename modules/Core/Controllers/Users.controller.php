@@ -28,7 +28,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => $classInstance->getSummary(),
-      ])
+      ]),
     );
 
     return $response;
@@ -43,7 +43,7 @@ class Users
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
 
     $dataPaginated = json_decode(
-      \Users::paginate(15, ['*'], 'page', $page)->toJson()
+      \Users::paginate(15, ['*'], 'page', $page)->toJson(),
     );
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
@@ -72,9 +72,9 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $args['itemId'])->update(
-          $parsedBody['data']
+          $parsedBody['data'],
         ),
-      ])
+      ]),
     );
 
     return $response;
@@ -91,7 +91,7 @@ class Users
           'data' => \Users::where('id', $args['itemId'])
             ->get()
             ->firstOrFail(),
-        ])
+        ]),
       );
 
       return $response;
@@ -109,14 +109,14 @@ class Users
 
     if (isset($parsedBody['data']['password'])) {
       $parsedBody['data']['password'] = $this->passwordService->generate(
-        $parsedBody['data']['password']
+        $parsedBody['data']['password'],
       );
     }
 
     $response->getBody()->write(
       json_encode([
         'data' => \Users::create($parsedBody['data']),
-      ])
+      ]),
     );
 
     return $response;
@@ -130,7 +130,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $args['itemId'])->delete(),
-      ])
+      ]),
     );
 
     return $response;

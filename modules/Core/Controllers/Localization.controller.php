@@ -35,9 +35,7 @@ class Localization
       // Do nothing
     }
 
-    $response->getBody()->write(
-      json_encode($locales),
-    );
+    $response->getBody()->write(json_encode($locales));
 
     return $response;
   }

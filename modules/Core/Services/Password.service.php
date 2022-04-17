@@ -14,7 +14,7 @@ class Password
     $spacelessPassword = $this->removeSpaces($password);
 
     return password_hash($spacelessPassword, PASSWORD_DEFAULT, [
-      'cost' => 12
+      'cost' => 12,
     ]);
   }
 

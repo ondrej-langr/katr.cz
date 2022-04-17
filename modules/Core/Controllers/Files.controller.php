@@ -90,9 +90,11 @@ class Files
     ResponseInterface $response
   ): ResponseInterface {
     $queryParams = $request->getQueryParams();
-    $page = isset($queryParams["page"]) ? $queryParams["page"] : 0;
+    $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
 
-    $dataPaginated = json_decode(\Files::paginate(15, ['*'], 'page', $page)->toJson());
+    $dataPaginated = json_decode(
+      \Files::paginate(15, ['*'], 'page', $page)->toJson(),
+    );
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
     unset($dataPaginated->first_page_url);
