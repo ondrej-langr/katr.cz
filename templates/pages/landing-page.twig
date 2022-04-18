@@ -1,128 +1,65 @@
 {% extends 'layouts/site-layout.twig' %}
 
 {% block seoTitle %}
-  Úvod
+  {{ data.seoTitle }}
 {% endblock %}
 
 {% block title %}
-  Komplexní služby<br />v lesním hospodářství
+  Komplexní služby <br />
+  v lesním hospodářství
 {% endblock %}
 
 {% block description %}
-  Dnes poskytujeme komplexní služby v lesním hospodářství od pěstební činnosti,
-  přes těžbu a odvoz dřeva, na které navazuje pilařský provoz s produkcí
-  širokého sortimentu omítaného i neomítaného řeziva a vedlejších produktů
-  (pilina, stěpka atd.). Vlastní dílenský provoz nabízí prodej PHM, servis a
-  opravy osobních i nákladních automobilů vč. nově otevřeného servisu zahradní
-  techniky.
+  {{ data.description }}
 {% endblock %}
 
 {% block content %}
   <div class="why" id="why">
     <div class="why-content">
-      <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-        <h2>
-          Jsme opravdoví specialisté
-        </h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        </p>
-      </div>
-      <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-        <h2>
-          S námi dlouho nečekáte
-        </h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        </p>
-      </div>
-      <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-        <h2>
-          Ve všem vám poradíme
-        </h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        </p>
-      </div>
+      {% for blocks in data.cols %}
+        <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+          {% for block in blocks %}
+            {% if block.type == 'header' %}
+              <h2>
+                {{ block.data.text }}
+              </h2>
+            {% elseif block.type == 'paragraph' %}
+              <p>
+                {{ block.data.text }}
+              </p>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
     </div>
   </div>
   <div class="about">
     <div class="about-content" id="services">
       <div class="about-text col-12 col-lg-4 col-md-12 col-sm-12 col-xl-4 col-xxl-4">
         <h2>
-          7 základních<br />činností firmy
+          {{ data.services.title }}
         </h2>
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-          pulvinar faucibus neque, nec rhoncus nunc ultrices sit amet. Curabitur
-          ac sagittis neque, vel egestas est. Aenean elementum, erat at aliquet
-          hendrerit.
-        </p><a href="kontakt"><button class="btn">Kontaktujte nás</button></a>
+          {{ data.services.description }}
+        </p>
+        <a href="kontakt"><button class="btn">Kontaktujte nás</button></a>
       </div>
       <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/lesnictvi">
-            <span class="number">1</span> <h2>
-              Lesnictví
-            </h2> <p>
-              V našich školkách pěstujeme široký sortiment
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/drevarska-vyroba">
-            <span class="number">2</span> <h2>
-              Dřevařská výroba
-            </h2> <p>
-              Provádíme odvoz kulatého dříví v délkách od 2 do 14m
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/doprava">
-            <span class="number">3</span> <h2>
-              Doprava
-            </h2> <p>
-              Provádíme odvoz kulatého dříví v délkách od 2 do 14m
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/pohonne-hmoty">
-            <span class="number">4</span> <h2>
-              Pohonné hmoty
-            </h2> <p>
-              Prodej a rozvoz pohonných hmot od prověřených dodavatelů
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/servis">
-            <span class="number">5</span> <h2>
-              Servis
-            </h2> <p>
-              Poskytujeme servis osobních vozidel a zahradní techniky
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/prodej-produktu">
-            <span class="number">6</span> <h2>
-              Prodej produktů
-            </h2> <p>
-              Prodej různých druhů dřeva, briket, pilin a další
-            </p>
-          </a>
-        </div>
-        <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          <a href="sluzby/nakup">
-            <span class="number">7</span> <h2>
-              Nákup
-            </h2> <p>
-              Odkoupíme od vás nejrůznější druhy dřeva
-            </p>
-          </a>
-        </div>
+        {% for service in services %}
+          <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+            <a href="sluzby/{{ service.title }}">
+              <span class="number">{{ loop.index }}</span>
+              <h2>
+                {{ service.title }}
+              </h2>
+              {% if service.excerpt %}
+                <p>
+                  {{ service.excerpt }}
+                </p>
+              {% endif %}
+            </a>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -145,7 +82,7 @@
                 {{ post.title }}
               </h3>
               <button class="btn">
-                <img src="assets/images/icons/right-arrow-white.png" />
+                {% include 'components/ArrowRight.twig' %}
               </button>
             </div>
           </a>
@@ -167,7 +104,7 @@
                 {{ opportunity.title }}
               </h3>
               <button class="btn">
-                <img src="assets/images/icons/right-arrow-white.png" />
+                {% include 'components/ArrowRight.twig' %}
               </button>
             </div>
           </a>

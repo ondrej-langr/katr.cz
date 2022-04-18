@@ -4,12 +4,58 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 $container = $app->getContainer();
-$promBase = PROM_URL_BASE ? PROM_URL_BASE : '/';
+$twig = $container->get('twig');
+$allServices = \Services::all()->toArray();
 
+/**
+ * basic getting of services with caching
+ */
+function getServices()
+{
+  global $allServices;
+
+  if (!$allServices) {
+    $allServices = \Services::all()->toArray();
+  }
+
+  return $allServices;
+}
+
+/**
+ * render helper
+ */
+function render(string $path, array $data)
+{
+  global $twig;
+
+  $layoutBase = [
+    'baseUrl' => PROM_URL_BASE ? PROM_URL_BASE : '/',
+    'services' => getServices(),
+    'allPages' => \Pages::where('id', '!=', 1)
+      ->get()
+      ->toArray(),
+  ];
+
+  return $twig->render(
+    $path,
+    array_merge($layoutBase, [
+      'data' => $data,
+    ])
+  );
+}
+
+// MAIN PAGE
 $router->get('/', function (
   ServerRequestInterface $request,
   ResponseInterface $response
-) use ($container, $promBase) {
+) {
+  $mainPage = \Pages::where('id', 1)
+    ->first()
+    ->toArray();
+
+  $blocks = $mainPage['content']['blocks'];
+  $cols = $blocks[1]['data']['itemContent'];
+
   $posts = \Posts::orderByDesc('created_at')
     ->limit(3)
     ->get()
@@ -20,11 +66,17 @@ $router->get('/', function (
     ->toArray();
 
   $response->getBody()->write(
-    $container->get('twig')->render('pages/landing-page.twig', [
-      'baseUrl' => $promBase,
-      'data' => [
-        'posts' => $posts,
-        'opportunities' => $opportunities,
+    render('pages/landing-page.twig', [
+      'seoTitle' => $mainPage['title'],
+      'posts' => $posts,
+      'opportunities' => $opportunities,
+      'description' => $mainPage['description'],
+      'cols' => array_map(function ($col) {
+        return $col['blocks'];
+      }, $cols),
+      'services' => [
+        'title' => $blocks[2]['data']['text'],
+        'description' => $blocks[3]['data']['text'],
       ],
     ])
   );
@@ -32,20 +84,18 @@ $router->get('/', function (
   return $response;
 });
 
+// BLOG
 $router->get('/blog', function (
   ServerRequestInterface $request,
   ResponseInterface $response
-) use ($container, $promBase) {
+) {
   $posts = \Posts::orderByDesc('created_at')
     ->get()
     ->toArray();
 
   $response->getBody()->write(
-    $container->get('twig')->render('pages/blog/index.twig', [
-      'baseUrl' => $promBase,
-      'data' => [
-        'posts' => $posts,
-      ],
+    render('pages/blog/index.twig', [
+      'posts' => $posts,
     ])
   );
 
@@ -56,54 +106,44 @@ $router->get('/blog/{post_id}', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
+) {
   $postData = \Posts::where('id', $args['post_id'])
     ->first()
     ->toArray();
 
-  $response->getBody()->write(
-    $container->get('twig')->render('pages/blog/[blog-slug].twig', [
-      'baseUrl' => $promBase,
-      'data' => $postData,
-    ])
-  );
+  $response->getBody()->write(render('pages/blog/[blog-slug].twig', $postData));
 
   return $response;
 });
 
+// ABOUT US
 $router->get('/o-nas', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
-  $response->getBody()->write(
-    $container->get('twig')->render('pages/o-nas.twig', [
-      'baseUrl' => $promBase,
-    ])
-  );
+) {
+  $response->getBody()->write(render('pages/o-nas.twig', []));
 
   return $response;
 });
 
+// GALLERY
 $router->get('/galerie', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
-  $response->getBody()->write(
-    $container->get('twig')->render('pages/galerie.twig', [
-      'baseUrl' => $promBase,
-    ])
-  );
+) {
+  $response->getBody()->write(render('pages/galerie.twig', []));
 
   return $response;
 });
 
+// KARIERA
 $router->get('/kariera', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
+) {
   $opportunities = array_map(function ($opportu) {
     if (is_string($opportu['content'])) {
       return json_decode(
@@ -119,35 +159,28 @@ $router->get('/kariera', function (
     }
   }, \Positions::all()->toArray());
 
-  $response->getBody()->write(
-    $container->get('twig')->render('pages/kariera.twig', [
-      'baseUrl' => $promBase,
-      'data' => $opportunities,
-    ])
-  );
+  $response->getBody()->write(render('pages/kariera.twig', $opportunities));
 
   return $response;
 });
 
+// CERTIFICATES
 $router->get('/certifikaty', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
-  $response->getBody()->write(
-    $container->get('twig')->render('pages/certifikaty.twig', [
-      'baseUrl' => $promBase,
-    ])
-  );
+) {
+  $response->getBody()->write(render('pages/certifikaty.twig', []));
 
   return $response;
 });
 
+// CONTACTS
 $router->get('/kontakt', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
   $args
-) use ($container, $promBase) {
+) {
   $contacts = \Contacts::all()->toArray();
 
   $groupedContacts = [];
@@ -163,23 +196,21 @@ $router->get('/kontakt', function (
   }
 
   $response->getBody()->write(
-    $container->get('twig')->render('pages/kontakt.twig', [
-      'baseUrl' => $promBase,
-      'data' => [
-        'contactGroups' => $groupedContacts,
-      ],
+    render('pages/kontakt.twig', [
+      'contactGroups' => $groupedContacts,
     ])
   );
 
   return $response;
 });
 
-$router->group('/sluzby', function ($router) {
-  $router->get('/doprava', '\App\Controllers\Sluzby:doprava');
-  $router->get('/drevarska-vyroba', '\App\Controllers\Sluzby:drevarskaVyroba');
-  $router->get('/lesnictvi', '\App\Controllers\Sluzby:lesnictvi');
-  $router->get('/nakup', '\App\Controllers\Sluzby:nakup');
-  $router->get('/pohonne-hmoty', '\App\Controllers\Sluzby:pohonneHmoty');
-  $router->get('/prodej-produktu', '\App\Controllers\Sluzby:prodejProduktu');
-  $router->get('/servis', '\App\Controllers\Sluzby:servis');
+// SERVICES
+$router->get('/sluzby/{serviceId}', function (
+  ServerRequestInterface $request,
+  ResponseInterface $response,
+  $args
+) {
+  $services = \Services::all()->toArray();
+
+  $response->getBody()->write(render('pages/blog/[blog-slug].twig', []));
 });
