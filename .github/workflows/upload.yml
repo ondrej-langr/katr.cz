@@ -87,8 +87,6 @@ jobs:
           server: katr.cz
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          protocol: ftps
-          port: 21
           exclude: '
             - **/.git*/**
             - .git/**
