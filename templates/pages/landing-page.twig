@@ -16,16 +16,16 @@
 {% block content %}
   <div class="why" id="why">
     <div class="why-content">
-      {% for blocks in data.cols %}
+      {% for col in data.cols %}
         <div class="why-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-          {% for block in blocks %}
-            {% if block.type == 'header' %}
+          {% for block in col %}
+            {% if loop.index is same as(1) %}
               <h2>
-                {{ block.data.text }}
+                {{ block.value }}
               </h2>
-            {% elseif block.type == 'paragraph' %}
+            {% else %}
               <p>
-                {{ block.data.text }}
+                {{ block.value }}
               </p>
             {% endif %}
           {% endfor %}
@@ -73,7 +73,7 @@
           Aktuálně se děje ..
         </h2>
         {% for post in data.posts %}
-          <a href="/blog/{{ post.id }}">
+          <a href="/blog/{{ post.slug }}">
             <div class="blog-main-box">
               <span class="date-main">
                 {{ post.created_at|date('d.m. Y') }}

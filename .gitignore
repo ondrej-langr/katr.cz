@@ -4,3 +4,4 @@ vendor
 public/bundle
 .env
 backup
+uploads

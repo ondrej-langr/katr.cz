@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Str;
+
 class Positions extends Model
 {
   protected $table = 'positions';
@@ -16,12 +18,37 @@ class Positions extends Model
     'content' => 'array',
   ];
 
-  protected $tableColumns = [
+  /**
+   * Takes care of events
+   */
+  public static function boot()
+  {
+    parent::boot();
+
+    static::saving(function ($entry) {
+      // Take care of slugs
+      foreach (
+        array_filter(self::$tableColumns, function ($col) {
+          return $col['type'] === 'slug';
+        })
+        as $colKey => $col
+      ) {
+        if ($entry->{$col['of']}) {
+          $entry->{$colKey} = Str::slug($entry->{$col['of']});
+        }
+      }
+    });
+  }
+
+  protected static $tableColumns = [
     'id' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => true,
+      'hide' => false,
+      'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
-      'editable' => false,
-      'autoIncrement' => true,
     ],
 
     'title' => [
@@ -42,6 +69,16 @@ class Positions extends Model
       'type' => 'json',
     ],
 
+    'slug' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => true,
+      'hide' => false,
+      'title' => 'Zkratka',
+      'type' => 'slug',
+      'of' => 'title',
+    ],
+
     'description' => [
       'required' => false,
       'editable' => true,
@@ -52,16 +89,19 @@ class Positions extends Model
     ],
   ];
 
-  protected $fillable = ['id', 'title', 'content', 'description'];
+  protected $fillable = ['id', 'title', 'content', 'slug', 'description'];
 
   public function getSummary()
   {
     return (object) [
-      'columns' => $this->tableColumns,
+      'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
+      'hasOrdering' => false,
+      'isDraftable' => false,
+      'hasPermissions' => false,
       'admin' => $this->adminSettings,
     ];
   }

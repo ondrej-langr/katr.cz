@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Password;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
@@ -11,6 +12,7 @@ try {
   include_once $CORE_ROOT . '/app/libs/env.bootstrap.php';
   include_once $CORE_ROOT . '/app/utils.php';
   include_once $CORE_ROOT . '/app/libs/db.bootstrap.php';
+  include_once $CORE_ROOT . '/app/bootstrap.php';
 
   echo '👋 Hello! Welcome to schema syncing to your database! ' . PHP_EOL;
   echo '🔧 Trying to find some schemas in modules...' . PHP_EOL;
@@ -48,9 +50,9 @@ try {
               $field = null;
 
               if ($columnKey === 'id' && $column['autoIncrement']) {
-                $field = $table->increments('id');
+                $field = $table->bigIncrements('id');
               } else {
-                if ($type === 'password') {
+                if ($type === 'password' || $type === 'slug') {
                   $type = 'string';
                 } elseif ($type === 'number') {
                   $type = 'integer';
@@ -71,6 +73,10 @@ try {
 
               if ($column['unique']) {
                 $field->unique();
+              }
+
+              if ($type === 'integer') {
+                $field->integer()->default(0);
               }
 
               if (!$column['required']) {
@@ -97,6 +103,15 @@ try {
       }
     }
   }
+
+  $passwordService = new Password();
+
+  $pass = $passwordService->generate('testPassword1289');
+  \Users::create([
+    'name' => 'Ondřej Langr',
+    'email' => 'hi@ondrejlangr.cz',
+    'password' => $pass,
+  ]);
 
   echo '✅ Done! Goodbye.' . PHP_EOL;
   exit(0);

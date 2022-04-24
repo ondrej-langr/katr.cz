@@ -1,0 +1,23 @@
+{% extends 'layouts/site-layout.twig' %}
+
+{% block seoTitle %}
+  {{ data.title }}
+{% endblock %}
+
+{% block title %}
+  {{ data.title }}
+{% endblock %}
+
+{% block description %}
+  {{ data.description }}
+{% endblock %}
+
+{% block content %}
+  <div class="service">
+    <div class="service-content">
+      {% include 'components/BlocksRenderer.twig' with {
+        blocks: data.content.blocks
+      } %}
+    </div>
+  </div>
+{% endblock %}

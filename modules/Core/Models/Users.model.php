@@ -12,12 +12,15 @@ class Users extends Model
     'layout' => 'simple',
   ];
 
-  protected $tableColumns = [
+  protected static $tableColumns = [
     'id' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => true,
+      'hide' => false,
+      'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
-      'editable' => false,
-      'autoIncrement' => true,
     ],
 
     'name' => [
@@ -74,11 +77,14 @@ class Users extends Model
   public function getSummary()
   {
     return (object) [
-      'columns' => $this->tableColumns,
+      'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
+      'hasOrdering' => false,
+      'isDraftable' => false,
+      'hasPermissions' => false,
       'admin' => $this->adminSettings,
     ];
   }

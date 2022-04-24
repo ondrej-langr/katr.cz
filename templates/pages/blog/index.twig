@@ -12,7 +12,7 @@
   <div class="blog">
     <div class="blog-content">
       {% for post in data.posts %}
-        <a href="/blog/{{ post.id }}">
+        <a href="/blog/{{ post.slug }}">
           <div class="blog-box">
             <h3>
               {{ post.title }}

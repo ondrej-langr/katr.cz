@@ -12,12 +12,19 @@ class Files extends Model
     'layout' => 'simple',
   ];
 
-  protected $tableColumns = [
+  protected $casts = [
+    'private' => 'boolean',
+  ];
+
+  protected static $tableColumns = [
     'id' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => true,
+      'hide' => false,
+      'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
-      'editable' => false,
-      'autoIncrement' => true,
     ],
 
     'filename' => [
@@ -55,6 +62,15 @@ class Files extends Model
       'title' => 'Is private',
       'type' => 'boolean',
     ],
+
+    'mimeType' => [
+      'required' => true,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Mime type',
+      'type' => 'string',
+    ],
   ];
 
   protected $fillable = [
@@ -63,16 +79,20 @@ class Files extends Model
     'description',
     'filepath',
     'private',
+    'mimeType',
   ];
 
   public function getSummary()
   {
     return (object) [
-      'columns' => $this->tableColumns,
+      'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
+      'hasOrdering' => false,
+      'isDraftable' => false,
+      'hasPermissions' => false,
       'admin' => $this->adminSettings,
     ];
   }

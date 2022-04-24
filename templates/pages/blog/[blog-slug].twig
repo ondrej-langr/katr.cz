@@ -28,11 +28,11 @@
               {{ block.data.text }}
             </p>
           {% elseif block.type == 'image' %}
-            <img class="big-image zooming" src="/api/entry-types/files/items/{{ block.data.fileId }}" />
+            <img class="big-image zooming" src="/api/entry-types/files/items/{{ block.data.fileId }}/raw" />
           {% elseif block.type == 'gallery' %}
             <div class="gallery">
               {% for fileId in block.data.fileIds %}
-                <img class="zooming" src="/api/entry-types/files/items/{{ fileId }}" />
+                <img class="zooming" src="/api/entry-types/files/items/{{ fileId }}/raw" />
               {% endfor %}
             </div>
           {% elseif block.type == 'embed' %}
