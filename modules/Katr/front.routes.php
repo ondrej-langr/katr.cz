@@ -83,7 +83,8 @@ function render(string $path, array $data)
       'hot_list' => getSetting('footer_hot_list'),
       'docs' => getSetting('footer_docs_list'),
     ],
-    'allPages' => \Pages::where('id', '!=', 2)
+    'allPages' => \Pages::onlyPublished()
+      ->where('id', '!=', 2)
       ->get()
       ->toArray(),
   ];
@@ -102,6 +103,7 @@ $router->get('/', function (
   ResponseInterface $response
 ) {
   $posts = \Posts::orderByDesc('created_at')
+    ->onlyPublished()
     ->limit(3)
     ->get()
     ->toArray();
@@ -138,6 +140,7 @@ $router->get('/blog', function (
   ResponseInterface $response
 ) {
   $posts = \Posts::orderByDesc('created_at')
+    ->onlyPublished()
     ->get()
     ->toArray();
 
@@ -155,11 +158,12 @@ $router->get('/blog/{post_slug}', function (
   ResponseInterface $response,
   $args
 ) {
-  $postData = \Posts::where('slug', $args['post_slug'])
-    ->first()
-    ->toArray();
-
-  if (!$postData) {
+  try {
+    $postData = \Posts::where('slug', $args['post_slug'])
+      ->onlyPublished()
+      ->firstOrFail()
+      ->toArray();
+  } catch (\Exception $e) {
     $response->getBody()->write(render('pages/404.twig', []));
 
     return $response->withStatus(404);
@@ -170,17 +174,6 @@ $router->get('/blog/{post_slug}', function (
     ->write(
       render('pages/blog/[blog-slug].twig', repairBlockContent($postData))
     );
-
-  return $response;
-});
-
-// ABOUT US
-$router->get('/o-nas', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  $response->getBody()->write(render('pages/o-nas.twig', []));
 
   return $response;
 });
@@ -222,17 +215,6 @@ $router->get('/kariera', function (
   }, \Positions::all()->toArray());
 
   $response->getBody()->write(render('pages/kariera.twig', $opportunities));
-
-  return $response;
-});
-
-// CERTIFICATES
-$router->get('/certifikaty', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  $response->getBody()->write(render('pages/certifikaty.twig', []));
 
   return $response;
 });
@@ -296,11 +278,12 @@ $router->get('/{page_slug}', function (
   ResponseInterface $response,
   $args
 ) {
-  $page = \Pages::where('slug', $args['page_slug'])
-    ->first()
-    ->toArray();
-
-  if (!$page) {
+  try {
+    $page = \Pages::onlyPublished()
+      ->where('slug', $args['page_slug'])
+      ->firstOrFail()
+      ->toArray();
+  } catch (\Exception $e) {
     $response->getBody()->write(render('pages/404.twig', []));
 
     return $response->withStatus(404);

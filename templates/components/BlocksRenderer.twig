@@ -69,9 +69,30 @@
             </a>
           </div>
           {% elseif block.type == 'columns' %}
-            <div class="d-flex">
-              {% for col in block.data.itemContent %}
-                <div class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
+            {% set filteredCols = block.data.itemContent|filter( v => v.blocks|length > 0 ) %}
+            {% set size = filteredCols|length %}
+
+            {% if size is same as(1) %}
+              {% set colsWrapperClassNames = "col-12" %}
+            {% elseif size is same as(2) %}
+              {% set colsWrapperClassNames = "col-12 col-sm-6" %}
+            {% elseif size is same as(3) %}
+              {% set colsWrapperClassNames = "col-12 col-md-4" %}
+            {% else %}
+              {% set colsWrapperClassNames = "col-12 col-sm-6 col-md-3" %}
+            {% endif %}
+
+            {% if size is same as(1) %}
+              {% set gutterClassName = "gx-0 gy-0" %}
+            {% elseif size is same as(2) %}
+              {% set gutterClassName = "gx-5 gy-0" %}
+            {% else %}
+              {% set gutterClassName = "gx-1 gy-0" %}
+            {% endif %}
+             
+            <div class="row {{gutterClassName}}">
+              {% for col in filteredCols %}
+                <div class="{{colsWrapperClassNames}}">
                   {% include 'components/BlocksRenderer.twig' with {blocks: col.blocks} %}
                 </div>
               {% endfor %}
