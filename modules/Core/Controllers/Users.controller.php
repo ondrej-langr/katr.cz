@@ -174,6 +174,7 @@ class Users
 
     $themePayload = array_merge($user, [
       'token' => $generatedJwt,
+      'app_url' => $_ENV['APP_URL'],
     ]);
 
     try {
