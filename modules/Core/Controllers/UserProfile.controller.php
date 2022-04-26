@@ -30,7 +30,7 @@ class UserProfile
         'data' => \Users::where('id', $userId)
           ->get()
           ->firstOrFail(),
-      ])
+      ]),
     );
 
     return $response;
@@ -61,7 +61,7 @@ class UserProfile
       $responseAry['message'] = 'missing params';
       $code = 400;
     } else {
-      $userDisabledErrorMessage = 'user-disabled';
+      $userCannotLoginBecauseOfState = false;
 
       try {
         $user = \Users::where('email', $args['email'])
@@ -69,7 +69,7 @@ class UserProfile
           ->firstOrFail();
         $passwordIsValid = $passwordService->validate(
           $args['password'],
-          $user->password
+          $user->password,
         );
 
         if (!$passwordIsValid) {
@@ -81,7 +81,8 @@ class UserProfile
           $user->state === 'blocked' ||
           $user->state === 'invited'
         ) {
-          throw new \Exception($userDisabledErrorMessage);
+          $userCannotLoginBecauseOfState = true;
+          throw new \Exception("user-state-$user->state");
         }
 
         $this->container->get('session')->set('user_id', $user->id);
@@ -89,12 +90,13 @@ class UserProfile
         $responseAry['message'] = 'successfully logged in';
         $code = 200;
       } catch (\Exception $e) {
-        if ($e->getMessage() === $userDisabledErrorMessage) {
+        if ($userCannotLoginBecauseOfState) {
           $responseAry['result'] = 'error';
-          $responseAry['message'] = 'user disabled';
-          $responseAry['code'] = 'user-disabled';
+          $responseAry['message'] = 'user cannot login';
+          $responseAry['code'] = $e->getMessage();
         } else {
           $responseAry['result'] = 'error';
+          $responseAry['code'] = 'invalid-credentials';
           $responseAry['message'] = 'wrong password or email';
         }
 
@@ -129,7 +131,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $userId)->update($parsedBody['data']),
-      ])
+      ]),
     );
 
     return $response;
@@ -144,7 +146,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'result' => 'success',
-      ])
+      ]),
     );
 
     return $response;
@@ -165,10 +167,10 @@ class UserProfile
 
     try {
       $user = \Users::where('email', $params['email'])
-        ->get()
+        ->where('state', '!=', 'blocked')
         ->firstOrFail();
     } catch (\Exception $e) {
-      // We did not find user on provided email ,but we do not want to let user know about it since we do not want to expose anything to public
+      // We did not find user on provided email, but we do not want to let user know about it since we do not want to expose anything to public
       return $response;
     }
 
@@ -183,13 +185,13 @@ class UserProfile
 
     try {
       $generatedEmailContent = $twigService->render(
-        'email/password-reset',
-        $themePayload
+        'email/password-reset.twig',
+        $themePayload,
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
         'index' =>
-          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/reset-password?token={{ token }}">here</a>!',
+          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/admin/reset-password?token={{ token }}">here</a>!',
       ]);
       $twig = new \Twig\Environment($loader);
 

@@ -66,7 +66,7 @@ class Users extends Model
       'hide' => false,
       'title' => 'Role',
       'type' => 'enum',
-      'enum' => ['Admin', 'Maintainer', 'Editor'],
+      'enum' => ['admin', 'maintainer', 'editor'],
     ],
 
     'state' => [

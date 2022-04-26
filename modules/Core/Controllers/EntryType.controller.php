@@ -18,6 +18,28 @@ class EntryType
     $this->loadedModels = $container->get('sysinfo')['loadedModels'];
   }
 
+  private function handleDuplicate($response, $exception)
+  {
+    $errorText = str_replace(
+      ['UNIQUE constraint failed: ', ' '],
+      '',
+      $exception->errorInfo[2],
+    );
+
+    $response->getBody()->write(
+      json_encode([
+        'data' => array_map(function ($item) {
+          return strpos($item, '.') !== false
+            ? explode('.', $item)[1]
+            : explode('_', $item)[1];
+        }, explode(',', $errorText)),
+        'code' => intval($exception->getCode()),
+        'message' => 'Duplicate entries',
+        'development-message' => $exception->getMessage(),
+      ]),
+    );
+  }
+
   /**
    * Checks if model is loaded/exists and returns the real, usable model name
    */
@@ -111,8 +133,6 @@ class EntryType
         ]),
       );
     } catch (\Exception $e) {
-      echo $e->getMessage();
-
       DB::rollback();
 
       return $response
@@ -174,31 +194,19 @@ class EntryType
     $parsedBody = $request->getParsedBody();
 
     try {
+      $item = $modelInstancePath::findOrFail($args['itemId']);
+      $item->update($parsedBody['data']);
+
       $response->getBody()->write(
         json_encode([
-          'data' => $modelInstancePath
-            ::find($args['itemId'])
-            ->update($parsedBody['data']),
+          'data' => $item,
         ]),
       );
+
+      return $response;
     } catch (\Exception $ex) {
       if ($ex->getCode() === '23000') {
-        $errorText = str_replace(
-          ['UNIQUE constraint failed: ', ' '],
-          '',
-          $ex->errorInfo[2],
-        );
-        $response->getBody()->write(
-          json_encode([
-            'data' => array_map(function ($item) {
-              return str_contains('.', $item)
-                ? explode('.', $item)[1]
-                : explode('_', $item)[1];
-            }, explode(',', $errorText)),
-            'code' => intval($ex->getCode()),
-            'message' => 'Duplicate entries',
-          ]),
-        );
+        $this->handleDuplicate($response, $ex);
 
         return $response
           ->withStatus(400)
@@ -259,22 +267,7 @@ class EntryType
       return $response;
     } catch (\Exception $ex) {
       if ($ex->getCode() === '23000') {
-        $errorText = str_replace(
-          ['UNIQUE constraint failed: ', ' '],
-          '',
-          $ex->errorInfo[2],
-        );
-        $response->getBody()->write(
-          json_encode([
-            'data' => array_map(function ($item) {
-              return str_contains('.', $item)
-                ? explode('.', $item)[1]
-                : explode('_', $item)[1];
-            }, explode(',', $errorText)),
-            'code' => intval($ex->getCode()),
-            'message' => 'Duplicate entries',
-          ]),
-        );
+        $this->handleDuplicate($response, $ex);
 
         return $response
           ->withStatus(400)

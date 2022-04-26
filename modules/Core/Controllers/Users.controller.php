@@ -28,7 +28,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => $classInstance->getSummary(),
-      ])
+      ]),
     );
 
     return $response;
@@ -43,7 +43,7 @@ class Users
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
 
     $dataPaginated = json_decode(
-      \Users::paginate(15, ['*'], 'page', $page)->toJson()
+      \Users::paginate(15, ['*'], 'page', $page)->toJson(),
     );
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
@@ -69,15 +69,45 @@ class Users
       unset($parsedBody['data']['password']);
     }
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Users::where('id', $args['itemId'])->update(
-          $parsedBody['data']
-        ),
-      ])
-    );
+    try {
+      $user = \Users::findOrFail($args['itemId']);
+      $user->update($parsedBody['data']);
 
-    return $response;
+      $response->getBody()->write(
+        json_encode([
+          'data' => $user,
+        ]),
+      );
+
+      return $response;
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        $errorText = str_replace(
+          ['UNIQUE constraint failed: ', ' '],
+          '',
+          $ex->errorInfo[2],
+        );
+        $response->getBody()->write(
+          json_encode([
+            'data' => array_map(function ($item) {
+              return str_contains('.', $item)
+                ? explode('.', $item)[1]
+                : explode('_', $item)[1];
+            }, explode(',', $errorText)),
+            'code' => intval($ex->getCode()),
+            'message' => 'Duplicate entries',
+          ]),
+        );
+
+        return $response
+          ->withStatus(400)
+          ->withHeader('Content-Description', $ex->getMessage());
+      }
+
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', $ex->getMessage());
+    }
   }
 
   public function getEntry(
@@ -91,7 +121,7 @@ class Users
           'data' => \Users::where('id', $args['itemId'])
             ->get()
             ->firstOrFail(),
-        ])
+        ]),
       );
 
       return $response;
@@ -111,19 +141,35 @@ class Users
     $twigService = $this->container->get('twig');
 
     if (isset($parsedBody['data']['password'])) {
-      $parsedBody['data']['password'] = $this->passwordService->generate(
-        $parsedBody['data']['password']
-      );
+      unset($parsedBody['data']['password']);
+    }
+    $parsedBody['data']['state'] = 'invited';
+
+    // Generate random password, because user will choose their password by themselves
+    $parsedBody['data']['password'] = $this->passwordService->generate(
+      base64_encode(random_bytes(10)),
+    );
+
+    try {
+      $user = \Users::create($parsedBody['data'])->toArray();
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        return $response
+          ->withStatus(409)
+          ->withHeader('Content-Description', $ex->getMessage());
+      }
+
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', $ex->getMessage());
     }
 
-    $parsedBody['state'] = 'invited';
-    $user = \Users::create($parsedBody['data']);
     $generatedJwt = $jwtService->generate(['id' => $user['id']]);
 
     $response->getBody()->write(
       json_encode([
         'data' => $user,
-      ])
+      ]),
     );
 
     $themePayload = array_merge($user, [
@@ -133,12 +179,12 @@ class Users
     try {
       $generatedEmailContent = $twigService->render(
         'email/invite-user.twig',
-        $themePayload
+        $themePayload,
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
         'index' =>
-          'Welcome, {{ name }}! Please continue your registration in <a href="{{ app_url }}/finalize-registration?token={{ token }}">here</a>!',
+          'Welcome, {{ name }}! Please continue with your registration <a href="{{ app_url }}/admin/finalize-registration?token={{ token }}">here</a>!',
       ]);
       $twig = new \Twig\Environment($loader);
 
@@ -146,7 +192,7 @@ class Users
     }
 
     $emailService->isHtml();
-    $emailService->addAddress($user->email, $user->name);
+    $emailService->addAddress($user['email'], $user['name']);
     $emailService->Subject = 'Finalize registration';
     $emailService->Body = $generatedEmailContent;
     $emailService->send();
@@ -162,7 +208,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $args['itemId'])->delete(),
-      ])
+      ]),
     );
 
     return $response;
@@ -173,14 +219,15 @@ class Users
     ResponseInterface $response,
     $args
   ) {
-    $user = \Users::findOrFail($args['itemId'])->update([
-      'state' => 'blocked',
-    ]);
+    $user = \Users::findOrFail($args['itemId']);
+
+    $user->state = 'blocked';
+    $user->save();
 
     $response->getBody()->write(
       json_encode([
         'data' => $user,
-      ])
+      ]),
     );
 
     return $response;
@@ -203,7 +250,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => $user,
-      ])
+      ]),
     );
 
     return $response;
@@ -236,12 +283,12 @@ class Users
     try {
       $generatedEmailContent = $twigService->render(
         'email/password-reset',
-        $themePayload
+        $themePayload,
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
         'index' =>
-          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/reset-password?token={{ token }}">here</a>!',
+          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/admin/reset-password?token={{ token }}">here</a>!',
       ]);
       $twig = new \Twig\Environment($loader);
 
@@ -253,13 +300,18 @@ class Users
     $emailService->Subject = 'Password reset';
     $emailService->Body = $generatedEmailContent;
 
-    // User should be supposed to be in this state
+    // If user is invited the this whole function is for resending whole token
     if ($user->state !== 'invited') {
       $user->state = 'password-reset';
     }
     $user->save();
-
     $emailService->send();
+
+    $response->getBody()->write(
+      json_encode([
+        'data' => $user,
+      ]),
+    );
 
     return $response;
   }
