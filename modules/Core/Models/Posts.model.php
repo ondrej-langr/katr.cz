@@ -49,6 +49,11 @@ class Posts extends Model
     });
   }
 
+  public function scopeOnlyPublished($query)
+  {
+    return $query->where('is_published', 1);
+  }
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,

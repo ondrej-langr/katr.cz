@@ -173,15 +173,42 @@ class EntryType
 
     $parsedBody = $request->getParsedBody();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $modelInstancePath
-          ::find($args['itemId'])
-          ->update($parsedBody['data']),
-      ]),
-    );
+    try {
+      $response->getBody()->write(
+        json_encode([
+          'data' => $modelInstancePath
+            ::find($args['itemId'])
+            ->update($parsedBody['data']),
+        ]),
+      );
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        $errorText = str_replace(
+          ['UNIQUE constraint failed: ', ' '],
+          '',
+          $ex->errorInfo[2],
+        );
+        $response->getBody()->write(
+          json_encode([
+            'data' => array_map(function ($item) {
+              return str_contains('.', $item)
+                ? explode('.', $item)[1]
+                : explode('_', $item)[1];
+            }, explode(',', $errorText)),
+            'code' => intval($ex->getCode()),
+            'message' => 'Duplicate entries',
+          ]),
+        );
 
-    return $response;
+        return $response
+          ->withStatus(400)
+          ->withHeader('Content-Description', $ex->getMessage());
+      } else {
+        return $response
+          ->withStatus(500)
+          ->withHeader('Content-Description', $ex->getMessage());
+      }
+    }
   }
 
   public function getEntry(
@@ -230,11 +257,32 @@ class EntryType
       );
 
       return $response;
-    } catch (\Illuminate\Database\QueryException $ex) {
-      if ($ex->getCode() === 23000) {
-        return $response->withStatus(400);
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        $errorText = str_replace(
+          ['UNIQUE constraint failed: ', ' '],
+          '',
+          $ex->errorInfo[2],
+        );
+        $response->getBody()->write(
+          json_encode([
+            'data' => array_map(function ($item) {
+              return str_contains('.', $item)
+                ? explode('.', $item)[1]
+                : explode('_', $item)[1];
+            }, explode(',', $errorText)),
+            'code' => intval($ex->getCode()),
+            'message' => 'Duplicate entries',
+          ]),
+        );
+
+        return $response
+          ->withStatus(400)
+          ->withHeader('Content-Description', $ex->getMessage());
       } else {
-        return $response->withStatus(500);
+        return $response
+          ->withStatus(500)
+          ->withHeader('Content-Description', $ex->getMessage());
       }
     }
   }

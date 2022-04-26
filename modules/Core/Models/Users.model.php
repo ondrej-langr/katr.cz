@@ -68,9 +68,27 @@ class Users extends Model
       'type' => 'enum',
       'enum' => ['Admin', 'Maintainer', 'Editor'],
     ],
+
+    'state' => [
+      'required' => true,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'State',
+      'type' => 'enum',
+      'enum' => ['active', 'invited', 'blocked', 'password-reset'],
+    ],
   ];
 
-  protected $fillable = ['id', 'name', 'password', 'email', 'avatar', 'role'];
+  protected $fillable = [
+    'id',
+    'name',
+    'password',
+    'email',
+    'avatar',
+    'role',
+    'state',
+  ];
 
   protected $hidden = ['password'];
 

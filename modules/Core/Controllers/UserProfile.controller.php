@@ -30,7 +30,7 @@ class UserProfile
         'data' => \Users::where('id', $userId)
           ->get()
           ->firstOrFail(),
-      ]),
+      ])
     );
 
     return $response;
@@ -61,17 +61,27 @@ class UserProfile
       $responseAry['message'] = 'missing params';
       $code = 400;
     } else {
+      $userDisabledErrorMessage = 'user-disabled';
+
       try {
         $user = \Users::where('email', $args['email'])
           ->get()
           ->firstOrFail();
         $passwordIsValid = $passwordService->validate(
           $args['password'],
-          $user->password,
+          $user->password
         );
 
         if (!$passwordIsValid) {
           throw new \Exception('Wrong password');
+        }
+
+        if (
+          $user->state === 'password-reset' ||
+          $user->state === 'blocked' ||
+          $user->state === 'invited'
+        ) {
+          throw new \Exception($userDisabledErrorMessage);
         }
 
         $this->container->get('session')->set('user_id', $user->id);
@@ -79,8 +89,15 @@ class UserProfile
         $responseAry['message'] = 'successfully logged in';
         $code = 200;
       } catch (\Exception $e) {
-        $responseAry['result'] = 'error';
-        $responseAry['message'] = 'wrong password or email';
+        if ($e->getMessage() === $userDisabledErrorMessage) {
+          $responseAry['result'] = 'error';
+          $responseAry['message'] = 'user disabled';
+          $responseAry['code'] = 'user-disabled';
+        } else {
+          $responseAry['result'] = 'error';
+          $responseAry['message'] = 'wrong password or email';
+        }
+
         $code = 400;
       }
     }
@@ -112,7 +129,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $userId)->update($parsedBody['data']),
-      ]),
+      ])
     );
 
     return $response;
@@ -127,7 +144,7 @@ class UserProfile
     $response->getBody()->write(
       json_encode([
         'result' => 'success',
-      ]),
+      ])
     );
 
     return $response;
@@ -167,7 +184,7 @@ class UserProfile
     try {
       $generatedEmailContent = $twigService->render(
         'email/password-reset',
-        $themePayload,
+        $themePayload
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
@@ -183,6 +200,10 @@ class UserProfile
     $emailService->addAddress($user->email, $user->name);
     $emailService->Subject = 'Password reset';
     $emailService->Body = $generatedEmailContent;
+
+    // User should be supposed to be in this state
+    $user->state = 'password-reset';
+    $user->save();
 
     $emailService->send();
 

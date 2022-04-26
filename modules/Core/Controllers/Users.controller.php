@@ -28,7 +28,7 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => $classInstance->getSummary(),
-      ]),
+      ])
     );
 
     return $response;
@@ -43,7 +43,7 @@ class Users
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
 
     $dataPaginated = json_decode(
-      \Users::paginate(15, ['*'], 'page', $page)->toJson(),
+      \Users::paginate(15, ['*'], 'page', $page)->toJson()
     );
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
@@ -72,9 +72,9 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $args['itemId'])->update(
-          $parsedBody['data'],
+          $parsedBody['data']
         ),
-      ]),
+      ])
     );
 
     return $response;
@@ -91,7 +91,7 @@ class Users
           'data' => \Users::where('id', $args['itemId'])
             ->get()
             ->firstOrFail(),
-        ]),
+        ])
       );
 
       return $response;
@@ -100,24 +100,56 @@ class Users
     }
   }
 
-  public function createEntry(
+  public function create(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
     $parsedBody = $request->getParsedBody();
+    $jwtService = $this->container->get('jwt-service');
+    $emailService = $this->container->get('email');
+    $twigService = $this->container->get('twig');
 
     if (isset($parsedBody['data']['password'])) {
       $parsedBody['data']['password'] = $this->passwordService->generate(
-        $parsedBody['data']['password'],
+        $parsedBody['data']['password']
       );
     }
 
+    $parsedBody['state'] = 'invited';
+    $user = \Users::create($parsedBody['data']);
+    $generatedJwt = $jwtService->generate(['id' => $user['id']]);
+
     $response->getBody()->write(
       json_encode([
-        'data' => \Users::create($parsedBody['data']),
-      ]),
+        'data' => $user,
+      ])
     );
+
+    $themePayload = array_merge($user, [
+      'token' => $generatedJwt,
+    ]);
+
+    try {
+      $generatedEmailContent = $twigService->render(
+        'email/invite-user.twig',
+        $themePayload
+      );
+    } catch (\Exception $e) {
+      $loader = new \Twig\Loader\ArrayLoader([
+        'index' =>
+          'Welcome, {{ name }}! Please continue your registration in <a href="{{ app_url }}/finalize-registration?token={{ token }}">here</a>!',
+      ]);
+      $twig = new \Twig\Environment($loader);
+
+      $generatedEmailContent = $twig->render('index', $themePayload);
+    }
+
+    $emailService->isHtml();
+    $emailService->addAddress($user->email, $user->name);
+    $emailService->Subject = 'Finalize registration';
+    $emailService->Body = $generatedEmailContent;
+    $emailService->send();
 
     return $response;
   }
@@ -130,8 +162,104 @@ class Users
     $response->getBody()->write(
       json_encode([
         'data' => \Users::where('id', $args['itemId'])->delete(),
-      ]),
+      ])
     );
+
+    return $response;
+  }
+
+  public function block(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) {
+    $user = \Users::findOrFail($args['itemId'])->update([
+      'state' => 'blocked',
+    ]);
+
+    $response->getBody()->write(
+      json_encode([
+        'data' => $user,
+      ])
+    );
+
+    return $response;
+  }
+
+  public function unblock(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) {
+    $user = \Users::findOrFail($args['itemId']);
+
+    if ($user->state !== 'blocked') {
+      return $response->withStatus(400);
+    }
+
+    $user->state = 'active';
+    $user->save();
+
+    $response->getBody()->write(
+      json_encode([
+        'data' => $user,
+      ])
+    );
+
+    return $response;
+  }
+
+  public function requestPasswordReset(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) {
+    $params = $request->getQueryParams();
+    $jwtService = $this->container->get('jwt-service');
+    $emailService = $this->container->get('email');
+    $twigService = $this->container->get('twig');
+
+    $user = \Users::findOrFail($args['itemId']);
+    if ($user->state === 'blocked') {
+      return $response->withStatus(400);
+    }
+
+    $generatedJwt = $jwtService->generate(['id' => $user['id']]);
+    $themePayload = [
+      'name' => $user->name,
+      'email' => $user->email,
+      'id' => $user->id,
+      'token' => $generatedJwt,
+      'app_url' => $_ENV['APP_URL'],
+    ];
+
+    try {
+      $generatedEmailContent = $twigService->render(
+        'email/password-reset',
+        $themePayload
+      );
+    } catch (\Exception $e) {
+      $loader = new \Twig\Loader\ArrayLoader([
+        'index' =>
+          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/reset-password?token={{ token }}">here</a>!',
+      ]);
+      $twig = new \Twig\Environment($loader);
+
+      $generatedEmailContent = $twig->render('index', $themePayload);
+    }
+
+    $emailService->isHtml();
+    $emailService->addAddress($user->email, $user->name);
+    $emailService->Subject = 'Password reset';
+    $emailService->Body = $generatedEmailContent;
+
+    // User should be supposed to be in this state
+    if ($user->state !== 'invited') {
+      $user->state = 'password-reset';
+    }
+    $user->save();
+
+    $emailService->send();
 
     return $response;
   }
