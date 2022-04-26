@@ -87,21 +87,19 @@ jobs:
           server: katr.cz
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          exclude: '
-            - **/.git*/**
-            - .git/**
-            - .git
-            - .github/**
-            - **/node_modules/**
-            - node_modules/**
-            - public/images/**
-            - cache/**
-            - .gitignore
-            - .prettierrc.js
-            - docker-compose.yml
-            - Dockerfile
-            - globals.d.ts
-            - tsconfig.json
-            - webpack.config.js
-            - yarn.lock
-            '
+          exclude: |
+            **/.git*/**
+            .git
+            .github/**
+            **/node_modules/**
+            public/images/**
+            cache/**
+            .gitignore
+            .prettierrc.js
+            docker-compose.yml
+            Dockerfile
+            globals.d.ts
+            tsconfig.json
+            webpack.config.js
+            yarn.lock
+            
