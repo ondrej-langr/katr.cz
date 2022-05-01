@@ -66,16 +66,20 @@ function getSetting($id)
   return null;
 }
 
+$imageId = getSetting('default_hero_image')['content']['data'];
+$heroImageUrl = $imageId ? \Files::get($imageId)->toArray()['path'] : '';
+
 /**
  * render helper
  */
 function render(string $path, array $data)
 {
-  global $twig;
+  global $twig, $heroImageUrl;
 
   $layoutBase = [
     'baseUrl' => PROM_URL_BASE ? PROM_URL_BASE : '/',
     'services' => getServices(),
+    'default_hero_image' => $heroImageUrl ?? 'assets/image/header-bg2.jpg',
     'footer' => [
       'contacts' => getSetting('footer_contacts')['content']['data'],
       'fakturace' => getSetting('footer_secret_items')['content']['data'],
