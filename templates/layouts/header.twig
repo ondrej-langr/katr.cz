@@ -33,7 +33,7 @@
     </nav>
     {% if title is defined %}
     <div class="header-content {% if description is not defined and title is defined %}smaller{% endif %}">
-        <img src="{{ (heroImageUrl ?? default_hero_image)|raw }}" class="header-content__image" />
+        <img src="{{ heroImageUrl|replace({"\n": "", "\r": "", "\t": ""})|length > 3 ? heroImageUrl : default_hero_image }}" class="header-content__image" />
         <div class="header-content__overlay"></div>
         <div class="header-content__text">
             <h1>
