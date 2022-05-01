@@ -1470,6 +1470,14 @@ form h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  .block-renderer {
+    align-items: center;
+    display: flex;
+    justify-content: normal;
+    flex-flow: column;
+    flex-wrap: wrap;
+  }
 }
 
 .blog-post-content {
