@@ -54,7 +54,7 @@ body > header > nav {
       align-items: center;
 
       a {
-        padding: 6px 10px;
+        padding: 6px 10px 6px 18px;
         font-size: 12px;
         font-weight: 500;
         position: relative;
@@ -65,13 +65,18 @@ body > header > nav {
           .fa-solid {
             position: absolute;
             content: '';
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             right: 3px;
             top: 4px;
             z-index: -1;
             path {
               fill: #339b30;
+            }
+
+            @media (min-width: 575px) {
+              width: 16px;
+              height: 16px;
             }
           }
         }
