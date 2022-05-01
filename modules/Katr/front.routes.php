@@ -3,6 +3,7 @@
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+$cachedHeroImageUrl;
 $container = $app->getContainer();
 $twig = $container->get('twig');
 $allServices = \Services::all()->toArray();
@@ -66,22 +67,31 @@ function getSetting($id)
   return null;
 }
 
-$imageId = getSetting('default_hero_image')['content']['data'];
-$heroImageUrl = $imageId ? \Files::find($imageId)->toArray()['path'] : '';
+function getDefaultHeroImageUrl()
+{
+  global $cachedHeroImageUrl;
 
-echo 'Imageid: ' . $imageId;
+  if (!$cachedHeroImageUrl) {
+    $imageId = getSetting('default_hero_image')['content']['data'];
+    $cachedHeroImageUrl = $imageId
+      ? \Files::find($imageId)->toArray()['path']
+      : 'assets/images/header-bg2.jpg';
+  }
+
+  return $cachedHeroImageUrl;
+}
 
 /**
  * render helper
  */
 function render(string $path, array $data)
 {
-  global $twig, $heroImageUrl;
+  global $twig;
 
   $layoutBase = [
     'baseUrl' => PROM_URL_BASE ? PROM_URL_BASE : '/',
     'services' => getServices(),
-    'default_hero_image' => $heroImageUrl ?? 'assets/images/header-bg2.jpg',
+    'default_hero_image' => getDefaultHeroImageUrl(),
     'footer' => [
       'contacts' => getSetting('footer_contacts')['content']['data'],
       'fakturace' => getSetting('footer_secret_items')['content']['data'],
