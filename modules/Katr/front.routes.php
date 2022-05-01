@@ -67,7 +67,7 @@ function getSetting($id)
 }
 
 $imageId = getSetting('default_hero_image')['content']['data'];
-$heroImageUrl = $imageId ? \Files::get($imageId)->toArray()['path'] : '';
+$heroImageUrl = $imageId ? \Files::find($imageId)->toArray()['path'] : '';
 
 /**
  * render helper
