@@ -8,8 +8,19 @@ class Contacts extends Model
   protected $modelIcon = 'Phone';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'simple',
+  ];
+
+  protected $fillable = [
+    'id',
+    'position',
+    'category',
+    'name',
+    'first_telephone',
+    'second_telephone',
+    'email',
   ];
 
   protected static $tableColumns = [
@@ -88,22 +99,13 @@ class Contacts extends Model
     ],
   ];
 
-  protected $fillable = [
-    'id',
-    'position',
-    'category',
-    'name',
-    'first_telephone',
-    'second_telephone',
-    'email',
-  ];
-
   public function getSummary()
   {
     return (object) [
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,

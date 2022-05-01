@@ -2,59 +2,57 @@
 /** @var Router $router */
 use Slim\Routing\RouteCollectorProxy as Router;
 use App\Middleware\Auth as AuthMiddleware;
+use App\Middleware\Permission as PermissionMiddleware;
 
 $auth = new AuthMiddleware($app->getContainer());
+$permissionMiddleware = new PermissionMiddleware($app->getContainer());
 
+// Languages
 $router->get(
   '/locales/{lang}.json',
   '\App\Controllers\Localization:getLocalization',
 );
 
+// Profile
 $router->group('/profile', function (Router $innerRouter) use ($auth) {
-  $innerRouter
-    ->get('/me', '\App\Controllers\UserProfile:getCurrent')
-    ->add($auth);
-
-  $innerRouter->post('/login', '\App\Controllers\UserProfile:login');
-
-  $innerRouter
-    ->post('/update', '\App\Controllers\UserProfile:update')
-    ->add($auth);
-
   $innerRouter->get(
     '/request-password-reset',
     '\App\Controllers\UserProfile:requestPasswordReset',
   );
-
-  $innerRouter->post(
-    '/finalize-password-reset',
-    '\App\Controllers\UserProfile:finalizePasswordReset',
-  );
-
   $innerRouter->get(
     '/request-email-change',
     '\App\Controllers\UserProfile:requestEmailChange',
   );
-
+  $innerRouter->post(
+    '/finalize-password-reset',
+    '\App\Controllers\UserProfile:finalizePasswordReset',
+  );
   $innerRouter->post(
     '/finalize-email-change',
     '\App\Controllers\UserProfile:finalizeEmailChange',
   );
+  $innerRouter->post('/login', '\App\Controllers\UserProfile:login');
 
   $innerRouter
-    ->get('/logout', '\App\Controllers\UserProfile:logout')
+    ->group('', function (Router $innerRouter) {
+      $innerRouter->get('/me', '\App\Controllers\UserProfile:getCurrent');
+      $innerRouter->get('/logout', '\App\Controllers\UserProfile:logout');
+      $innerRouter->post('/update', '\App\Controllers\UserProfile:update');
+    })
     ->add($auth);
 });
 
-$router->group('/entry-types', function (Router $innerRouter) use ($auth) {
+$router->group('/entry-types', function (Router $innerRouter) use (
+  $auth,
+  $permissionMiddleware
+) {
   // get info about all of models
   $innerRouter->get('', 'App\Controllers\EntryTypes:getInfo')->add($auth);
 
+  // Folders
   $innerRouter->group('/folders', function (Router $innerRouter) use ($auth) {
     $innerRouter->get('', '\App\Controllers\Folders:get')->add($auth);
-
     $innerRouter->post('', '\App\Controllers\Folders:create')->add($auth);
-
     $innerRouter->delete('', '\App\Controllers\Folders:delete')->add($auth);
   });
 
@@ -81,80 +79,54 @@ $router->group('/entry-types', function (Router $innerRouter) use ($auth) {
     });
   });
 
-  // custom user type group
-  $innerRouter->group('/users', function (Router $innerRouter) use ($auth) {
-    // get info only about one entry type
-    $innerRouter->get('', '\App\Controllers\Users:getInfo')->add($auth);
+  // Users
+  $innerRouter
+    ->group('/users', function (Router $innerRouter) {
+      $innerRouter->get('', '\App\Controllers\Users:getInfo');
 
-    // entry type items group
-    $innerRouter->group('/items', function (Router $innerRouter) use ($auth) {
-      // get many entries for type
-      $innerRouter->get('', '\App\Controllers\Users:getManyEntries');
+      $innerRouter->group('/items', function (Router $innerRouter) {
+        $innerRouter->get('', '\App\Controllers\Users:getMany');
+        $innerRouter->post('/create', '\App\Controllers\Users:create');
 
-      // create a entry-type entry
-      $innerRouter
-        ->post('/create', '\App\Controllers\Users:create')
-        ->add($auth);
+        $innerRouter->group('/{itemId}', function (Router $innerRouter) {
+          $innerRouter->get('', '\App\Controllers\Users:getOne');
+          $innerRouter->patch('', '\App\Controllers\Users:update');
+          $innerRouter->delete('', '\App\Controllers\Users:delete');
 
-      // entry-type entry group
-      $innerRouter->group('/{itemId}', function (Router $innerRouter) use (
-        $auth
-      ) {
-        $innerRouter->get('', '\App\Controllers\Users:getEntry');
-
-        $innerRouter
-          ->patch('', '\App\Controllers\Users:updateEntry')
-          ->add($auth);
-
-        $innerRouter
-          ->delete('', '\App\Controllers\Users:deleteEntry')
-          ->add($auth);
-
-        // Utils
-        $innerRouter->get('/block', '\App\Controllers\Users:block')->add($auth);
-        $innerRouter
-          ->get('/unblock', '\App\Controllers\Users:unblock')
-          ->add($auth);
-        $innerRouter
-          ->get(
+          $innerRouter->get('/block', '\App\Controllers\Users:block');
+          $innerRouter->get('/unblock', '\App\Controllers\Users:unblock');
+          $innerRouter->get(
             '/request-password-reset',
             '\App\Controllers\Users:requestPasswordReset',
-          )
-          ->add($auth);
+          );
+        });
       });
-    });
-  });
+    })
+    ->add($permissionMiddleware)
+    ->add($auth);
 
-  // entry type group
+  // Other
   $innerRouter->group('/{modelId}', function (Router $innerRouter) use ($auth) {
-    // get info only about one entry type
     $innerRouter->get('', '\App\Controllers\EntryType:getInfo')->add($auth);
 
-    // entry type items group
     $innerRouter->group('/items', function (Router $innerRouter) use ($auth) {
-      // get many entries for type
-      $innerRouter->get('', '\App\Controllers\EntryType:getManyEntries');
-
+      $innerRouter->get('', '\App\Controllers\EntryType:getMany');
       $innerRouter
-        ->post('/reorder', '\App\Controllers\EntryType:reorderEntries')
+        ->post('/reorder', '\App\Controllers\EntryType:swapTwo')
+        ->add($auth);
+      $innerRouter
+        ->post('/create', '\App\Controllers\EntryType:create')
         ->add($auth);
 
-      // create a entry-type entry
-      $innerRouter
-        ->post('/create', '\App\Controllers\EntryType:createEntry')
-        ->add($auth);
-
-      // entry-type entry group
       $innerRouter->group('/{itemId}', function (Router $innerRouter) use (
         $auth
       ) {
-        $innerRouter->get('', '\App\Controllers\EntryType:getEntry');
+        $innerRouter->get('', '\App\Controllers\EntryType:getOne');
         $innerRouter
-          ->patch('', '\App\Controllers\EntryType:updateEntry')
+          ->patch('', '\App\Controllers\EntryType:update')
           ->add($auth);
-        // Delete
         $innerRouter
-          ->delete('', '\App\Controllers\EntryType:deleteEntry')
+          ->delete('', '\App\Controllers\EntryType:delete')
           ->add($auth);
       });
     });

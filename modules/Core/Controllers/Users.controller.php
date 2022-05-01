@@ -9,35 +9,27 @@ use Psr\Http\Message\ServerRequestInterface;
 class Users
 {
   private $container;
-  private $loadedModels;
 
   public function __construct(Container $container)
   {
     $this->container = $container;
     $this->passwordService = $container->get('password-service');
-    $this->loadedModels = $container->get('sysinfo')['loadedModels'];
   }
 
   public function getInfo(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $classInstance = new \Users();
+    $instance = new \Users();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $classInstance->getSummary(),
-      ]),
-    );
+    prepareJsonResponse($response, (array) $instance->getSummary());
 
     return $response;
   }
 
-  public function getManyEntries(
+  public function getMany(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
     $queryParams = $request->getQueryParams();
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
@@ -58,12 +50,19 @@ class Users
     return $response;
   }
 
-  public function updateEntry(
+  public function update(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
     $parsedBody = $request->getParsedBody();
+    $user = $this->container->get('session')->get('user');
+
+    if ($user->id === $args['itemId']) {
+      return $response
+        ->withStatus(400)
+        ->withHeader('Content-Description', 'cannot change self by this route');
+    }
 
     if (isset($parsedBody['data']['password'])) {
       unset($parsedBody['data']['password']);
@@ -73,11 +72,7 @@ class Users
       $user = \Users::findOrFail($args['itemId']);
       $user->update($parsedBody['data']);
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => $user,
-        ]),
-      );
+      prepareJsonResponse($response, $user->toArray());
 
       return $response;
     } catch (\Exception $ex) {
@@ -87,16 +82,16 @@ class Users
           '',
           $ex->errorInfo[2],
         );
-        $response->getBody()->write(
-          json_encode([
-            'data' => array_map(function ($item) {
-              return str_contains('.', $item)
-                ? explode('.', $item)[1]
-                : explode('_', $item)[1];
-            }, explode(',', $errorText)),
-            'code' => intval($ex->getCode()),
-            'message' => 'Duplicate entries',
-          ]),
+
+        prepareJsonResponse(
+          $response,
+          array_map(function ($item) {
+            return strpos($item, '.') !== false
+              ? explode('.', $item)[1]
+              : explode('_', $item)[1];
+          }, explode(',', $errorText)),
+          'Duplicate entries',
+          intval($ex->getCode()),
         );
 
         return $response
@@ -110,18 +105,15 @@ class Users
     }
   }
 
-  public function getEntry(
+  public function getOne(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => \Users::where('id', $args['itemId'])
-            ->get()
-            ->firstOrFail(),
-        ]),
+      prepareJsonResponse(
+        $response,
+        \Users::findOrFail($args['itemId'])->toArray(),
       );
 
       return $response;
@@ -132,8 +124,7 @@ class Users
 
   public function create(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
     $parsedBody = $request->getParsedBody();
     $jwtService = $this->container->get('jwt-service');
@@ -166,11 +157,7 @@ class Users
 
     $generatedJwt = $jwtService->generate(['id' => $user['id']]);
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $user,
-      ]),
-    );
+    prepareJsonResponse($response, $user);
 
     $themePayload = array_merge($user, [
       'token' => $generatedJwt,
@@ -201,15 +188,16 @@ class Users
     return $response;
   }
 
-  public function deleteEntry(
+  public function delete(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Users::where('id', $args['itemId'])->delete(),
-      ]),
+    prepareJsonResponse(
+      $response,
+      \Users::findOrFail($args['itemId'])
+        ->delete()
+        ->toArray(),
     );
 
     return $response;
@@ -225,11 +213,7 @@ class Users
     $user->state = 'blocked';
     $user->save();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $user,
-      ]),
-    );
+    prepareJsonResponse($response, (array) $user);
 
     return $response;
   }
@@ -248,11 +232,7 @@ class Users
     $user->state = 'active';
     $user->save();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $user,
-      ]),
-    );
+    prepareJsonResponse($response, (array) $user);
 
     return $response;
   }
@@ -305,14 +285,11 @@ class Users
     if ($user->state !== 'invited') {
       $user->state = 'password-reset';
     }
+
     $user->save();
     $emailService->send();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $user,
-      ]),
-    );
+    prepareJsonResponse($response, (array) $user);
 
     return $response;
   }

@@ -8,9 +8,22 @@ class Users extends Model
   protected $modelIcon = 'Users';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'simple',
   ];
+
+  protected $fillable = [
+    'id',
+    'name',
+    'password',
+    'email',
+    'avatar',
+    'role',
+    'state',
+  ];
+
+  protected $hidden = ['password'];
 
   protected static $tableColumns = [
     'id' => [
@@ -80,24 +93,13 @@ class Users extends Model
     ],
   ];
 
-  protected $fillable = [
-    'id',
-    'name',
-    'password',
-    'email',
-    'avatar',
-    'role',
-    'state',
-  ];
-
-  protected $hidden = ['password'];
-
   public function getSummary()
   {
     return (object) [
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,

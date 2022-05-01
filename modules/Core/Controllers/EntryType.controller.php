@@ -26,17 +26,15 @@ class EntryType
       $exception->errorInfo[2],
     );
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => array_map(function ($item) {
-          return strpos($item, '.') !== false
-            ? explode('.', $item)[1]
-            : explode('_', $item)[1];
-        }, explode(',', $errorText)),
-        'code' => intval($exception->getCode()),
-        'message' => 'Duplicate entries',
-        'development-message' => $exception->getMessage(),
-      ]),
+    prepareJsonResponse(
+      $response,
+      array_map(function ($item) {
+        return strpos($item, '.') !== false
+          ? explode('.', $item)[1]
+          : explode('_', $item)[1];
+      }, explode(',', $errorText)),
+      'Duplicate entries',
+      intval($exception->getCode()),
     );
   }
 
@@ -54,7 +52,7 @@ class EntryType
           return strtolower($modelName);
         }, $this->loadedModels),
         function ($modelName) {
-          return !in_array($modelName, ['files']);
+          return !in_array($modelName, ['files', 'users']);
         },
       ),
     );
@@ -79,16 +77,12 @@ class EntryType
 
     $classInstance = new $modelInstancePath();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $classInstance->getSummary(),
-      ]),
-    );
+    prepareJsonResponse($response, $classInstance->getSummary());
 
     return $response;
   }
 
-  public function reorderEntries(
+  public function swapTwo(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -127,11 +121,7 @@ class EntryType
 
       DB::commit();
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => 1,
-        ]),
-      );
+      prepareJsonResponse($response, [], '', 'success');
     } catch (\Exception $e) {
       DB::rollback();
 
@@ -143,7 +133,7 @@ class EntryType
     return $response;
   }
 
-  public function getManyEntries(
+  public function getMany(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -181,7 +171,7 @@ class EntryType
     return $response;
   }
 
-  public function updateEntry(
+  public function update(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -197,11 +187,7 @@ class EntryType
       $item = $modelInstancePath::findOrFail($args['itemId']);
       $item->update($parsedBody['data']);
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => $item,
-        ]),
-      );
+      prepareJsonResponse($response, $item->toArray());
 
       return $response;
     } catch (\Exception $ex) {
@@ -219,7 +205,7 @@ class EntryType
     }
   }
 
-  public function getEntry(
+  public function getOne(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -230,13 +216,9 @@ class EntryType
     }
 
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => $modelInstancePath
-            ::where('id', $args['itemId'])
-            ->get()
-            ->firstOrFail(),
-        ]),
+      prepareJsonResponse(
+        $response,
+        $modelInstancePath::findOrFail($args['itemId'])->toArray(),
       );
 
       return $response;
@@ -245,7 +227,7 @@ class EntryType
     }
   }
 
-  public function createEntry(
+  public function create(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -258,10 +240,9 @@ class EntryType
     $parsedBody = $request->getParsedBody();
 
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => $modelInstancePath::create($parsedBody['data']),
-        ]),
+      prepareJsonResponse(
+        $response,
+        $modelInstancePath::create($parsedBody['data'])->toArray(),
       );
 
       return $response;
@@ -280,7 +261,7 @@ class EntryType
     }
   }
 
-  public function deleteEntry(
+  public function delete(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
@@ -290,10 +271,12 @@ class EntryType
       return $response->withStatus(404);
     }
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $modelInstancePath::where('id', $args['itemId'])->delete(),
-      ]),
+    prepareJsonResponse(
+      $response,
+      $modelInstancePath
+        ::where('id', $args['itemId'])
+        ->delete()
+        ->toArray(),
     );
 
     return $response;

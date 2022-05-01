@@ -8,12 +8,30 @@ class Files extends Model
   protected $modelIcon = 'Folder';
   public $timestamps = true;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = true;
   protected $adminSettings = [
     'layout' => 'simple',
   ];
 
   protected $casts = [
     'private' => 'boolean',
+  ];
+
+  protected $appends = ['path'];
+
+  public function getPathAttribute()
+  {
+    return (PROM_URL_BASE ?? '') .
+      "/api/entry-types/files/items/{$this->id}/raw";
+  }
+
+  protected $fillable = [
+    'id',
+    'filename',
+    'description',
+    'filepath',
+    'private',
+    'mimeType',
   ];
 
   protected static $tableColumns = [
@@ -73,21 +91,13 @@ class Files extends Model
     ],
   ];
 
-  protected $fillable = [
-    'id',
-    'filename',
-    'description',
-    'filepath',
-    'private',
-    'mimeType',
-  ];
-
   public function getSummary()
   {
     return (object) [
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,

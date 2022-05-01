@@ -10,6 +10,7 @@ class Positions extends Model
   protected $modelIcon = 'BuildingFactory';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -40,6 +41,8 @@ class Positions extends Model
     });
   }
 
+  protected $fillable = ['id', 'title', 'content', 'slug', 'description'];
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -54,7 +57,7 @@ class Positions extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -67,6 +70,7 @@ class Positions extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -89,14 +93,13 @@ class Positions extends Model
     ],
   ];
 
-  protected $fillable = ['id', 'title', 'content', 'slug', 'description'];
-
   public function getSummary()
   {
     return (object) [
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,

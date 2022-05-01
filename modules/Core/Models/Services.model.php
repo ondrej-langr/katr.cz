@@ -10,6 +10,7 @@ class Services extends Model
   protected $modelIcon = 'Briefcase';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -47,6 +48,25 @@ class Services extends Model
     });
   }
 
+  protected $fillable = [
+    'id',
+    'title',
+    'content',
+    'slug',
+    'hero_image',
+    'excerpt',
+    'description',
+    'order',
+    'permissions',
+  ];
+
+  protected $with = ['hero_image'];
+
+  public function hero_image()
+  {
+    return $this->belongsTo(\Files::class, 'hero_image', 'id');
+  }
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -61,7 +81,7 @@ class Services extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -74,6 +94,7 @@ class Services extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -84,6 +105,17 @@ class Services extends Model
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
+    ],
+
+    'hero_image' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'type' => 'file',
+      'title' => 'Úvodní obrázek',
+      'adminHidden' => true,
+      'typeFilter' => 'image',
     ],
 
     'excerpt' => [
@@ -122,18 +154,8 @@ class Services extends Model
       'hide' => false,
       'title' => 'permissions',
       'type' => 'json',
+      'default' => '',
     ],
-  ];
-
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'excerpt',
-    'description',
-    'order',
-    'permissions',
   ];
 
   public function getSummary()
@@ -142,6 +164,7 @@ class Services extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,

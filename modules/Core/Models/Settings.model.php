@@ -8,6 +8,7 @@ class Settings extends Model
   protected $modelIcon = 'Settings';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'simple',
   ];
@@ -17,6 +18,8 @@ class Settings extends Model
 
     'permissions' => 'array',
   ];
+
+  protected $fillable = ['id', 'name', 'label', 'content', 'permissions'];
 
   protected static $tableColumns = [
     'id' => [
@@ -54,6 +57,7 @@ class Settings extends Model
       'hide' => false,
       'title' => 'content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'permissions' => [
@@ -63,10 +67,9 @@ class Settings extends Model
       'hide' => false,
       'title' => 'permissions',
       'type' => 'json',
+      'default' => '',
     ],
   ];
-
-  protected $fillable = ['id', 'name', 'label', 'content', 'permissions'];
 
   public function getSummary()
   {
@@ -74,6 +77,7 @@ class Settings extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,

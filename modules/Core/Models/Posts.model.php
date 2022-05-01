@@ -10,6 +10,7 @@ class Posts extends Model
   protected $modelIcon = 'Archive';
   public $timestamps = true;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -54,6 +55,17 @@ class Posts extends Model
     return $query->where('is_published', 1);
   }
 
+  protected $fillable = [
+    'id',
+    'title',
+    'content',
+    'slug',
+    'description',
+    'is_published',
+    'order',
+    'permissions',
+  ];
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -68,7 +80,7 @@ class Posts extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -81,6 +93,7 @@ class Posts extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -129,18 +142,8 @@ class Posts extends Model
       'hide' => false,
       'title' => 'permissions',
       'type' => 'json',
+      'default' => '',
     ],
-  ];
-
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'description',
-    'is_published',
-    'order',
-    'permissions',
   ];
 
   public function getSummary()
@@ -149,6 +152,7 @@ class Posts extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,

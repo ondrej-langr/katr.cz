@@ -25,16 +25,11 @@ class Files
 
   public function getInfo(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $classInstance = new \Files();
+    $instance = new \Files();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $classInstance->getSummary(),
-      ]),
-    );
+    prepareJsonResponse($response, (array) $instance->getSummary());
 
     return $response;
   }
@@ -45,12 +40,9 @@ class Files
     array $args
   ): ResponseInterface {
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => \Files::where('id', $args['itemId'])
-            ->get()
-            ->firstOrFail(),
-        ]),
+      prepareJsonResponse(
+        $response,
+        \Files::findOrFail($args['itemId'])->toArray(),
       );
 
       return $response;
@@ -73,12 +65,13 @@ class Files
       $rootFromQuery . ($rootFromQuery !== '/' ? '/' : ''),
     );
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Files::where([
-          ['filepath', 'regexp', '^' . $finalPart . '[^\/]*(\.).*$'],
-        ])->get(),
-      ]),
+    prepareJsonResponse(
+      $response,
+      \Files::where([
+        ['filepath', 'regexp', '^' . $finalPart . '[^\/]*(\.).*$'],
+      ])
+        ->get()
+        ->toArray(),
     );
 
     return $response;
@@ -229,11 +222,7 @@ class Files
 
       DB::commit();
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => $createdFile,
-        ]),
-      );
+      prepareJsonResponse($response, $createdFile->toArray());
     } catch (\Exception $e) {
       echo $e->getMessage();
 
@@ -254,13 +243,10 @@ class Files
   ): ResponseInterface {
     $parsedBody = $request->getParsedBody();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Files::where('id', $args['itemId'])->update(
-          $parsedBody['data'],
-        ),
-      ]),
-    );
+    $file = \Files::findOrFail($args['itemId']);
+    $file->update($parsedBody['data']);
+
+    prepareJsonResponse($response, $file->toArray());
 
     return $response;
   }
