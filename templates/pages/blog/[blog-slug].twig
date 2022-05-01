@@ -17,37 +17,9 @@
         </p>
       {% endif %}
       <hr />
-      {% if data.content and data.content.blocks %}
-        {% for block in data.content.blocks %}
-          {% if block.type == 'header' %}
-            <h{{block.data.level}}>
-              {{ block.data.text }}
-            </h{{block.data.level}}>
-          {% elseif block.type == 'paragraph' %}
-            <p>
-              {{ block.data.text }}
-            </p>
-          {% elseif block.type == 'image' %}
-            <img class="big-image zooming" src="/api/entry-types/files/items/{{ block.data.fileId }}/raw" />
-          {% elseif block.type == 'gallery' %}
-            <div class="gallery">
-              {% for fileId in block.data.fileIds %}
-                <img class="zooming" src="/api/entry-types/files/items/{{ fileId }}/raw" />
-              {% endfor %}
-            </div>
-          {% elseif block.type == 'embed' %}
-            {% if block.data.service == 'youtube' %}
-              <iframe width="100%"
-                height="515"
-                src="{{ block.data.embed }}"
-                title="YouTube video player"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
+      {% include 'components/BlocksRenderer.twig' with {
+        blocks: data.content.blocks
+      } %}
     </div>
   </div>
 {% endblock %}
