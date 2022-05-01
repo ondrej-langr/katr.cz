@@ -152,7 +152,7 @@ body > header {
 
   .header-content {
     width: 100%;
-    min-height: 750px;
+    min-height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -204,6 +204,10 @@ body > header {
         padding-top: 60px;
         padding-bottom: 45px;
       }
+    }
+
+    @media (min-width: 575px) {
+      min-height: 750px;
     }
   }
 }
