@@ -30,13 +30,21 @@
     {% if block('title') is defined %}
       {% include 'layouts/header.twig' with {
         title: block('title')
-      }|merge(
-        block('description') ?? false
-          ? {
-            description: block('description')
-          }
-          : {}
-      ) %}
+      }
+        |merge(
+          block('description') ?? false
+            ? {
+              description: block('description')
+            }
+            : {}
+        )
+        |merge(
+          block('heroImageUrl') ?? false
+            ? {
+              heroImageUrl: block('heroImageUrl')
+            }
+            : {}
+        ) %}
     {% else %}
       {% include 'layouts/header.twig' %}
     {% endif %}
