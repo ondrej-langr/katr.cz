@@ -82,7 +82,7 @@ jobs:
         run: npm run build
 
       - name: Delete twig cache
-        uses: StephanThierry/ftp-delete-action@/v2.1
+        uses: StephanThierry/ftp-delete-action@v2.1
         with:
           host: katr.cz
           user: ${{ secrets.FTP_USER }}
