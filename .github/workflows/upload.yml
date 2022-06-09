@@ -81,6 +81,14 @@ jobs:
       - name: 🏗 Build the production build
         run: npm run build
 
+      - name: Delete twig cache
+        uses: StephanThierry/ftp-delete-action@/v2.1
+        with:
+          host: katr.cz
+          user: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          remoteDirectories: "/cache"
+
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
