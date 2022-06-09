@@ -271,8 +271,7 @@ $router->get('/sluzby/{service_slug}', function (
   $args
 ) {
   $service = \Services::where('slug', $args['service_slug'])
-    ->first()
-    ->toArray();
+    ->first();
 
   if (!$service) {
     $response->getBody()->write(render('pages/404.twig', []));
@@ -283,7 +282,7 @@ $router->get('/sluzby/{service_slug}', function (
   $response
     ->getBody()
     ->write(
-      render('pages/sluzby/[service-slug].twig', repairBlockContent($service))
+      render('pages/sluzby/[service-slug].twig', repairBlockContent($service->toArray()))
     );
 
   return $response;
