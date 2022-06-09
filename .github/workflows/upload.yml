@@ -88,6 +88,7 @@ jobs:
           user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           remoteDirectories: "/cache"
+          ignoreSSL: "1"
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
