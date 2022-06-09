@@ -46,7 +46,7 @@
       <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
         {% for service in services %}
           <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-            <a href="sluzby/{{ service.title }}">
+            <a href="sluzby/{{ service.slug }}">
               <span class="number">{{ loop.index }}</span>
               <h2>
                 {{ service.title }}
