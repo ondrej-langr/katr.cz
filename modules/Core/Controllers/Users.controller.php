@@ -33,10 +33,25 @@ class Users
   ): ResponseInterface {
     $queryParams = $request->getQueryParams();
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
+    $where = [];
+    $whereIn = [];
 
-    $dataPaginated = json_decode(
-      \Users::paginate(15, ['*'], 'page', $page)->toJson(),
-    );
+    if (isset($queryParams['where'])) {
+      [$where, $whereIn] = normalizeWhereQueryParam($queryParams['where']);
+    }
+
+    //echo json_encode($whereIn);
+
+    $query = \Users::where($where);
+    if (count($whereIn)) {
+      foreach ($whereIn as $whereInItem) {
+        $query->whereIn($whereInItem[0], $whereInItem[1]);
+      }
+    }
+
+    $result = $query->paginate(15, ['*'], 'page', $page);
+    $dataPaginated = json_decode($result->toJson());
+
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
     unset($dataPaginated->first_page_url);
@@ -213,7 +228,7 @@ class Users
     $user->state = 'blocked';
     $user->save();
 
-    prepareJsonResponse($response, (array) $user);
+    prepareJsonResponse($response, $user->toArray());
 
     return $response;
   }
@@ -232,7 +247,7 @@ class Users
     $user->state = 'active';
     $user->save();
 
-    prepareJsonResponse($response, (array) $user);
+    prepareJsonResponse($response, $user->toArray());
 
     return $response;
   }
@@ -289,7 +304,7 @@ class Users
     $user->save();
     $emailService->send();
 
-    prepareJsonResponse($response, (array) $user);
+    prepareJsonResponse($response, $user->toArray());
 
     return $response;
   }

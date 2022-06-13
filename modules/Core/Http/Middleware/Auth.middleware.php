@@ -34,7 +34,6 @@ class Auth
   public function __invoke(Request $request, RequestHandler $handler): Response
   {
     $userId = $this->container->get('session')->get('user_id', false);
-
     if (!$userId) {
       $response = new Response();
       return $response

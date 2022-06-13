@@ -65,6 +65,12 @@ if (!defined('PROM_SESSION_LIFETIME')) {
 if (!defined('PROM_TOKEN_LIFETIME')) {
   define('PROM_TOKEN_LIFETIME', $_ENV['SECURITY_TOKEN_LIFETIME'] ?? 86400);
 }
+if (!defined('PROM_PERMISSIONS_ALLOW_EVERYTHING_KEY')) {
+  define('PROM_PERMISSIONS_ALLOW_EVERYTHING_KEY', 'allow-everything');
+}
+if (!defined('PROM_PERMISSIONS_ALLOW_OWN_KEY')) {
+  define('PROM_PERMISSIONS_ALLOW_OWN_KEY', 'allow-own');
+}
 if (!defined('PROM_CORE_DIR')) {
   define(
     'PROM_CORE_DIR',

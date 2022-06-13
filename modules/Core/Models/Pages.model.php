@@ -20,7 +20,7 @@ class Pages extends Model
 
     'is_published' => 'boolean',
 
-    'permissions' => 'array',
+    'coeditors' => 'array',
   ];
 
   /**
@@ -65,7 +65,9 @@ class Pages extends Model
     'description',
     'is_published',
     'order',
-    'permissions',
+    'coeditors',
+    'created_by',
+    'updated_by',
   ];
 
   protected $with = ['hero_image'];
@@ -73,6 +75,16 @@ class Pages extends Model
   public function hero_image()
   {
     return $this->belongsTo(\Files::class, 'hero_image', 'id');
+  }
+
+  public function created_by()
+  {
+    return $this->belongsTo(\User::class, 'created_by', 'id');
+  }
+
+  public function updated_by()
+  {
+    return $this->belongsTo(\User::class, 'updated_by', 'id');
   }
 
   protected static $tableColumns = [
@@ -164,14 +176,44 @@ class Pages extends Model
       'adminHidden' => true,
     ],
 
-    'permissions' => [
+    'coeditors' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Coeditors',
+      'type' => 'json',
+      'default' => '',
+    ],
+
+    'created_by' => [
       'required' => false,
       'editable' => false,
       'unique' => false,
       'hide' => false,
-      'title' => 'permissions',
-      'type' => 'json',
-      'default' => '',
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Created by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
+    ],
+
+    'updated_by' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Updated by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
     ],
   ];
 
@@ -186,7 +228,8 @@ class Pages extends Model
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,
       'isDraftable' => true,
-      'hasPermissions' => true,
+      'isSharable' => true,
+      'ownable' => true,
       'admin' => $this->adminSettings,
     ];
   }

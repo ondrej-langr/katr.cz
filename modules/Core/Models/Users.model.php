@@ -19,9 +19,14 @@ class Users extends Model
     'password',
     'email',
     'avatar',
-    'role',
     'state',
+    'role',
   ];
+
+  public function role()
+  {
+    return $this->belongsTo(\UserRoles::class, 'role', 'id');
+  }
 
   protected $hidden = ['password'];
 
@@ -72,16 +77,6 @@ class Users extends Model
       'type' => 'string',
     ],
 
-    'role' => [
-      'required' => true,
-      'editable' => true,
-      'unique' => false,
-      'hide' => false,
-      'title' => 'Role',
-      'type' => 'enum',
-      'enum' => ['admin', 'maintainer', 'editor'],
-    ],
-
     'state' => [
       'required' => true,
       'editable' => false,
@@ -90,6 +85,21 @@ class Users extends Model
       'title' => 'State',
       'type' => 'enum',
       'enum' => ['active', 'invited', 'blocked', 'password-reset'],
+    ],
+
+    'role' => [
+      'required' => true,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'type' => 'relationship',
+      'targetModel' => 'userRoles',
+      'title' => 'Role',
+      'adminHidden' => true,
+      'labelConstructor' => 'label',
     ],
   ];
 
@@ -104,7 +114,8 @@ class Users extends Model
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,
       'isDraftable' => false,
-      'hasPermissions' => false,
+      'isSharable' => false,
+      'ownable' => false,
       'admin' => $this->adminSettings,
     ];
   }

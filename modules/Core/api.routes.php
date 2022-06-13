@@ -2,9 +2,11 @@
 /** @var Router $router */
 use Slim\Routing\RouteCollectorProxy as Router;
 use App\Middleware\Auth as AuthMiddleware;
+use App\Middleware\EntryType as EntryTypeMiddleware;
 use App\Middleware\Permission as PermissionMiddleware;
 
 $auth = new AuthMiddleware($app->getContainer());
+$entryTypeMiddleware = new EntryTypeMiddleware($app->getContainer());
 $permissionMiddleware = new PermissionMiddleware($app->getContainer());
 
 // Languages
@@ -44,40 +46,43 @@ $router->group('/profile', function (Router $innerRouter) use ($auth) {
 
 $router->group('/entry-types', function (Router $innerRouter) use (
   $auth,
-  $permissionMiddleware
+  $permissionMiddleware,
+  $entryTypeMiddleware
 ) {
   // get info about all of models
   $innerRouter->get('', 'App\Controllers\EntryTypes:getInfo')->add($auth);
 
   // Folders
-  $innerRouter->group('/folders', function (Router $innerRouter) use ($auth) {
-    $innerRouter->get('', '\App\Controllers\Folders:get')->add($auth);
-    $innerRouter->post('', '\App\Controllers\Folders:create')->add($auth);
-    $innerRouter->delete('', '\App\Controllers\Folders:delete')->add($auth);
-  });
+  $innerRouter
+    ->group('/folders', function (Router $innerRouter) {
+      $innerRouter->get('', '\App\Controllers\Folders:get');
+      $innerRouter->post('', '\App\Controllers\Folders:create');
+      $innerRouter->delete('', '\App\Controllers\Folders:delete');
+    })
+    ->add($auth);
 
   // Files
-  $innerRouter->group('/files', function (Router $innerRouter) use ($auth) {
-    $innerRouter
-      ->get('/paged-items', '\App\Controllers\Files:getManyListed')
-      ->add($auth);
+  $innerRouter
+    ->group('/files', function (Router $innerRouter) {
+      $innerRouter->get('/paged-items', '\App\Controllers\Files:getManyListed');
 
-    $innerRouter->group('/items', function (Router $innerRouter) use ($auth) {
-      $innerRouter->get('', '\App\Controllers\Files:getMany')->add($auth);
-      $innerRouter
-        ->post('/create', '\App\Controllers\Files:create')
-        ->add($auth);
+      $innerRouter->group('/items', function (Router $innerRouter) {
+        $innerRouter->get('', '\App\Controllers\Files:getMany');
+        $innerRouter->post('/create', '\App\Controllers\Files:create');
 
-      $innerRouter->group('/{itemId}', function (Router $innerRouter) use (
-        $auth
-      ) {
-        $innerRouter->get('/raw', '\App\Controllers\Files:getFile');
-        $innerRouter->get('', '\App\Controllers\Files:get')->add($auth);
-        $innerRouter->patch('', '\App\Controllers\Files:update')->add($auth);
-        $innerRouter->delete('', '\App\Controllers\Files:delete')->add($auth);
+        $innerRouter->group('/{itemId}', function (Router $innerRouter) {
+          $innerRouter->get('', '\App\Controllers\Files:get');
+          $innerRouter->patch('', '\App\Controllers\Files:update');
+          $innerRouter->delete('', '\App\Controllers\Files:delete');
+        });
       });
-    });
-  });
+    })
+    ->add($permissionMiddleware)
+    ->add($auth);
+  $innerRouter->get(
+    '/files/items/{itemId}/raw',
+    '\App\Controllers\Files:getFile',
+  );
 
   // Users
   $innerRouter
@@ -93,9 +98,9 @@ $router->group('/entry-types', function (Router $innerRouter) use (
           $innerRouter->patch('', '\App\Controllers\Users:update');
           $innerRouter->delete('', '\App\Controllers\Users:delete');
 
-          $innerRouter->get('/block', '\App\Controllers\Users:block');
-          $innerRouter->get('/unblock', '\App\Controllers\Users:unblock');
-          $innerRouter->get(
+          $innerRouter->patch('/block', '\App\Controllers\Users:block');
+          $innerRouter->patch('/unblock', '\App\Controllers\Users:unblock');
+          $innerRouter->patch(
             '/request-password-reset',
             '\App\Controllers\Users:requestPasswordReset',
           );
@@ -105,30 +110,55 @@ $router->group('/entry-types', function (Router $innerRouter) use (
     ->add($permissionMiddleware)
     ->add($auth);
 
-  // Other
-  $innerRouter->group('/{modelId}', function (Router $innerRouter) use ($auth) {
-    $innerRouter->get('', '\App\Controllers\EntryType:getInfo')->add($auth);
+  // User roles
+  $innerRouter
+    ->group('/{route:user-roles|userroles}', function (Router $innerRouter) {
+      $innerRouter->get('', '\App\Controllers\UserRoles:getInfo');
 
-    $innerRouter->group('/items', function (Router $innerRouter) use ($auth) {
-      $innerRouter->get('', '\App\Controllers\EntryType:getMany');
-      $innerRouter
-        ->post('/reorder', '\App\Controllers\EntryType:swapTwo')
-        ->add($auth);
-      $innerRouter
-        ->post('/create', '\App\Controllers\EntryType:create')
-        ->add($auth);
+      $innerRouter->group('/items', function (Router $innerRouter) {
+        $innerRouter->get('', '\App\Controllers\UserRoles:getMany');
+        $innerRouter->post('/create', '\App\Controllers\UserRoles:create');
 
-      $innerRouter->group('/{itemId}', function (Router $innerRouter) use (
-        $auth
-      ) {
-        $innerRouter->get('', '\App\Controllers\EntryType:getOne');
-        $innerRouter
-          ->patch('', '\App\Controllers\EntryType:update')
-          ->add($auth);
-        $innerRouter
-          ->delete('', '\App\Controllers\EntryType:delete')
-          ->add($auth);
+        $innerRouter->group('/{itemId}', function (Router $innerRouter) {
+          $innerRouter->patch('', '\App\Controllers\UserRoles:update');
+          $innerRouter->delete('', '\App\Controllers\UserRoles:delete');
+        });
       });
-    });
+    })
+    ->add($permissionMiddleware)
+    ->add($auth);
+  $innerRouter
+    ->get(
+      '/{route:user-roles|userroles}/items/{itemId}',
+      '\App\Controllers\UserRoles:getOne',
+    )
+    ->add($auth);
+
+  // Other
+  $innerRouter->group('/{modelId}', function (Router $innerRouter) use (
+    $auth,
+    $permissionMiddleware,
+    $entryTypeMiddleware
+  ) {
+    $innerRouter
+      ->get('', '\App\Controllers\EntryType:getInfo')
+      ->add($entryTypeMiddleware)
+      ->add($auth);
+
+    $innerRouter
+      ->group('/items', function (Router $innerRouter) {
+        $innerRouter->get('', '\App\Controllers\EntryType:getMany');
+        $innerRouter->patch('/reorder', '\App\Controllers\EntryType:swapTwo');
+        $innerRouter->post('/create', '\App\Controllers\EntryType:create');
+
+        $innerRouter->group('/{itemId}', function (Router $innerRouter) {
+          $innerRouter->get('', '\App\Controllers\EntryType:getOne');
+          $innerRouter->patch('', '\App\Controllers\EntryType:update');
+          $innerRouter->delete('', '\App\Controllers\EntryType:delete');
+        });
+      })
+      ->add($permissionMiddleware)
+      ->add($entryTypeMiddleware)
+      ->add($auth);
   });
 });
