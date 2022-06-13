@@ -29,10 +29,10 @@
             {% endif %}
           </label>
           <div class="tab">
-            {% for fileId in block.data.fileIds %}
+            {% for file in block.data.fileIds %}
               <div class="gallery-item col-12 col-lg-4 col-md-4 col-sm">
-                <img src="/api/entry-types/files/items/{{ fileId }}/raw"
-                  data-original="/api/entry-types/files/items/{{ fileId }}/raw"
+                <img src="/api/entry-types/files/items/{{ file.id }}/raw"
+                  data-original="/api/entry-types/files/items/{{ file.id }}/raw"
                   class="zooming"
                   alt=""
                   style="cursor: zoom-in;" />
