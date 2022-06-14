@@ -11,6 +11,17 @@
 {% block content %}
   <div class="contact">
     <div class="contact-content">
+      {% if (data.emailSent) %}
+        {% if (data.emailSuccess) %}
+          <div class="mt-n5 mb-5 alert alert-success" role="alert">
+            Vaše zpráva byla úspěšně odeslána! V nedohledné době vás budeme kontaktovat na uvedený email.
+          </div>
+        {% else %}
+          <div class="mt-n5 mb-5 alert alert-danger" role="alert">
+            Stala se někde chyba. Zkuste to znovu za chvíli nebo nám zavolejte.
+          </div>
+        {% endif %}
+      {% endif %}
       <div class="tabs">
         {% for group in data.contactGroups %}
           <input type="radio" name="tabs" id="tab{{ loop.index }}" {% if loop.index is same as(1) %} checked="checked" {% endif %} />
@@ -52,28 +63,38 @@
       </div>
     </div>
     <div class="form-content">
-      <form role="form">
+      <form role="form" method="POST">
         <h2>
           Napište nám
         </h2>
         <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around left">
-          <label for="name">Jméno</label>
-          <input type="text"
+          <label for="name">Jméno *</label>
+          <input required type="text"
             class="form-control"
             id="name"
+            name="name"
             placeholder="Jméno"
             aria-describedby="name" />
-          <label for="email">E-mail</label>
-          <input type="email"
+          <label for="email">E-mail *</label>
+          <input required type="email"
             class="form-control"
             id="email"
+            name="email"
             placeholder="E-mail"
             aria-describedby="email" />
         </div>
         <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around right">
-          <label for="message" class="form-label">Zpráva</label>
-          <textarea class="form-control" id="message" rows="6"></textarea>
+          <label for="message" class="form-label">Zpráva *</label>
+          <textarea required class="form-control" name="message" id="message" rows="6" ></textarea>
         </div>
+        <div class="col-12">
+          <div class="h-captcha" data-sitekey="c9efc57f-acc2-46a0-a19d-53e4b684e8ce"></div>
+        </div>
+        {% if (data.captchafail) %}
+          <div class="col-12 mb-3 alert alert-danger" role="alert">
+            Zapoměli jste vyplnit kontrolu před roboty. Vyplňte a pošlete znovu, prosím.
+          </div>
+        {% endif %}
         <button type="submit" class="btn">Odeslat zprávu</button>
       </form>
     </div>

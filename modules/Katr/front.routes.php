@@ -5,6 +5,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 $cachedHeroImageUrl;
 $container = $app->getContainer();
+$emailService = $container->get('email');
 $twig = $container->get('twig');
 $allServices = \Services::all()->toArray();
 $settings = \Settings::orderBy('id', 'ASC')
@@ -236,11 +237,68 @@ $router->get('/kariera', function (
 });
 
 // CONTACTS
-$router->get('/kontakt', function (
+$router->map(['GET', 'POST'], '/kontakt', function (
   ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
+  ResponseInterface $response
+) use ($emailService, $twig) {
+  $params = $request->getQueryParams();
+  if ($request->getMethod() === 'POST') {
+    $data = $request->getParsedBody();
+
+    if (
+      !isset($data['h-captcha-response']) ||
+      empty($data['h-captcha-response'])
+    ) {
+      return $response
+        ->withStatus(302)
+        ->withHeader('Location', '/kontakt?captchafail=true');
+    }
+
+    if (
+      isset($data['email']) &&
+      !empty($data['email']) &&
+      isset($data['name']) &&
+      !empty($data['name']) &&
+      isset($data['message']) &&
+      !empty($data['message'])
+    ) {
+      // Verify recaptcha
+      $captchaData = [
+        'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
+        'response' => $data['h-captcha-response'],
+      ];
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
+      curl_setopt($ch, CURLOPT_POST, true);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $captchaResponse = curl_exec($ch);
+      $captchaResponseData = json_decode($captchaResponse);
+
+      // IF capcha is correct then proceed
+      if ($captchaResponseData->success) {
+        $emailService->isHtml();
+        $emailService->addAddress('dotazy@katr.cz');
+        $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
+        $emailService->Body = $twig->render('email/contact-form.twig', [
+          'email' => $data['email'],
+          'name' => $data['name'],
+          'message' => $data['message'],
+        ]);
+
+        $emailSuccess = $emailService->send();
+      }
+
+      return $response
+        ->withStatus(302)
+        ->withHeader(
+          'Location',
+          '/kontakt?success=' . ($emailSuccess ? 'true' : 'false')
+        );
+    }
+  }
+
   $contacts = \Contacts::all()->toArray();
 
   $groupedContacts = [];
@@ -258,6 +316,10 @@ $router->get('/kontakt', function (
   $response->getBody()->write(
     render('pages/kontakt.twig', [
       'contactGroups' => $groupedContacts,
+      'emailSent' => isset($params['success']),
+      'captchafail' => isset($params['captchafail']),
+      'emailSuccess' =>
+        isset($params['success']) && $params['success'] === 'true',
     ])
   );
 
@@ -270,8 +332,7 @@ $router->get('/sluzby/{service_slug}', function (
   ResponseInterface $response,
   $args
 ) {
-  $service = \Services::where('slug', $args['service_slug'])
-    ->first();
+  $service = \Services::where('slug', $args['service_slug'])->first();
 
   if (!$service) {
     $response->getBody()->write(render('pages/404.twig', []));
@@ -282,7 +343,10 @@ $router->get('/sluzby/{service_slug}', function (
   $response
     ->getBody()
     ->write(
-      render('pages/sluzby/[service-slug].twig', repairBlockContent($service->toArray()))
+      render(
+        'pages/sluzby/[service-slug].twig',
+        repairBlockContent($service->toArray())
+      )
     );
 
   return $response;

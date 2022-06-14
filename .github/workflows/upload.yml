@@ -62,14 +62,15 @@ jobs:
                   DB_PASSWORD=${DB_PASS}
 
                   # Mail
-                  MAIL_HOST=smtp.mailtrap.io
-                  MAIL_PORT=2525
+                  MAIL_HOST=email.active24.com
+                  MAIL_PORT=465
                   MAIL_USER=${MAIL_USER}
                   MAIL_PASS=${MAIL_PASS}
                   MAIL_ADDRESS=${MAIL_ADDRESS}
 
                   # Security
                   SECURITY_SECRET=${SECURITY_SECRET}
+                  SECURITY_HCAPTCHA_SECRET=${SECURITY_HCAPTCHA_SECRET}
                 `,
                 function (err) {
                   if (err) return reject();

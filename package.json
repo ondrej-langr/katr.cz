@@ -33,6 +33,8 @@
     "alpinejs": "^3.9.6",
     "bootstrap": "5.1.3",
     "jquery": "^3.6.0",
+    "photoswipe": "^5.2.7",
+    "photoswipe-dynamic-caption-plugin": "^1.1.1",
     "zooming": "^2.1.1"
   }
 }

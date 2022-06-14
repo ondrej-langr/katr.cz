@@ -1976,6 +1976,16 @@ path@^0.12.7:
     process "^0.11.1"
     util "^0.10.3"
 
+photoswipe-dynamic-caption-plugin@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/photoswipe-dynamic-caption-plugin/-/photoswipe-dynamic-caption-plugin-1.1.1.tgz#17d7155991141818a27a06978f480de2cb1686cf"
+  integrity sha512-uP0e8udjkevikEKcq2HrYOsWvjlfc5MKZcjjbVNQpfPPrK1ovnc+lGIKpnGzm4VBRXCg08WOaWrN6BACOMssYA==
+
+photoswipe@^5.2.7:
+  version "5.2.7"
+  resolved "https://registry.yarnpkg.com/photoswipe/-/photoswipe-5.2.7.tgz#9ff2aaf2a3e03c817ac2835dc6dee0f901e8159d"
+  integrity sha512-AogMba7W/O5gOtDIZ8cQuou1ltwxlaLNoZY1qi1s+kbYXpZk9D6rXxnNGAfDppl+bfe+sKLW2w2sx+3uQ8oPzg==
+
 php-parser@3.1.0-beta.5:
   version "3.1.0-beta.5"
   resolved "https://registry.yarnpkg.com/php-parser/-/php-parser-3.1.0-beta.5.tgz#81fd04ede37f3796ba2585b985831caffd62ba50"

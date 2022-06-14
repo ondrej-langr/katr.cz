@@ -28,15 +28,27 @@
               Žádný popisek
             {% endif %}
           </label>
-          <div class="tab">
+          <div class="tab gallery-photoswipe portfolio-gallery">
             {% for file in block.data.fileIds %}
-              <div class="gallery-item col-12 col-lg-4 col-md-4 col-sm">
+              <a href="/api/entry-types/files/items/{{ file.id }}/raw"
+                class="gallery-item col-12 col-lg-4 col-md-4 col-sm"
+                data-pswp-width="1024"
+                data-pswp-height="768">
                 <img src="/api/entry-types/files/items/{{ file.id }}/raw"
-                  data-original="/api/entry-types/files/items/{{ file.id }}/raw"
-                  class="zooming"
-                  alt=""
-                  style="cursor: zoom-in;" />
-              </div>
+                  alt="{{ file.title }}" />
+                <div class="d-none hidden-caption-content">
+                  {% if file.title %}
+                    <p class="heading">
+                      {{ file.title }}
+                    </p>
+                  {% endif %}
+                  {% if file.description %}
+                    <p class="description">
+                      {{ file.description }}
+                    </p>
+                  {% endif %}
+                </div>
+              </a>
             {% endfor %}
           </div>
         {% endfor %}
