@@ -36,10 +36,11 @@ jobs:
           MAIL_ADDRESS: '${{secrets.MAIL_ADDRESS}}'
 
           SECURITY_SECRET: '${{secrets.SECURITY_SECRET}}'
+          SECURITY_HCAPTCHA_SECRET: '${{secrets.SECURITY_HCAPTCHA_SECRET}}'
         with:
           script: |
             const fs = require('fs');
-            const { DB_NAME, DB_USER, DB_PASS, MAIL_USER, MAIL_PASS, MAIL_ADDRESS, SECURITY_SECRET } =
+            const { DB_NAME, DB_USER, DB_PASS, MAIL_USER, MAIL_PASS, MAIL_ADDRESS, SECURITY_SECRET, SECURITY_HCAPTCHA_SECRET } =
               process.env;
 
             await new Promise((resolve, reject) =>
