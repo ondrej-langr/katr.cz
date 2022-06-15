@@ -26,5 +26,5 @@ $mailer->Password = $_ENV['MAIL_PASS'];
 // Set from to header
 $mailer->setFrom(
   isset($_ENV['MAIL_ADDRESS']) ? $_ENV['MAIL_ADDRESS'] : $_ENV['MAIL_USER'],
-  $_ENV['APP_NAME'] ? $_ENV['APP_NAME'] : 'PROM Mailer'
+  $_ENV['APP_NAME'] ? $_ENV['APP_NAME'] : 'PROM Mailer',
 );
