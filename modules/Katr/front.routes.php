@@ -101,7 +101,7 @@ function render(string $path, array $data)
       'docs' => getSetting('footer_docs_list'),
     ],
     'allPages' => \Pages::onlyPublished()
-      ->where('id', '!=', 2)
+      ->where([['id', '!=', 2], ['slug', '!=', 'uzitecne-odkazy']])
       ->get()
       ->toArray(),
   ];
