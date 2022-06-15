@@ -31,7 +31,7 @@
           <div class="tab gallery-photoswipe portfolio-gallery">
             {% for file in block.data.fileIds %}
               <a href="/api/entry-types/files/items/{{ file.id }}/raw"
-                class="gallery-item col-12 col-lg-4 col-md-4 col-sm"
+                class="gallery-item"
                 data-pswp-width="1024"
                 data-pswp-height="768">
                 <img src="/api/entry-types/files/items/{{ file.id }}/raw"

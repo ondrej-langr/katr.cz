@@ -818,14 +818,14 @@ ul {
   }
 
   &:not(.is-image) {
-    display: flex;
-    position: relative;
-    align-items: center;
-    font-size: 14px;
-    padding: 10px 25px;
-    color: #fff;
-    background-color: #339b30;
     a {
+      display: flex;
+      position: relative;
+      align-items: center;
+      font-size: 14px;
+      padding: 10px 25px;
+      color: #fff;
+      background-color: #339b30;
     }
   }
 }
@@ -863,10 +863,12 @@ ul.tabs {
 }
 
 .portfolio-gallery {
+  gap: 10px;
+  display: grid;
   a {
     position: relative;
     aspect-ratio: 2/1;
-    margin: 10px;
+    width: calc(33.3333% - 20px);
 
     img {
       position: absolute;
@@ -876,6 +878,14 @@ ul.tabs {
       height: 100%;
       object-fit: cover;
       object-position: center;
+    }
+
+    @media screen and (max-width: 900px) {
+      width: calc(50% - 20px);
+    }
+
+    @media screen and (max-width: 420px) {
+      width: 100%;
     }
   }
 }
