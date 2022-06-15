@@ -67,8 +67,8 @@ class EntryType
       $fromEntry->order = $savedOrderId;
 
       if ($instance->getSummary()->ownable && $this->currentUser) {
-        $fromEntry->update_by = $this->currentUser->id;
-        $toEntry->update_by = $this->currentUser->id;
+        $fromEntry->updated_by = $this->currentUser->id;
+        $toEntry->updated_by = $this->currentUser->id;
       }
 
       $fromEntry->save();

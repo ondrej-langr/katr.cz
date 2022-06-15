@@ -73,7 +73,7 @@ class Permission
     }
 
     // Handle any other than admin
-    if ($roleId !== 0) {
+    if ($roleId !== 0 && $modelFromUrl !== 'files') {
       $response = new Response();
       $role = \UserRoles::where('id', $roleId)
         ->first()
