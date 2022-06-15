@@ -9,11 +9,13 @@ use Psr\Http\Message\ServerRequestInterface;
 class Users
 {
   private $container;
+  private $currentUser;
 
   public function __construct(Container $container)
   {
     $this->container = $container;
     $this->passwordService = $container->get('password-service');
+    $this->currentUser = $container->get('session')->get('user', false);
   }
 
   public function getInfo(
@@ -126,10 +128,14 @@ class Users
     array $args
   ): ResponseInterface {
     try {
-      prepareJsonResponse(
-        $response,
-        \Users::findOrFail($args['itemId'])->toArray(),
-      );
+      // If is not admin then we will return just id and name for safety reasons
+      if (strval($this->currentUser->role) === '0') {
+        $item = \Users::findOrFail($args['itemId']);
+      } else {
+        $item = \Users::select('id', 'name')->findOrFail($args['itemId']);
+      }
+
+      prepareJsonResponse($response, $item->toArray());
 
       return $response;
     } catch (\Exception $e) {

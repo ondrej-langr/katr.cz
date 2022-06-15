@@ -94,7 +94,6 @@ $router->group('/entry-types', function (Router $innerRouter) use (
         $innerRouter->post('/create', '\App\Controllers\Users:create');
 
         $innerRouter->group('/{itemId}', function (Router $innerRouter) {
-          $innerRouter->get('', '\App\Controllers\Users:getOne');
           $innerRouter->patch('', '\App\Controllers\Users:update');
           $innerRouter->delete('', '\App\Controllers\Users:delete');
 
@@ -108,6 +107,9 @@ $router->group('/entry-types', function (Router $innerRouter) use (
       });
     })
     ->add($permissionMiddleware)
+    ->add($auth);
+  $innerRouter
+    ->get('/users/items/{itemId}', '\App\Controllers\Users:getOne')
     ->add($auth);
 
   // User roles
