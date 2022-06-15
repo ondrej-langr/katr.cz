@@ -129,13 +129,13 @@ class Users
   ): ResponseInterface {
     try {
       // If is not admin then we will return just id and name for safety reasons
-      if (strval($this->currentUser->role) === '0') {
-        $item = \Users::findOrFail($args['itemId']);
-      } else {
-        $item = \Users::select('id', 'name')->findOrFail($args['itemId']);
-      }
-
-      prepareJsonResponse($response, $item->toArray());
+      prepareJsonResponse(
+        $response,
+        \Users::findOrFail(
+          $args['itemId'],
+          strval($this->currentUser->role) === '0' ? ['id', 'name'] : null,
+        )->toArray(),
+      );
 
       return $response;
     } catch (\Exception $e) {
