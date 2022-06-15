@@ -14,6 +14,7 @@ $mailer->Port = $_ENV['MAIL_PORT'];
 
 // We only talk authorized
 $mailer->SMTPAuth = true;
+$mailer->SMTPSecure = 'tls';
 
 // UTF-8 only
 $mailer->CharSet = 'UTF-8';
@@ -25,5 +26,5 @@ $mailer->Password = $_ENV['MAIL_PASS'];
 // Set from to header
 $mailer->setFrom(
   isset($_ENV['MAIL_ADDRESS']) ? $_ENV['MAIL_ADDRESS'] : $_ENV['MAIL_USER'],
-  $_ENV['APP_NAME'] ? $_ENV['APP_NAME'] : 'PROM Mailer',
+  $_ENV['APP_NAME'] ? $_ENV['APP_NAME'] : 'PROM Mailer'
 );
