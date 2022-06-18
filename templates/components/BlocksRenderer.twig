@@ -45,8 +45,8 @@
           {% elseif block.type == 'gallery' %}
             <div class="gallery gallery-photoswipe">
               {% for file in block.data.fileIds %}
-                <a href="/api/entry-types/files/items/{{ file.id }}/raw" data-pswp-width="1024" data-pswp-height="768">
-                  <img src="/api/entry-types/files/items/{{ file.id }}/raw" alt="{{ file.title }}" />
+                <a href="/api/entry-types/files/items/{{ file.id }}/raw?q=90&w=1240" data-pswp-width="1240" data-pswp-height="768">
+                  <img src="/api/entry-types/files/items/{{ file.id }}/raw?q=60&w=400" alt="{{ file.title }}" />
                   <div class="d-none hidden-caption-content">
                    {% if file.title %}
                       <p class="heading">{{file.title}}</p>
@@ -74,7 +74,7 @@
             <div class="btn-box {% if block.data.placeholderImage %} is-image {% endif %}">
               <a href="{{block.data.linkTo}}" title="{{block.data.label}}" {% if block.data.openOnNewTab %} target="_blank" {% endif %} {% if block.data.isDownload %} download {% endif %}>
                 {% if block.data.placeholderImage %}
-                  <img class="big-image w-100" src="/api/entry-types/files/items/{{ block.data.placeholderImage }}/raw" />
+                  <img class="big-image w-100" src="/api/entry-types/files/items/{{ block.data.placeholderImage }}/raw?q=90&w=1240" />
                 {% else %}
                   {% if block.data.isDownload %}
                     <svg xmlns="http://www.w3.org/2000/svg"
