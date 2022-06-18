@@ -2,25 +2,29 @@
 
 namespace App\Controllers;
 
+use App\Services\FileService;
+use App\Services\ImageService;
 use DI\Container;
 use GuzzleHttp\Psr7\MimeType;
-use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 use Illuminate\Database\Capsule\Manager as DB;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\Filesystem;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Files
 {
   private $container;
-  private $fs;
+  private Filesystem $fs;
+  private FileService $fileService;
+  private ImageService $imageService;
 
   public function __construct(Container $container)
   {
     $this->container = $container;
     $this->fs = $container->get('filesystem');
+    $this->fileService = $container->get('file-service');
+    $this->imageService = $container->get('image-service');
   }
 
   public function getInfo(
@@ -42,7 +46,7 @@ class Files
     try {
       prepareJsonResponse(
         $response,
-        \Files::findOrFail($args['itemId'])->toArray(),
+        $this->fileService->getById($args['itemId'])->toArray(),
       );
 
       return $response;
@@ -56,22 +60,11 @@ class Files
     ResponseInterface $response
   ): ResponseInterface {
     $queryParams = $request->getQueryParams();
-    $rootFromQuery = isset($queryParams['path']) ? $queryParams['path'] : '/';
-
-    // Find files by regex with provided path. This is different logic to access something with pagination
-    $finalPart = str_replace(
-      '/',
-      '\/',
-      $rootFromQuery . ($rootFromQuery !== '/' ? '/' : ''),
-    );
+    $directoryPath = isset($queryParams['path']) ? $queryParams['path'] : '/';
 
     prepareJsonResponse(
       $response,
-      \Files::where([
-        ['filepath', 'regexp', '^' . $finalPart . '[^\/]*(\.).*$'],
-      ])
-        ->get()
-        ->toArray(),
+      $this->fileService->getManyByDirectory($directoryPath)->toArray(),
     );
 
     return $response;
@@ -132,27 +125,43 @@ class Files
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
+    $id = $args['itemId'];
+    $queryParams = $request->getQueryParams();
+
     try {
       $userId = $this->container->get('session')->get('user_id', false);
-      $fileInfo = \Files::where('id', $args['itemId'])
-        ->get()
-        ->firstOrFail();
+      $fileInfo = $this->fileService->getById($id);
 
       if ($fileInfo->private && !$userId) {
         return $response->withStatus(401);
       }
 
-      $file = $this->fs->readStream($fileInfo->filepath);
+      if (preg_match('/image\/.*/', $fileInfo->mimeType)) {
+        $args = [];
 
-      $stream = new Stream($file);
+        if (isset($queryParams['q']) && !empty($queryParams['q'])) {
+          $args['q'] = intval($queryParams['q']);
+        }
+        if (isset($queryParams['h']) && !empty($queryParams['h'])) {
+          $args['h'] = intval($queryParams['h']);
+        }
+        if (isset($queryParams['w']) && !empty($queryParams['w'])) {
+          $args['w'] = intval($queryParams['w']);
+        }
+
+        $stream = $this->imageService->getProcessed($fileInfo, $args);
+      } else {
+        $stream = $this->fileService->getStream($fileInfo);
+      }
 
       return $response
         ->withHeader('Content-Type', $this->fs->mimeType($fileInfo->filepath))
-        ->withHeader('Content-Length', $this->fs->fileSize($fileInfo->filepath))
+        ->withHeader('Content-Length', $stream->getSize())
         ->withBody($stream);
     } catch (\Exception $e) {
-      echo $e->getMessage();
-      return $response->withStatus(404);
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', $e->getMessage());
     }
   }
 
@@ -256,18 +265,9 @@ class Files
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
+    $id = $args['itemId'];
     try {
-      $fileInfo = \Files::where('id', $args['itemId'])
-        ->get()
-        ->firstOrFail();
-
-      try {
-        $this->fs->delete($fileInfo->filepath);
-      } catch (FilesystemException | UnableToDeleteFile $exception) {
-        // TODO: Handle this better - db transactions?
-      }
-
-      $fileInfo->delete();
+      $this->fileService->deleteById($id);
 
       return $response->withStatus(200);
     } catch (\Exception $e) {

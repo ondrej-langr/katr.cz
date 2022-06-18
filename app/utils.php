@@ -8,8 +8,6 @@
  */
 use Psr\Http\Message\ResponseInterface;
 
-use function Symfony\Component\String\b;
-
 include_once __DIR__ . '/libs/env.bootstrap.php';
 
 function getDirContents($dir, &$results = [])

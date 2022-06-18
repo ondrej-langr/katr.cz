@@ -15,6 +15,12 @@ $PROM_ROOT_FOLDER =
   __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
 $PROM_UPLOADS_ROOT = $PROM_ROOT_FOLDER . DIRECTORY_SEPARATOR . 'uploads';
 $PROM_LOCALES_ROOT = $PROM_ROOT_FOLDER . DIRECTORY_SEPARATOR . 'locales';
+$PROM_FILE_CACHE_ROOT =
+  $PROM_ROOT_FOLDER .
+  DIRECTORY_SEPARATOR .
+  'cache' .
+  DIRECTORY_SEPARATOR .
+  'files';
 
 // load .env file if exists
 $dotenv = new Dotenv();
@@ -40,6 +46,9 @@ if (!defined('PROM_ROOT_FOLDER')) {
 }
 if (!defined('PROM_LOCALES_ROOT')) {
   define('PROM_LOCALES_ROOT', $PROM_LOCALES_ROOT);
+}
+if (!defined('PROM_FILE_CACHE_ROOT')) {
+  define('PROM_FILE_CACHE_ROOT', $PROM_FILE_CACHE_ROOT);
 }
 if (!defined('PROM_UPLOADS_ROOT')) {
   define('PROM_UPLOADS_ROOT', $PROM_UPLOADS_ROOT);

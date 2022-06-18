@@ -144,6 +144,12 @@ function bootstrap()
       return $localesFilesystem;
     });
 
+    // Set locales filesystem module and attach it to container
+    $container->set('file-cache-filesystem', function () {
+      global $fileCacheFilesystem;
+      return $fileCacheFilesystem;
+    });
+
     // Set mailer module and attach it to container
     $container->set('email', function () {
       global $mailer;
