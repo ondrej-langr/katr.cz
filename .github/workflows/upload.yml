@@ -89,7 +89,7 @@ jobs:
           host: katr.cz
           user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          remoteDirectories: "/cache"
+          remoteDirectories: "/cache/twig"
           ignoreSSL: "1"
 
       - name: 📂 Sync files
