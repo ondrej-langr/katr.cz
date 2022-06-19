@@ -301,7 +301,7 @@ $router->map(['GET', 'POST'], '/kontakt', function (
 
   $contacts = \Contacts::all()->toArray();
   $contactPositions = \Contact_positions::orderBy('order', 'ASC')
-    ->all()
+    ->get()
     ->toArray();
 
   $groupedContacts = [];
