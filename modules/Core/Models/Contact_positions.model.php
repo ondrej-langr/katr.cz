@@ -2,10 +2,12 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class Contacts extends Model
+use Illuminate\Support\Str;
+
+class Contact_positions extends Model
 {
-  protected $table = 'contacts';
-  protected $modelIcon = 'Phone';
+  protected $table = 'contact_positions';
+  protected $modelIcon = 'Speakerphone';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
   protected $ignoreSeeding = false;
@@ -17,23 +19,36 @@ class Contacts extends Model
     'coeditors' => 'array',
   ];
 
+  /**
+   * Takes care of events
+   */
+  public static function boot()
+  {
+    parent::boot();
+
+    static::saving(function ($entry) {
+      // Take care of slugs
+      foreach (
+        array_filter(self::$tableColumns, function ($col) {
+          return $col['type'] === 'slug';
+        })
+        as $colKey => $col
+      ) {
+        if ($entry->{$col['of']}) {
+          $entry->{$colKey} = Str::slug($entry->{$col['of']});
+        }
+      }
+    });
+  }
+
   protected $fillable = [
     'id',
-    'position',
-    'category',
     'name',
-    'first_telephone',
-    'second_telephone',
-    'email',
+    'slug',
     'coeditors',
     'created_by',
     'updated_by',
   ];
-
-  public function category()
-  {
-    return $this->belongsTo(\Contact_positions::class, 'category', 'id');
-  }
 
   public function created_by()
   {
@@ -56,63 +71,24 @@ class Contacts extends Model
       'type' => 'number',
     ],
 
-    'position' => [
+    'name' => [
       'required' => true,
       'editable' => true,
       'unique' => true,
       'hide' => false,
       'type' => 'string',
-      'title' => 'Pozice',
+      'title' => 'Název',
     ],
 
-    'category' => [
+    'slug' => [
       'required' => true,
-      'editable' => true,
-      'unique' => false,
+      'editable' => false,
+      'unique' => true,
       'hide' => false,
-      'multiple' => false,
-      'foreignKey' => 'id',
-      'fill' => false,
-      'type' => 'relationship',
-      'labelConstructor' => 'name',
-      'targetModel' => 'contact_positions',
-      'title' => 'Kategorie',
-    ],
-
-    'name' => [
-      'required' => true,
-      'editable' => true,
-      'unique' => false,
-      'hide' => false,
-      'type' => 'string',
-      'title' => 'Jméno',
-    ],
-
-    'first_telephone' => [
-      'required' => false,
-      'editable' => true,
-      'unique' => false,
-      'hide' => false,
-      'type' => 'string',
-      'title' => 'Telefon',
-    ],
-
-    'second_telephone' => [
-      'required' => false,
-      'editable' => true,
-      'unique' => false,
-      'hide' => false,
-      'type' => 'string',
-      'title' => 'Druhý telefon',
-    ],
-
-    'email' => [
-      'required' => false,
-      'editable' => true,
-      'unique' => false,
-      'hide' => false,
-      'type' => 'string',
-      'title' => 'Email',
+      'type' => 'slug',
+      'of' => 'name',
+      'title' => 'Slug',
+      'adminHidden' => true,
     ],
 
     'coeditors' => [
