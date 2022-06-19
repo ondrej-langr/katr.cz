@@ -300,17 +300,24 @@ $router->map(['GET', 'POST'], '/kontakt', function (
   }
 
   $contacts = \Contacts::all()->toArray();
+  $contactPositions = \Contact_positions::orderBy('order', 'ASC')
+    ->all()
+    ->toArray();
 
   $groupedContacts = [];
 
-  foreach ($contacts as $contact) {
-    $category = $contact['category'];
+  foreach ($contactPositions as $contactPosition) {
+    $contactPositionName = $contactPosition['name'];
+    $groupedContacts[$contactPositionName]['label'] = $contactPositionName;
 
-    if (!isset($groupedContacts[$category]['label'])) {
-      $groupedContacts[$category]['label'] = $category;
+    foreach (
+      array_filter($contacts, function ($item) use ($contactPosition) {
+        return intval($item['category']) === intval($contactPosition['id']);
+      })
+      as $contact
+    ) {
+      $groupedContacts[$contactPositionName]['contacts'][] = $contact;
     }
-
-    $groupedContacts[$category]['contacts'][] = $contact;
   }
 
   $response->getBody()->write(
