@@ -41,7 +41,19 @@
               {{ block.data.text }}
             </p>
           {% elseif block.type == 'image' %}
-            <img class="big-image zooming w-100" src="/api/entry-types/files/items/{{ block.data.fileId }}/raw" />
+            <div class="big-image w-full gallery-photoswipe">
+              <a class="w-full" href="/api/entry-types/files/items/{{ block.data.fileId }}/raw?q=90&w=1240" data-pswp-width="1240" data-pswp-height="768">
+                  <img src="/api/entry-types/files/items/{{ block.data.fileId }}/raw?q=80&w=1240" alt="{{ block.data.label }}" />
+                  <div class="d-none hidden-caption-content">
+                    {% if block.data.label %}
+                        <p class="heading">{{block.data.label}}</p>
+                    {% endif %}
+                    {% if block.data.description %}
+                        <p class="description">{{block.data.description}}</p>
+                    {% endif %}
+                  </div>
+              </a>
+            </div>
           {% elseif block.type == 'gallery' %}
             <div class="gallery gallery-photoswipe">
               {% for file in block.data.fileIds %}
