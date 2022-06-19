@@ -26,6 +26,11 @@ class Contact_positions extends Model
   {
     parent::boot();
 
+    static::created(function ($entry) {
+      $entry->order = $entry->id;
+      $entry->save();
+    });
+
     static::saving(function ($entry) {
       // Take care of slugs
       foreach (
@@ -45,6 +50,7 @@ class Contact_positions extends Model
     'id',
     'name',
     'slug',
+    'order',
     'coeditors',
     'created_by',
     'updated_by',
@@ -88,6 +94,17 @@ class Contact_positions extends Model
       'type' => 'slug',
       'of' => 'name',
       'title' => 'Slug',
+      'adminHidden' => true,
+    ],
+
+    'order' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'autoIncrement' => true,
+      'title' => 'Order',
+      'type' => 'number',
       'adminHidden' => true,
     ],
 
@@ -141,7 +158,7 @@ class Contact_positions extends Model
       'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
-      'hasOrdering' => false,
+      'hasOrdering' => true,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => true,
