@@ -2,13 +2,17 @@
 
 /** @var \DI\Container $container */
 
+use App\Twig\Extensions\AppExtension;
+
 // get container
 $container = $app->getContainer();
 
 $utilsService = $container->get('utils-service');
+$twig = $container->get('twig');
 
 $utilsService->autoloadFolder(__DIR__ . '/Services');
 $utilsService->autoloadFolder(__DIR__ . '/Http/Middleware');
+$utilsService->autoloadFolder(__DIR__ . '/rendering/TwigExtensions');
 
 class Path
 {
@@ -25,18 +29,10 @@ class Path
   }
 }
 
-$container->set('password-service', function () {
-  return new \App\Services\Password();
-});
+$container->set('password-service', new \App\Services\Password());
+$container->set('jwt-service', new \App\Services\JWT());
+$container->set('image-service', new \App\Services\ImageService($container));
+$container->set('file-service', new \App\Services\FileService($container));
 
-$container->set('jwt-service', function () {
-  return new \App\Services\JWT();
-});
-
-$container->set('image-service', function () use ($container) {
-  return new \App\Services\ImageService($container);
-});
-
-$container->set('file-service', function () use ($container) {
-  return new \App\Services\FileService($container);
-});
+// Add twig app extension
+$twig->addExtension(new AppExtension($container));

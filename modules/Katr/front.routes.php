@@ -276,7 +276,7 @@ $router->map(['GET', 'POST'], '/kontakt', function (
       $captchaResponse = curl_exec($ch);
       $captchaResponseData = json_decode($captchaResponse);
 
-      // IF capcha is correct then proceed
+      // if capcha is correct then proceed
       if ($captchaResponseData->success) {
         $emailService->isHtml();
         $emailService->addAddress('dotazy@katr.cz');

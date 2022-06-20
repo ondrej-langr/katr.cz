@@ -30,15 +30,14 @@
           </label>
           <div class="tab gallery-photoswipe portfolio-gallery">
             {% for file in block.data.fileIds %}
-              <a href="/api/entry-types/files/items/{{
-                file.id
-                }}/raw?q=90&w=1240"
+              {% set fullImage = image(file.id, 1240) %}
+              {% set thumbnail = image(file.id, 400, null, 60) %}
+              <a href="{{ fullImage.src }}"
                 class="gallery-item"
-                data-pswp-width="1024"
-                data-pswp-height="768">
-                <img src="/api/entry-types/files/items/{{
-                  file.id
-                  }}/raw?q=60&w=400"
+                data-pswp-width="{{ fullImage.width }}"
+                data-pswp-height="{{ fullImage.height }}">
+                <img src="{{ thumbnail.src }}"
+                  width="{{ thumbnail.width }}"
                   alt="{{ file.title }}" />
                 <div class="d-none hidden-caption-content">
                   {% if file.title %}

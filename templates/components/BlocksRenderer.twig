@@ -41,9 +41,11 @@
               {{ block.data.text }}
             </p>
           {% elseif block.type == 'image' %}
+            {% set fullImage = image(block.data.fileId, 1240) %}
+            {% set thumbnail = image(block.data.fileId, 1240, null, 85) %}
             <div class="big-image w-full gallery-photoswipe">
-              <a class="w-full" href="/api/entry-types/files/items/{{ block.data.fileId }}/raw?q=90&w=1240" data-pswp-width="1240" data-pswp-height="768">
-                  <img src="/api/entry-types/files/items/{{ block.data.fileId }}/raw?q=80&w=1240" alt="{{ block.data.label }}" />
+              <a class="w-full" href="{{ fullImage.src }}" data-pswp-width="{{fullImage.width}}" data-pswp-height="{{fullImage.height}}">
+                  <img src="{{thumbnail.src}}" width="{{thumbnail.width}}" height="{{thumbnail.height}}" alt="{{ block.data.label }}" />
                   <div class="d-none hidden-caption-content">
                     {% if block.data.label %}
                         <p class="heading">{{block.data.label}}</p>
@@ -57,15 +59,25 @@
           {% elseif block.type == 'gallery' %}
             <div class="gallery gallery-photoswipe">
               {% for file in block.data.fileIds %}
-                <a href="/api/entry-types/files/items/{{ file.id }}/raw?q=90&w=1240" data-pswp-width="1240" data-pswp-height="768">
-                  <img src="/api/entry-types/files/items/{{ file.id }}/raw?q=60&w=400" alt="{{ file.title }}" />
+                {% set fullImage = image(file.id, 1240) %}
+                {% set thumbnail = image(file.id, 400, null, 60) %}
+                <a href="{{ fullImage.src }}"
+                  data-pswp-width="{{ fullImage.width }}"
+                  data-pswp-height="{{ fullImage.height }}">
+                  <img src="{{ thumbnail.src }}"
+                    width="{{ thumbnail.width }}"
+                    alt="{{ file.title }}" />
                   <div class="d-none hidden-caption-content">
-                   {% if file.title %}
-                      <p class="heading">{{file.title}}</p>
-                   {% endif %}
-                   {% if file.description %}
-                      <p class="description">{{file.description}}</p>
-                   {% endif %}
+                    {% if file.title %}
+                      <p class="heading">
+                        {{ file.title }}
+                      </p>
+                    {% endif %}
+                    {% if file.description %}
+                      <p class="description">
+                        {{ file.description }}
+                      </p>
+                    {% endif %}
                   </div>
                 </a>
               {% endfor %}

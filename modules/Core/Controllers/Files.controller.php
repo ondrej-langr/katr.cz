@@ -6,6 +6,7 @@ use App\Services\FileService;
 use App\Services\ImageService;
 use DI\Container;
 use GuzzleHttp\Psr7\MimeType;
+use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 use Illuminate\Database\Capsule\Manager as DB;
 use League\Flysystem\Filesystem;
@@ -137,19 +138,11 @@ class Files
       }
 
       if (preg_match('/image\/.*/', $fileInfo->mimeType)) {
-        $args = [];
-
-        if (isset($queryParams['q']) && !empty($queryParams['q'])) {
-          $args['q'] = intval($queryParams['q']);
-        }
-        if (isset($queryParams['h']) && !empty($queryParams['h'])) {
-          $args['h'] = intval($queryParams['h']);
-        }
-        if (isset($queryParams['w']) && !empty($queryParams['w'])) {
-          $args['w'] = intval($queryParams['w']);
-        }
-
-        $stream = $this->imageService->getProcessed($fileInfo, $args);
+        $imageResource = $this->imageService->getProcessed(
+          $fileInfo,
+          $queryParams,
+        );
+        $stream = new Stream($imageResource['resource']);
       } else {
         $stream = $this->fileService->getStream($fileInfo);
       }
