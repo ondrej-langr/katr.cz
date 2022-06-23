@@ -231,13 +231,15 @@ class EntryType
   ): ResponseInterface {
     $modelInstancePath = $request->getAttribute('model-instance-path');
 
-    prepareJsonResponse(
-      $response,
-      $modelInstancePath
-        ::where('id', $args['itemId'])
-        ->delete()
-        ->toArray(),
-    );
+    if (!$modelInstancePath::where('id', $args['itemId'])->delete()) {
+      prepareJsonResponse($response, [], 'Failed to delete');
+
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', 'Failed to delete');
+    }
+
+    prepareJsonResponse($response, [], 'Item deleted');
 
     return $response;
   }
