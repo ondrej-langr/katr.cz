@@ -36,6 +36,14 @@ class Auth
     $userId = $this->container->get('session')->get('user_id', false);
     if (!$userId) {
       $response = new Response();
+
+      prepareJsonResponse(
+        $response,
+        [],
+        'User is not logged in',
+        'not-logged-in',
+      );
+
       return $response
         ->withStatus(401)
         ->withHeader('Content-Description', 'user logged off');
@@ -48,6 +56,13 @@ class Auth
         $response = new Response();
         // User does not exist hence the session destroy
         $this->container->get('session')::destroy();
+
+        prepareJsonResponse(
+          $response,
+          [],
+          'User is not logged in',
+          'not-logged-in',
+        );
 
         return $response
           ->withStatus(500)
