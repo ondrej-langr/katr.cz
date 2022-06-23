@@ -59,7 +59,7 @@ class Contacts extends Model
     'position' => [
       'required' => true,
       'editable' => true,
-      'unique' => true,
+      'unique' => false,
       'hide' => false,
       'type' => 'string',
       'title' => 'Pozice',
