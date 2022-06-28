@@ -279,7 +279,7 @@ $router->map(['GET', 'POST'], '/kontakt', function (
       // if capcha is correct then proceed
       if ($captchaResponseData->success) {
         $emailService->isHtml();
-        $emailService->addAddress('dotazy@katr.cz');
+        $emailService->addAddress('sekretariat@katr.cz');
         $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
         $emailService->Body = $twig->render('email/contact-form.twig', [
           'email' => $data['email'],
