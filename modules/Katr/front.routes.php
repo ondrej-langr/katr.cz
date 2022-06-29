@@ -200,24 +200,6 @@ $router->get('/', function (
 });
 
 // BLOG
-$router->get('/blog', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response
-) {
-  $posts = \Posts::orderByDesc('created_at')
-    ->onlyPublished()
-    ->get()
-    ->toArray();
-
-  $response->getBody()->write(
-    render('pages/blog/index.twig', [
-      'posts' => $posts,
-    ])
-  );
-
-  return $response;
-});
-
 $router->get('/blog/{post_slug}', function (
   ServerRequestInterface $request,
   ResponseInterface $response,
@@ -395,6 +377,16 @@ $router->get('/{page_slug}', function (
     $response->getBody()->write(render('pages/404.twig', []));
 
     return $response->withStatus(404);
+  }
+
+  // TODO something more smart?
+  if (
+    str_includes(json_encode(repairBlockContent($page)), 'blog-page-items-list')
+  ) {
+    $page['posts'] = \Posts::orderByDesc('created_at')
+      ->onlyPublished()
+      ->get()
+      ->toArray();
   }
 
   $response

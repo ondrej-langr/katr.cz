@@ -130,6 +130,8 @@
                 <li>{{ listItem|raw }}</li>
               {% endfor %}
             </ul>
+          {% elseif block.type == 'dynamicBlock' %}
+            {{ getDynamicBlock(block.data.blockId, data)|raw }}
           {% elseif block.type == 'tags' %}
             <ul class="badges">
               {% for tag in block.data.tags %}
