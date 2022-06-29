@@ -50,7 +50,7 @@ class ImageService
     if (count($args)) {
       $fileName = basename(
         $fileInfo->filepath,
-        '.' . pathinfo($fileInfo->filepath, PATHINFO_EXTENSION),
+        '.' . pathinfo($fileInfo->filepath, PATHINFO_EXTENSION)
       );
 
       $fileNameWithArgs = implode('.', [
@@ -59,13 +59,13 @@ class ImageService
           array_map(function ($key) use ($args) {
             $arg = $args[$key];
             return "$key$arg";
-          }, array_keys($args)),
+          }, array_keys($args))
         ),
         $fileName,
       ]);
       $fileBasenameWithArgs = "$fileNameWithArgs.jpeg";
 
-      if (!$this->fs->fileExists($fileBasenameWithArgs)) {
+      if (!$this->cacheFs->fileExists($fileBasenameWithArgs)) {
         $gdImageSource = \imagecreatefromstring(stream_get_contents($file));
 
         if (isset($args['w']) && !isset($args['h'])) {
@@ -77,7 +77,7 @@ class ImageService
         $imageConverted = \imagejpeg(
           $gdImageSource,
           Path::join(PROM_FILE_CACHE_ROOT, $fileBasenameWithArgs),
-          $args['q'] ?? 90,
+          $args['q'] ?? 90
         );
 
         if (!$imageConverted) {
@@ -96,7 +96,7 @@ class ImageService
       array_map(function ($key) use ($args) {
         $arg = $args[$key];
         return "$key=$arg";
-      }, array_keys($args)),
+      }, array_keys($args))
     );
 
     return [

@@ -30,7 +30,7 @@ function repairBlockContent($item)
 
 function connectGalleries($content = []): array
 {
-  if (isset($content['content']) && isset($item['content']['blocks'])) {
+  if (isset($content['content']) && isset($content['content']['blocks'])) {
     $bigGalleryPocket = [];
     $newBlocks = [];
 
