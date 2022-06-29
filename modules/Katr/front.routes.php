@@ -150,6 +150,8 @@ function render(string $path, array $data)
     ],
     'allPages' => \Pages::onlyPublished()
       ->where('showInMenu', true)
+      ->orderBy('order', 'ASC')
+      ->orderBy('id', 'ASC')
       ->get()
       ->toArray(),
   ];
