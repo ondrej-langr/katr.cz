@@ -18,6 +18,8 @@ class Pages extends Model
   protected $casts = [
     'content' => 'array',
 
+    'showInMenu' => 'boolean',
+
     'is_published' => 'boolean',
 
     'coeditors' => 'array',
@@ -60,6 +62,7 @@ class Pages extends Model
     'title',
     'content',
     'slug',
+    'showInMenu',
     'hero_image',
     'excerpt',
     'description',
@@ -125,6 +128,16 @@ class Pages extends Model
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
+    ],
+
+    'showInMenu' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'type' => 'boolean',
+      'title' => 'Zobrazit v menu',
+      'default' => false,
     ],
 
     'hero_image' => [

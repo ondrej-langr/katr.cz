@@ -1,6 +1,7 @@
-version: "3"
+version: '3'
+
 services:
-  php-web:
+  php_web:
     container_name: katr_prom_web
     build:
       context: .
@@ -18,10 +19,10 @@ services:
     container_name: katr_prom_mysql
     image: mariadb:latest
     environment:
-      MYSQL_ROOT_PASSWORD: "secret"
-      MYSQL_USER: "secret"
-      MYSQL_PASSWORD: "secret"
-      MYSQL_DATABASE: "secret"
+      MYSQL_ROOT_PASSWORD: 'secret'
+      MYSQL_USER: 'secret'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_DATABASE: 'secret'
     volumes:
       - mysqldata:/var/lib/mysql
     ports:

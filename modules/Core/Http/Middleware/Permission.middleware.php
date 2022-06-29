@@ -22,7 +22,7 @@ class Permission
 
   public function __construct($container)
   {
-    $this->adminOnlyModels = ['files', 'users', 'userroles', 'settings'];
+    $this->adminOnlyModels = ['users', 'userroles'];
     $this->container = $container;
     $this->loadedModels = $container->get('sysinfo')['loadedModels'];
   }
@@ -74,8 +74,9 @@ class Permission
         ->withHeader('Content-Description', 'model does not exist');
     }
 
-    // Handle any other than admin
-    if ($roleId !== 0) {
+    // TODO we should allow setting permission on files too so it makes sense
+    // Handle any other than admin and allow manipulate files on any user
+    if ($roleId !== 0 && strtolower($modelFromUrl) !== 'files') {
       if (in_array(strtolower($modelFromUrl), $this->adminOnlyModels)) {
         $response = new Response();
 
