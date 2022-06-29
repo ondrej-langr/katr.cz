@@ -28,6 +28,54 @@ function repairBlockContent($item)
   }
 }
 
+function connectGalleries($content = []): array
+{
+  if (isset($content['content']) && isset($item['content']['blocks'])) {
+    $bigGalleryPocket = [];
+    $newBlocks = [];
+
+    foreach ($content['content']['blocks'] as $key => $block) {
+      if ($block['type'] === 'gallery') {
+        $bigGalleryPocket[] = $block;
+      } else {
+        if (count($bigGalleryPocket) > 1) {
+          $blockValue = [
+            'type' => 'big-gallery',
+            'data' => $bigGalleryPocket,
+          ];
+        } elseif (count($bigGalleryPocket) === 1) {
+          $blockValue = $bigGalleryPocket[0];
+        } else {
+          $blockValue = $block;
+        }
+        $newBlocks[] = $blockValue;
+        $bigGalleryPocket = [];
+      }
+
+      // If we end with gallery we have to attach that gallery too
+      if (
+        $key === count($content['content']['blocks']) - 1 &&
+        count($bigGalleryPocket)
+      ) {
+        if (count($bigGalleryPocket) > 1) {
+          $blockValue = [
+            'type' => 'big-gallery',
+            'data' => $bigGalleryPocket,
+          ];
+        } else {
+          $blockValue = $bigGalleryPocket[0];
+        }
+
+        $newBlocks[] = $blockValue;
+      }
+    }
+
+    $content['content']['blocks'] = $newBlocks;
+  }
+
+  return $content;
+}
+
 /**
  * basic getting of services with caching
  */
@@ -60,7 +108,7 @@ function getSetting($id)
 {
   $allSettings = getSettings();
 
-  foreach ($allSettings as $key => $val) {
+  foreach ($allSettings as $val) {
     if ($val['name'] === $id) {
       return $val;
     }
@@ -101,7 +149,7 @@ function render(string $path, array $data)
       'docs' => getSetting('footer_docs_list'),
     ],
     'allPages' => \Pages::onlyPublished()
-      ->where([['id', '!=', 2], ['slug', '!=', 'uzitecne-odkazy']])
+      ->where('showInMenu', true)
       ->get()
       ->toArray(),
   ];
@@ -191,32 +239,6 @@ $router->get('/blog/{post_slug}', function (
     ->write(
       render('pages/blog/[blog-slug].twig', repairBlockContent($postData))
     );
-
-  return $response;
-});
-
-// GALLERY
-$router->get('/galerie', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  $content = repairBlockContent(
-    \Pages::where('id', 2)
-      ->first()
-      ->toArray()
-  );
-
-  if ($content['content']['blocks']) {
-    $content['content']['blocks'] = array_filter(
-      $content['content']['blocks'],
-      function ($item) {
-        return $item['type'] === 'gallery';
-      }
-    );
-  }
-
-  $response->getBody()->write(render('pages/galerie.twig', $content));
 
   return $response;
 });
@@ -378,7 +400,10 @@ $router->get('/{page_slug}', function (
   $response
     ->getBody()
     ->write(
-      render('pages/sluzby/[service-slug].twig', repairBlockContent($page))
+      render(
+        'pages/sluzby/[service-slug].twig',
+        connectGalleries(repairBlockContent($page))
+      )
     );
 
   return $response;

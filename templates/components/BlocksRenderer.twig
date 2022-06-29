@@ -56,6 +56,48 @@
                   </div>
               </a>
             </div>
+          {% elseif block.type == 'big-gallery' %}
+             <div class="tabs">
+              {% for gallery in block.data %}
+                <input type="radio"
+                  name="tabs"
+                  id="tab{{ loop.index }}"
+                  checked="checked" />
+                <label for="tab{{ loop.index }}">
+                  {% if gallery.data.label %}
+                    {{ gallery.data.label }}
+                  {% else %}
+                    Žádný popisek
+                  {% endif %}
+                </label>
+                <div class="tab gallery-photoswipe portfolio-gallery">
+                  {% for file in gallery.data.fileIds %}
+                    {% set fullImage = image(file.id, 1240) %}
+                    {% set thumbnail = image(file.id, 400, null, 60) %}
+                    <a href="{{ fullImage.src }}"
+                      class="gallery-item"
+                      data-pswp-width="{{ fullImage.width }}"
+                      data-pswp-height="{{ fullImage.height }}">
+                      <img src="{{ thumbnail.src }}"
+                        width="{{ thumbnail.width }}"
+                        alt="{{ file.title }}" />
+                      <div class="d-none hidden-caption-content">
+                        {% if file.title %}
+                          <p class="heading">
+                            {{ file.title }}
+                          </p>
+                        {% endif %}
+                        {% if file.description %}
+                          <p class="description">
+                            {{ file.description }}
+                          </p>
+                        {% endif %}
+                      </div>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endfor %}
+            </div>
           {% elseif block.type == 'gallery' %}
             <div class="gallery gallery-photoswipe">
               {% for file in block.data.fileIds %}
