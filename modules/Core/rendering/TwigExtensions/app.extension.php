@@ -49,7 +49,7 @@ class AppExtension extends AbstractExtension
     try {
       return $this->twigService->render(
         "dynamic-blocks/$blockPath.twig",
-        $payload
+        $payload,
       );
     } catch (\Exception $e) {
       return "No block found for '$blockPath'";

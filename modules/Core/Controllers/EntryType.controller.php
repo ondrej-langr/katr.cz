@@ -112,12 +112,12 @@ class EntryType
 
     if ($request->getAttribute('permission-only-own', false) === true) {
       $query->where(
-        onlyOwnersOrEditors($this->currentUser->id, $classInstance)
+        onlyOwnersOrEditors($this->currentUser->id, $classInstance),
       );
     }
 
     $dataPaginated = json_decode(
-      $query->paginate(15, ['*'], 'page', $page)->toJson()
+      $query->paginate(15, ['*'], 'page', $page)->toJson(),
     );
 
     // Unset some things as they are not useful or active
@@ -147,7 +147,7 @@ class EntryType
 
       if ($request->getAttribute('permission-only-own', false) === true) {
         $query->where(
-          onlyOwnersOrEditors($this->currentUser->id, $classInstance)
+          onlyOwnersOrEditors($this->currentUser->id, $classInstance),
         );
       }
 
@@ -190,7 +190,7 @@ class EntryType
 
       if ($request->getAttribute('permission-only-own', false) === true) {
         $query->where(
-          onlyOwnersOrEditors($this->currentUser->id, $classInstance)
+          onlyOwnersOrEditors($this->currentUser->id, $classInstance),
         );
       }
 
@@ -221,7 +221,7 @@ class EntryType
 
       prepareJsonResponse(
         $response,
-        $modelInstancePath::create($parsedBody['data'])->toArray()
+        $modelInstancePath::create($parsedBody['data'])->toArray(),
       );
 
       return $response;
@@ -252,7 +252,7 @@ class EntryType
 
     if ($request->getAttribute('permission-only-own', false) === true) {
       $query->where(
-        onlyOwnersOrEditors($this->currentUser->id, $classInstance)
+        onlyOwnersOrEditors($this->currentUser->id, $classInstance),
       );
     }
 
