@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block description %}
-  {{ data.description }}
+  {{ data.description|raw }}
 {% endblock %}
 
 {% block content %}
@@ -20,11 +20,11 @@
           {% for block in col %}
             {% if loop.index is same as(1) %}
               <h2>
-                {{ block.value }}
+                {{ block.value|raw }}
               </h2>
             {% else %}
               <p>
-                {{ block.value }}
+                {{ block.value|raw }}
               </p>
             {% endif %}
           {% endfor %}
@@ -47,7 +47,7 @@
               </h2>
               {% if service.excerpt %}
                 <p>
-                  {{ service.excerpt }}
+                  {{ service.excerpt|raw }}
                 </p>
               {% endif %}
             </a>
