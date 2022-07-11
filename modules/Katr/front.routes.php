@@ -191,9 +191,14 @@ $router->get('/', function (
       ],
       'title' => getSetting('main_page_title')['content']['data'],
       'description' => getSetting('main_page_description')['content']['data'],
-      'services' => [
-        'title' => getSetting('main_page_about_title')['content']['data'],
-        'description' => getSetting('main_page_about_text')['content']['data'],
+      'about' => getSetting('main_page_about')['content']['data'],
+      'blog_list' => [
+        'before' => getSetting('main_page_blog_list_before')['content']['data'],
+        'after' => getSetting('main_page_blog_list_after')['content']['data'],
+      ],
+      'positions' => [
+        'before' => getSetting('main_page_positions_before')['content']['data'],
+        'after' => getSetting('main_page_positions_after')['content']['data'],
       ],
     ])
   );
