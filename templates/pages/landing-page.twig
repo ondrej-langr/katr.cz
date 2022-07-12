@@ -35,7 +35,7 @@
   <div class="about">
     <div class="about-content" id="services">
       <div class="about-text col-12 col-lg-4 col-md-12 col-sm-12 col-xl-4 col-xxl-4">
-        {{ data.about|raw }}
+        {{ data.about.content|raw }}
       </div>
       <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
         {% for service in services %}
@@ -59,7 +59,10 @@
   <div class="blog-main">
     <div class="blog-main-content">
       <div class="blog-main-image col-lg-5 col-xl-5 col-xxl-5">
-        <img src="assets/images/blog-main.jpg" />
+        {% set image = image(data.blog_list.image, 516) %}
+        <img src="{{ image.src }}"
+          width="{{ image.width }}"
+          alt="{{ image.title }}" />
       </div>
       <div class="blog-main-inner col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7">
         {{ data.blog_list.before|raw }}
@@ -101,7 +104,10 @@
         {{ data.positions.after|raw }}
       </div>
       <div class="work-main-image col-lg-5 col-xl-5 col-xxl-5">
-        <img src="assets/images/work-main.jpg" />
+        {% set image = image(data.positions.image, 516) %}
+        <img src="{{ image.src }}"
+          width="{{ image.width }}"
+          alt="{{ image.title }}" />
       </div>
     </div>
   </div>
