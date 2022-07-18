@@ -8,12 +8,12 @@
   Nabízíme pracovní příležitost<br />na těchto pozicích
 {% endblock %}
 
-{% if data.settings.hero_image %}
-  {% block heroImageUrl %}
+{% block heroImageUrl %}
+  {% if data.settings.hero_image %}
     {% set heroImage = image(data.settings.hero_image, 1320) %}
     {{ heroImage.src }}
-  {% endblock %}
-{% endif %}
+  {% endif %}
+{% endblock %}
 
 {% block content %}
   <div class="work">
