@@ -8,10 +8,17 @@
   Nabízíme pracovní příležitost<br />na těchto pozicích
 {% endblock %}
 
+{% if data.settings.hero_image %}
+  {% block heroImageUrl %}
+    {% set heroImage = image(data.settings.hero_image, 1320) %}
+    {{ heroImage.src }}
+  {% endblock %}
+{% endif %}
+
 {% block content %}
   <div class="work">
     <div class="work-content">
-      {% for oppurtinity in data %}
+      {% for oppurtinity in data.opportunities %}
         <div class="work-box" id="w{{ oppurtinity.id }}">
           <h3>
             {{ oppurtinity.title }}

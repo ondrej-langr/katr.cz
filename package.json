@@ -4,9 +4,9 @@
   "description": "",
   "license": "ISC",
   "scripts": {
-    "build": "webpack --config webpack.config.js --env NODE_ENV=local --env production --progress",
-    "dev": "docker-compose up -d && webpack serve --config webpack.config.js",
-    "stop-docker": "docker-compose down"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@prettier/plugin-php": "^0.18.4",

@@ -246,7 +246,16 @@ $router->get('/kariera', function (
     return repairBlockContent($opportu);
   }, \Positions::all()->toArray());
 
-  $response->getBody()->write(render('pages/kariera.twig', $opportunities));
+  $response
+    ->getBody()
+    ->write(
+      render('pages/kariera.twig', [
+        'opportunities' => $opportunities,
+        'settings' => [
+          'hero_image' => getSetting('kariera_hero_image')['content']['data'],
+        ],
+      ])
+    );
 
   return $response;
 });
