@@ -163,6 +163,7 @@ body > header {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
+    padding: 70px 0px 50px 0;
 
     &__overlay {
       position: absolute;
@@ -211,6 +212,7 @@ body > header {
 
     @media (min-width: 575px) {
       min-height: 750px;
+      padding: 0;
     }
   }
 }
@@ -1246,6 +1248,10 @@ ul.tabs {
 
   .blog-main-image {
     margin-bottom: 45px;
+
+    img {
+      width: 100%;
+    }
   }
 
   .blog-main {
