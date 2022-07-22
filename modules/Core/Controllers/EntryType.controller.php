@@ -9,75 +9,41 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class EntryType
 {
-  private $container;
-  private $loadedModels;
+  private $currentUser;
 
   public function __construct(Container $container)
   {
-    $this->container = $container;
-    $this->loadedModels = $container->get('sysinfo')['loadedModels'];
+    $this->currentUser = $container->get('session')->get('user', false);
   }
 
-  /**
-   * Checks if model is loaded/exists and returns the real, usable model name
-   */
-  private function getModelFromArg(string $modelName)
+  private function handleDuplicate($response, $exception)
   {
-    $modelIndex = array_search(
-      strtolower($modelName),
-      // filter out those files we wanted to opt out
-      array_filter(
-        // format all model names to be all in lowercase
-        array_map(function ($modelName) {
-          return strtolower($modelName);
-        }, $this->loadedModels),
-        function ($modelName) {
-          return !in_array($modelName, ['files']);
-        },
-      ),
-    );
-    if ($modelIndex === false) {
-      return false;
-    }
-
-    $modelName = $this->loadedModels[$modelIndex];
-
-    return "\\$modelName";
+    handleDuplicateEntriesError($response, $exception);
   }
 
   public function getInfo(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
-    }
+    $instance = $request->getAttribute('model-instance');
 
-    $classInstance = new $modelInstancePath();
-
-    $response->getBody()->write(
-      json_encode([
-        'data' => $classInstance->getSummary(),
-      ]),
-    );
+    prepareJsonResponse($response, $instance->getSummary());
 
     return $response;
   }
 
-  public function reorderEntries(
+  public function swapTwo(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    $classInstance = new $modelInstancePath();
+    $instancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
+    $instance = $request->getAttribute('model-instance');
     $parsedBody = $request->getParsedBody();
     $data = $parsedBody['data'];
 
     if (
-      !$classInstance->getSummary()->hasOrdering ||
+      !$instance->getSummary()->hasOrdering ||
       !isset($data['fromId']) ||
       !isset($data['toId'])
     ) {
@@ -85,14 +51,19 @@ class EntryType
     }
 
     try {
-      $fromEntry = $modelInstancePath
-        ::where('id', $data['fromId'])
-        ->get()
-        ->firstOrFail();
-      $toEntry = $modelInstancePath
-        ::where('id', $data['toId'])
-        ->get()
-        ->firstOrFail();
+      $ownableQueryFilter =
+        $request->getAttribute('permission-only-own', false) === true
+          ? onlyOwnersOrEditors($this->currentUser->id, $classInstance)
+          : [];
+
+      $fromEntryQuery = $instancePath::where('id', $data['fromId']);
+      $toEntryQuery = $instancePath::where('id', $data['toId']);
+
+      $fromEntryQuery->where($ownableQueryFilter);
+      $toEntryQuery->where($ownableQueryFilter);
+
+      $fromEntry = $fromEntryQuery->firstOrFail();
+      $toEntry = $toEntryQuery->firstOrFail();
 
       DB::beginTransaction();
 
@@ -100,19 +71,18 @@ class EntryType
       $toEntry->order = $fromEntry->order;
       $fromEntry->order = $savedOrderId;
 
+      if ($instance->getSummary()->ownable && $this->currentUser) {
+        $fromEntry->updated_by = $this->currentUser->id;
+        $toEntry->updated_by = $this->currentUser->id;
+      }
+
       $fromEntry->save();
       $toEntry->save();
 
       DB::commit();
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => 1,
-        ]),
-      );
+      prepareJsonResponse($response, [], '', 'success');
     } catch (\Exception $e) {
-      echo $e->getMessage();
-
       DB::rollback();
 
       return $response
@@ -123,19 +93,14 @@ class EntryType
     return $response;
   }
 
-  public function getManyEntries(
+  public function getMany(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
-    }
-
+    $modelInstancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
     $queryParams = $request->getQueryParams();
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
-    $classInstance = new $modelInstancePath();
 
     if ($classInstance->getSummary()->hasOrdering) {
       $query = $modelInstancePath
@@ -145,9 +110,16 @@ class EntryType
       $query = $modelInstancePath::orderBy('id', 'ASC');
     }
 
+    if ($request->getAttribute('permission-only-own', false) === true) {
+      $query->where(
+        onlyOwnersOrEditors($this->currentUser->id, $classInstance),
+      );
+    }
+
     $dataPaginated = json_decode(
       $query->paginate(15, ['*'], 'page', $page)->toJson(),
     );
+
     // Unset some things as they are not useful or active
     unset($dataPaginated->links);
     unset($dataPaginated->first_page_url);
@@ -161,99 +133,138 @@ class EntryType
     return $response;
   }
 
-  public function updateEntry(
+  public function update(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
-    }
-
-    $parsedBody = $request->getParsedBody();
-
-    $response->getBody()->write(
-      json_encode([
-        'data' => $modelInstancePath
-          ::find($args['itemId'])
-          ->update($parsedBody['data']),
-      ]),
-    );
-
-    return $response;
-  }
-
-  public function getEntry(
-    ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
-  ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
-    }
-
-    try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => $modelInstancePath
-            ::where('id', $args['itemId'])
-            ->get()
-            ->firstOrFail(),
-        ]),
-      );
-
-      return $response;
-    } catch (\Exception $e) {
-      return $response->withStatus(404);
-    }
-  }
-
-  public function createEntry(
-    ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
-  ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
-    }
-
+    $modelInstancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
     $parsedBody = $request->getParsedBody();
 
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => $modelInstancePath::create($parsedBody['data']),
-        ]),
-      );
+      $query = $modelInstancePath::where('id', $args['itemId']);
+
+      if ($request->getAttribute('permission-only-own', false) === true) {
+        $query->where(
+          onlyOwnersOrEditors($this->currentUser->id, $classInstance),
+        );
+      }
+
+      $item = $query->firstOrFail();
+
+      if ($classInstance->getSummary()->ownable && $this->currentUser) {
+        $parsedBody['data']['updated_by'] = $this->currentUser->id;
+      }
+
+      $item->update($parsedBody['data']);
+
+      prepareJsonResponse($response, $item->toArray());
 
       return $response;
-    } catch (\Illuminate\Database\QueryException $ex) {
-      if ($ex->getCode() === 23000) {
-        return $response->withStatus(400);
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        $this->handleDuplicate($response, $ex);
+
+        return $response
+          ->withStatus(400)
+          ->withHeader('Content-Description', $ex->getMessage());
       } else {
-        return $response->withStatus(500);
+        return $response
+          ->withStatus(500)
+          ->withHeader('Content-Description', $ex->getMessage());
       }
     }
   }
 
-  public function deleteEntry(
+  public function getOne(
     ServerRequestInterface $request,
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
-    $modelInstancePath = $this->getModelFromArg($args['modelId']);
-    if ($modelInstancePath === false) {
-      return $response->withStatus(404);
+    $modelInstancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
+
+    try {
+      $query = $modelInstancePath::where('id', $args['itemId']);
+
+      if ($request->getAttribute('permission-only-own', false) === true) {
+        $query->where(
+          onlyOwnersOrEditors($this->currentUser->id, $classInstance),
+        );
+      }
+
+      $item = $query->firstOrFail();
+
+      prepareJsonResponse($response, $item->toArray());
+
+      return $response;
+    } catch (\Exception $error) {
+      return $response
+        ->withStatus(404)
+        ->withHeader('Content-Description', $error->getMessage());
+    }
+  }
+
+  public function create(
+    ServerRequestInterface $request,
+    ResponseInterface $response
+  ): ResponseInterface {
+    $modelInstancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
+    $parsedBody = $request->getParsedBody();
+
+    try {
+      if ($classInstance->getSummary()->ownable && $this->currentUser) {
+        $parsedBody['data']['created_by'] = $this->currentUser->id;
+      }
+
+      prepareJsonResponse(
+        $response,
+        $modelInstancePath::create($parsedBody['data'])->toArray(),
+      );
+
+      return $response;
+    } catch (\Exception $ex) {
+      if ($ex->getCode() === '23000') {
+        $this->handleDuplicate($response, $ex);
+
+        return $response
+          ->withStatus(400)
+          ->withHeader('Content-Description', $ex->getMessage());
+      } else {
+        return $response
+          ->withStatus(500)
+          ->withHeader('Content-Description', $ex->getMessage());
+      }
+    }
+  }
+
+  public function delete(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    array $args
+  ): ResponseInterface {
+    $modelInstancePath = $request->getAttribute('model-instance-path');
+    $classInstance = $request->getAttribute('model-instance');
+
+    $query = $modelInstancePath::where('id', $args['itemId']);
+
+    if ($request->getAttribute('permission-only-own', false) === true) {
+      $query->where(
+        onlyOwnersOrEditors($this->currentUser->id, $classInstance),
+      );
     }
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $modelInstancePath::where('id', $args['itemId'])->delete(),
-      ]),
-    );
+    if (!$query->delete()) {
+      prepareJsonResponse($response, [], 'Failed to delete');
+
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', 'Failed to delete');
+    }
+
+    prepareJsonResponse($response, [], 'Item deleted');
 
     return $response;
   }

@@ -1,4 +1,11 @@
 <?php
+/**
+ * DO NOT DELETE OR EDIT THIS FILE.
+ * THIS FILE IS PART OF COCKPIT CMS
+ * AND ANY MODIFICATION MAY BREAK OR BE
+ * OVERRIDDEN IN NEXT UPDATE.
+ *
+ */
 
 namespace App\Middleware;
 
@@ -27,15 +34,42 @@ class Auth
   public function __invoke(Request $request, RequestHandler $handler): Response
   {
     $userId = $this->container->get('session')->get('user_id', false);
-    $response = $handler->handle($request);
-
     if (!$userId) {
       $response = new Response();
+
+      prepareJsonResponse(
+        $response,
+        [],
+        'User is not logged in',
+        'not-logged-in',
+      );
+
       return $response
         ->withStatus(401)
         ->withHeader('Content-Description', 'user logged off');
+    } else {
+      try {
+        $this->container
+          ->get('session')
+          ->set('user', \Users::findOrFail($userId));
+      } catch (\Exception $e) {
+        $response = new Response();
+        // User does not exist hence the session destroy
+        $this->container->get('session')::destroy();
+
+        prepareJsonResponse(
+          $response,
+          [],
+          'User is not logged in',
+          'not-logged-in',
+        );
+
+        return $response
+          ->withStatus(500)
+          ->withHeader('Content-Description', 'logged in user does not exist');
+      }
     }
 
-    return $response;
+    return $handler->handle($request);
   }
 }

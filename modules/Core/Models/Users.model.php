@@ -8,9 +8,27 @@ class Users extends Model
   protected $modelIcon = 'Users';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'simple',
   ];
+
+  protected $fillable = [
+    'id',
+    'name',
+    'password',
+    'email',
+    'avatar',
+    'state',
+    'role',
+  ];
+
+  public function role()
+  {
+    return $this->belongsTo(\UserRoles::class, 'role', 'id');
+  }
+
+  protected $hidden = ['password'];
 
   protected static $tableColumns = [
     'id' => [
@@ -59,20 +77,31 @@ class Users extends Model
       'type' => 'string',
     ],
 
+    'state' => [
+      'required' => true,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'State',
+      'type' => 'enum',
+      'enum' => ['active', 'invited', 'blocked', 'password-reset'],
+    ],
+
     'role' => [
       'required' => true,
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'type' => 'relationship',
+      'targetModel' => 'userRoles',
       'title' => 'Role',
-      'type' => 'enum',
-      'enum' => ['Admin', 'Maintainer', 'Editor'],
+      'adminHidden' => true,
+      'labelConstructor' => 'label',
     ],
   ];
-
-  protected $fillable = ['id', 'name', 'password', 'email', 'avatar', 'role'];
-
-  protected $hidden = ['password'];
 
   public function getSummary()
   {
@@ -80,11 +109,13 @@ class Users extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,
       'isDraftable' => false,
-      'hasPermissions' => false,
+      'isSharable' => false,
+      'ownable' => false,
       'admin' => $this->adminSettings,
     ];
   }

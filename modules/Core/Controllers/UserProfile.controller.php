@@ -9,29 +9,23 @@ use Psr\Http\Message\ServerRequestInterface;
 class UserProfile
 {
   private $container;
+  private $jwt;
+  private $passService;
 
   public function __construct(Container $container)
   {
     $this->container = $container;
+    $this->jwt = $container->get('jwt-service');
+    $this->passService = $container->get('password-service');
   }
 
   public function getCurrent(
     ServerRequestInterface $request,
     ResponseInterface $response
   ): ResponseInterface {
-    $userId = $this->container->get('session')->get('user_id');
+    $user = $this->container->get('session')->get('user');
 
-    if (!$userId) {
-      return $response;
-    }
-
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Users::where('id', $userId)
-          ->get()
-          ->firstOrFail(),
-      ]),
-    );
+    prepareJsonResponse($response, $user->toArray());
 
     return $response;
   }
@@ -41,10 +35,7 @@ class UserProfile
     ResponseInterface $response
   ): ResponseInterface {
     $userId = $this->container->get('session')->get('user_id', false);
-
-    $passwordService = $this->container->get('password-service');
     $args = $request->getParsedBody();
-
     $code = 200;
     $responseAry = [
       'result' => 'success',
@@ -61,11 +52,13 @@ class UserProfile
       $responseAry['message'] = 'missing params';
       $code = 400;
     } else {
+      $userCannotLoginBecauseOfState = false;
+
       try {
         $user = \Users::where('email', $args['email'])
           ->get()
           ->firstOrFail();
-        $passwordIsValid = $passwordService->validate(
+        $passwordIsValid = $this->passService->validate(
           $args['password'],
           $user->password,
         );
@@ -74,13 +67,30 @@ class UserProfile
           throw new \Exception('Wrong password');
         }
 
+        if (
+          $user->state === 'password-reset' ||
+          $user->state === 'blocked' ||
+          $user->state === 'invited'
+        ) {
+          $userCannotLoginBecauseOfState = true;
+          throw new \Exception("user-state-$user->state");
+        }
+
         $this->container->get('session')->set('user_id', $user->id);
         $responseAry['result'] = 'success';
         $responseAry['message'] = 'successfully logged in';
         $code = 200;
       } catch (\Exception $e) {
-        $responseAry['result'] = 'error';
-        $responseAry['message'] = 'wrong password or email';
+        if ($userCannotLoginBecauseOfState) {
+          $responseAry['result'] = 'error';
+          $responseAry['message'] = 'user cannot login';
+          $responseAry['code'] = $e->getMessage();
+        } else {
+          $responseAry['result'] = 'error';
+          $responseAry['code'] = 'invalid-credentials';
+          $responseAry['message'] = 'wrong password or email';
+        }
+
         $code = 400;
       }
     }
@@ -94,26 +104,34 @@ class UserProfile
     ServerRequestInterface $request,
     ResponseInterface $response
   ): ResponseInterface {
-    $userId = $this->container->get('session')->get('user_id');
+    $user = $this->container->get('session')->get('user');
     $parsedBody = $request->getParsedBody();
-
-    if (!$userId) {
-      return $response;
-    }
 
     if (!$parsedBody['data']) {
       return $response->withStatus(400);
     }
+    $data = $parsedBody['data'];
 
-    if (isset($parsedBody['data']['password'])) {
-      unset($parsedBody['data']['password']);
+    if (isset($data['id'])) {
+      unset($data['id']);
     }
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Users::where('id', $userId)->update($parsedBody['data']),
-      ]),
-    );
+    // Unset items that user should not remove by themselves
+    if (isset($data['password'])) {
+      unset($data['password']);
+    }
+
+    if (isset($data['role'])) {
+      unset($data['role']);
+    }
+
+    if (isset($data['state'])) {
+      unset($data['state']);
+    }
+
+    $user->update($data);
+
+    prepareJsonResponse($response, $user->toArray());
 
     return $response;
   }
@@ -124,21 +142,19 @@ class UserProfile
   ): ResponseInterface {
     $this->container->get('session')::destroy();
 
-    $response->getBody()->write(
-      json_encode([
-        'result' => 'success',
-      ]),
-    );
+    prepareJsonResponse($response, [], '', 'success');
 
     return $response;
   }
 
+  /**
+   * User have forgot theirs password and requested renewal when logged of
+   */
   public function requestPasswordReset(
     ServerRequestInterface $request,
     ResponseInterface $response
   ) {
     $params = $request->getQueryParams();
-    $jwtService = $this->container->get('jwt-service');
     $emailService = $this->container->get('email');
     $twigService = $this->container->get('twig');
 
@@ -148,14 +164,14 @@ class UserProfile
 
     try {
       $user = \Users::where('email', $params['email'])
-        ->get()
+        ->where('state', '!=', 'blocked')
         ->firstOrFail();
     } catch (\Exception $e) {
-      // We did not find user on provided email ,but we do not want to let user know about it since we do not want to expose anything to public
+      // We did not find user on provided email, but we do not want to let user know about it since we do not want to expose anything to public
       return $response;
     }
 
-    $generatedJwt = $jwtService->generate(['id' => $user['id']]);
+    $generatedJwt = $this->jwt->generate(['id' => $user['id']]);
     $themePayload = [
       'name' => $user->name,
       'email' => $user->email,
@@ -166,13 +182,13 @@ class UserProfile
 
     try {
       $generatedEmailContent = $twigService->render(
-        'email/password-reset',
+        'email/password-reset.twig',
         $themePayload,
       );
     } catch (\Exception $e) {
       $loader = new \Twig\Loader\ArrayLoader([
         'index' =>
-          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/reset-password?token={{ token }}">here</a>!',
+          'Hey, {{ name }}! We noticed that you requested a password reset. Please continue <a href="{{ app_url }}/admin/reset-password?token={{ token }}">here</a>!',
       ]);
       $twig = new \Twig\Environment($loader);
 
@@ -184,22 +200,26 @@ class UserProfile
     $emailService->Subject = 'Password reset';
     $emailService->Body = $generatedEmailContent;
 
+    // User should be supposed to be in this state
+    $user->state = 'password-reset';
+    $user->save();
+
     $emailService->send();
 
     return $response;
   }
 
+  /**
+   * Finalizing of password renewal via token
+   */
   public function finalizePasswordReset(
     ServerRequestInterface $request,
     ResponseInterface $response
   ): ResponseInterface {
     $params = $request->getParsedBody();
-    $jwtService = $this->container->get('jwt-service');
-    $passwordService = $this->container->get('password-service');
     $token = $params['token'];
     $newPassword = $params['new_password'];
-
-    $decodedPayload = $jwtService->validate($token);
+    $decodedPayload = $this->jwt->validate($token);
 
     if (!$decodedPayload) {
       return $response->withStatus(401);
@@ -215,12 +235,14 @@ class UserProfile
       return $response->withStatus(404);
     }
 
-    $user->password = $passwordService->generate($newPassword);
+    $user->password = $this->passService->generate($newPassword);
+    $user->state = 'active';
     $user->save();
 
     return $response;
   }
 
+  // TODO
   public function requestEmailChange(
     ServerRequestInterface $request,
     ResponseInterface $response
@@ -228,6 +250,7 @@ class UserProfile
     return $response;
   }
 
+  // TODO
   public function finalizeEmailChange(
     ServerRequestInterface $request,
     ResponseInterface $response

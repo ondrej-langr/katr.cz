@@ -1,23 +1,5 @@
 <header>
     <nav class="{% if title is not defined %}dark{% endif %}">
-        <div class="nav-topper">
-            <div class="nav-topper-content">
-                <ul class="left">
-                    <li><a href="tel:+420554230811">+420 554 230 811</a></li>
-                    <li>
-                        <a href="mailto:sekretariat@katr.cz">
-                            sekretariat@katr.cz
-                        </a>
-                    </li>
-                </ul>
-                <ul class="right">
-                    <li>
-                        <a href="aktuality">Aktuality</a>
-                        <a href="kariera">Kariéra</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
         <div class="nav-content" x-data="{ currrentSubmenu: false }">
             <a href="" class="logo-wrap">
                 <img src="assets/images/katr-logo.svg" class="logo" />
@@ -33,7 +15,7 @@
     </nav>
     {% if title is defined %}
     <div class="header-content {% if description is not defined and title is defined %}smaller{% endif %}">
-        <img src="assets/images/header-bg2.jpg" class="header-content__image" />
+        <img src="{{ heroImageUrl|replace({"\n": "", "\r": "", "\t": ""})|length > 3 ? heroImageUrl : default_hero_image }}" class="header-content__image" />
         <div class="header-content__overlay"></div>
         <div class="header-content__text">
             <h1>

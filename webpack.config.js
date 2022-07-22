@@ -59,7 +59,15 @@ module.exports = (env, args) => {
       rules: [
         {
           test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                url: false,
+              },
+            },
+          ],
         },
         {
           test: /\.(jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
@@ -67,7 +75,16 @@ module.exports = (env, args) => {
         },
         {
           test: /\.s[ac]ss$/i,
-          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                url: false,
+              },
+            },
+            'sass-loader',
+          ],
         },
         {
           test: /\.jsx?$/,

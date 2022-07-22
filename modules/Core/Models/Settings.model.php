@@ -8,6 +8,7 @@ class Settings extends Model
   protected $modelIcon = 'Settings';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'simple',
   ];
@@ -15,8 +16,28 @@ class Settings extends Model
   protected $casts = [
     'content' => 'array',
 
-    'permissions' => 'array',
+    'coeditors' => 'array',
   ];
+
+  protected $fillable = [
+    'id',
+    'name',
+    'label',
+    'content',
+    'coeditors',
+    'created_by',
+    'updated_by',
+  ];
+
+  public function created_by()
+  {
+    return $this->belongsTo(\User::class, 'created_by', 'id');
+  }
+
+  public function updated_by()
+  {
+    return $this->belongsTo(\User::class, 'updated_by', 'id');
+  }
 
   protected static $tableColumns = [
     'id' => [
@@ -54,19 +75,49 @@ class Settings extends Model
       'hide' => false,
       'title' => 'content',
       'type' => 'json',
+      'default' => '',
     ],
 
-    'permissions' => [
+    'coeditors' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Coeditors',
+      'type' => 'json',
+      'default' => '',
+    ],
+
+    'created_by' => [
       'required' => false,
       'editable' => false,
       'unique' => false,
       'hide' => false,
-      'title' => 'permissions',
-      'type' => 'json',
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Created by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
+    ],
+
+    'updated_by' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Updated by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
     ],
   ];
-
-  protected $fillable = ['id', 'name', 'label', 'content', 'permissions'];
 
   public function getSummary()
   {
@@ -74,11 +125,13 @@ class Settings extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => false,
       'isDraftable' => false,
-      'hasPermissions' => true,
+      'isSharable' => true,
+      'ownable' => true,
       'admin' => $this->adminSettings,
     ];
   }

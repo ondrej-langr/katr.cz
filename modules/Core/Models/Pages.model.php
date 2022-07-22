@@ -1,17 +1,16 @@
 <?php
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Illuminate\Support\Str;
 
 class Pages extends Model
 {
-  use SoftDeletes;
-
   protected $table = 'pages';
   protected $modelIcon = 'Notebook';
   public $timestamps = true;
-  protected $hasSoftDeletes = true;
+  protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -19,9 +18,11 @@ class Pages extends Model
   protected $casts = [
     'content' => 'array',
 
+    'showInMenu' => 'boolean',
+
     'is_published' => 'boolean',
 
-    'permissions' => 'array',
+    'coeditors' => 'array',
   ];
 
   /**
@@ -51,6 +52,44 @@ class Pages extends Model
     });
   }
 
+  public function scopeOnlyPublished($query)
+  {
+    return $query->where('is_published', 1);
+  }
+
+  protected $fillable = [
+    'id',
+    'title',
+    'content',
+    'slug',
+    'showInMenu',
+    'hero_image',
+    'excerpt',
+    'description',
+    'is_published',
+    'order',
+    'coeditors',
+    'created_by',
+    'updated_by',
+  ];
+
+  protected $with = ['hero_image'];
+
+  public function hero_image()
+  {
+    return $this->belongsTo(\Files::class, 'hero_image', 'id');
+  }
+
+  public function created_by()
+  {
+    return $this->belongsTo(\User::class, 'created_by', 'id');
+  }
+
+  public function updated_by()
+  {
+    return $this->belongsTo(\User::class, 'updated_by', 'id');
+  }
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -65,7 +104,7 @@ class Pages extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -78,6 +117,7 @@ class Pages extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -88,6 +128,27 @@ class Pages extends Model
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
+    ],
+
+    'showInMenu' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'type' => 'boolean',
+      'title' => 'Zobrazit v menu',
+      'default' => false,
+    ],
+
+    'hero_image' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'type' => 'file',
+      'title' => 'Úvodní obrázek',
+      'adminHidden' => true,
+      'typeFilter' => 'image',
     ],
 
     'excerpt' => [
@@ -128,26 +189,45 @@ class Pages extends Model
       'adminHidden' => true,
     ],
 
-    'permissions' => [
+    'coeditors' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Coeditors',
+      'type' => 'json',
+      'default' => '',
+    ],
+
+    'created_by' => [
       'required' => false,
       'editable' => false,
       'unique' => false,
       'hide' => false,
-      'title' => 'permissions',
-      'type' => 'json',
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Created by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
     ],
-  ];
 
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'excerpt',
-    'description',
-    'is_published',
-    'order',
-    'permissions',
+    'updated_by' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Updated by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
+    ],
   ];
 
   public function getSummary()
@@ -156,11 +236,13 @@ class Pages extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,
       'isDraftable' => true,
-      'hasPermissions' => true,
+      'isSharable' => true,
+      'ownable' => true,
       'admin' => $this->adminSettings,
     ];
   }

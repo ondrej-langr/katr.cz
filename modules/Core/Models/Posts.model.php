@@ -10,6 +10,7 @@ class Posts extends Model
   protected $modelIcon = 'Archive';
   public $timestamps = true;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -19,7 +20,7 @@ class Posts extends Model
 
     'is_published' => 'boolean',
 
-    'permissions' => 'array',
+    'coeditors' => 'array',
   ];
 
   /**
@@ -49,6 +50,34 @@ class Posts extends Model
     });
   }
 
+  public function scopeOnlyPublished($query)
+  {
+    return $query->where('is_published', 1);
+  }
+
+  protected $fillable = [
+    'id',
+    'title',
+    'content',
+    'slug',
+    'description',
+    'is_published',
+    'order',
+    'coeditors',
+    'created_by',
+    'updated_by',
+  ];
+
+  public function created_by()
+  {
+    return $this->belongsTo(\User::class, 'created_by', 'id');
+  }
+
+  public function updated_by()
+  {
+    return $this->belongsTo(\User::class, 'updated_by', 'id');
+  }
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -63,7 +92,7 @@ class Posts extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -76,6 +105,7 @@ class Posts extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -117,25 +147,45 @@ class Posts extends Model
       'adminHidden' => true,
     ],
 
-    'permissions' => [
+    'coeditors' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Coeditors',
+      'type' => 'json',
+      'default' => '',
+    ],
+
+    'created_by' => [
       'required' => false,
       'editable' => false,
       'unique' => false,
       'hide' => false,
-      'title' => 'permissions',
-      'type' => 'json',
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Created by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
     ],
-  ];
 
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'description',
-    'is_published',
-    'order',
-    'permissions',
+    'updated_by' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Updated by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
+    ],
   ];
 
   public function getSummary()
@@ -144,11 +194,13 @@ class Posts extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,
       'isDraftable' => true,
-      'hasPermissions' => true,
+      'isSharable' => true,
+      'ownable' => true,
       'admin' => $this->adminSettings,
     ];
   }

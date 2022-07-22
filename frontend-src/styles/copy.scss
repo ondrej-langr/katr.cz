@@ -33,11 +33,14 @@ h1 {
 h2 {
   font-size: 34px;
   margin-bottom: 10px;
+  margin-top: 35px;
 }
 
 h3 {
+  font-size: 34px;
   margin-bottom: 10px;
-  font-size: 28px;
+  width: 100%;
+  margin-top: 35px;
 }
 
 p {
@@ -107,16 +110,19 @@ footer {
   width: 100%;
   padding-top: 85px;
   padding-bottom: 60px;
-  // background-image: url('images/bg/cartographer.png');
-}
+  position: relative;
+  background-image: url(/assets/images/bg/cartographer.png);
 
-.footer-content {
-  width: 90%;
-  max-width: 1440px;
-  margin-left: auto;
-  margin-right: auto;
-  display: flex;
-  flex-wrap: wrap;
+  .footer-content {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 .footer-box {
@@ -149,7 +155,7 @@ body > header {
 
   .header-content {
     width: 100%;
-    min-height: 750px;
+    min-height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -157,6 +163,7 @@ body > header {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
+    padding: 70px 0px 50px 0;
 
     &__overlay {
       position: absolute;
@@ -201,6 +208,11 @@ body > header {
         padding-top: 60px;
         padding-bottom: 45px;
       }
+    }
+
+    @media (min-width: 575px) {
+      min-height: 750px;
+      padding: 0;
     }
   }
 }
@@ -311,7 +323,7 @@ span.number {
 .blog-main-content {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
   width: 90%;
   max-width: 1240px;
 }
@@ -367,12 +379,16 @@ span.date-main {
   padding-left: 85px;
 }
 
-.blog-main-image {
-  margin-top: -165px;
-}
+.work-main-image {
+  top: -165px;
+  position: relative;
 
-.blog-main-image img {
-  max-width: 100%;
+  img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 /* WHY */
@@ -424,7 +440,7 @@ span.date-main {
 .work-main-content {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
   width: 90%;
   max-width: 1240px;
 }
@@ -479,11 +495,15 @@ span.date-main {
 }
 
 .work-main-image {
-  margin-top: -165px;
-}
+  top: -165px;
+  position: relative;
 
-.work-main-image img {
-  max-width: 100%;
+  img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 /* WORK PAGE */
@@ -683,7 +703,7 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 100px;
+  margin-top: 70px;
   margin-bottom: 55px;
 }
 
@@ -794,22 +814,33 @@ ul {
   margin-top: 5px;
   display: flex;
   margin-bottom: 25px;
-}
 
-.btn-box a {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 10px 25px;
-  color: #fff;
-  background-color: #339b30;
-  font-size: 14px;
-}
+  a {
+    svg {
+      margin-right: 7px;
+      width: 16px;
+      height: 16px;
+    }
+  }
 
-.btn-box a svg {
-  margin-right: 7px;
-  width: 16px;
-  height: 16px;
+  &.is-image {
+    img {
+      border-radius: 10px;
+      height: auto;
+    }
+  }
+
+  &:not(.is-image) {
+    a {
+      display: flex;
+      position: relative;
+      align-items: center;
+      font-size: 14px;
+      padding: 10px 25px;
+      color: #fff;
+      background-color: #339b30;
+    }
+  }
 }
 
 table {
@@ -842,6 +873,34 @@ ul.tabs {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.portfolio-gallery {
+  gap: 10px;
+  display: grid;
+  a {
+    position: relative;
+    aspect-ratio: 2/1;
+    width: calc(33.3333% - 20px);
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    @media screen and (max-width: 900px) {
+      width: calc(50% - 20px);
+    }
+
+    @media screen and (max-width: 420px) {
+      width: 100%;
+    }
+  }
 }
 
 .gallery-item {
@@ -1014,32 +1073,12 @@ ul.tabs {
     display: none;
   }
 
-  nav ul li a {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
   .nav-topper {
     min-height: 35px;
   }
 
-  nav .logo {
-    width: 60px;
-    height: 45px;
-  }
-
-  .nav-content {
-    min-height: 70px;
-    width: 100%;
-    padding: 5px;
-  }
-
   .nav-topper-content {
     width: 95%;
-  }
-
-  .nav-topper-content ul li a {
-    font-size: 12px;
   }
 
   nav .dropdown-menu {
@@ -1062,11 +1101,6 @@ ul.tabs {
   footer {
     padding-top: 45px;
     padding-bottom: 25px;
-  }
-
-  nav ul li a.dropdown svg {
-    width: 10px;
-    height: 10px;
   }
 
   .about-page {
@@ -1214,6 +1248,10 @@ ul.tabs {
 
   .blog-main-image {
     margin-bottom: 45px;
+
+    img {
+      width: 100%;
+    }
   }
 
   .blog-main {
@@ -1240,8 +1278,6 @@ ul.tabs {
 
   header {
     min-height: auto;
-    padding-top: 120px;
-    padding-bottom: 120px;
   }
 
   .about-text h2 {
@@ -1485,6 +1521,14 @@ form h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  .block-renderer {
+    align-items: center;
+    display: flex;
+    justify-content: normal;
+    flex-flow: column;
+    flex-wrap: wrap;
+  }
 }
 
 .blog-post-content {
@@ -1515,7 +1559,7 @@ form h2 {
 
 .blog-post p {
   max-width: 660px;
-  margin-bottom: 0;
+  margin: 0 auto;
 }
 
 .blog-post {
@@ -1528,7 +1572,7 @@ form h2 {
   }
 
   iframe,
-  img.big-image {
+  .big-image {
     width: 100%;
     margin-top: 55px;
     margin-bottom: 55px;
@@ -1548,9 +1592,21 @@ form h2 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
 
-  img {
-    width: 100%;
+  a {
     aspect-ratio: 1 / 1;
+    width: 100%;
+    height: auto;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      object-fit: cover;
+      object-position: center;
+    }
   }
 }
 

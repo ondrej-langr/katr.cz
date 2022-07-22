@@ -5,12 +5,11 @@
 {% endblock %}
 
 {% block title %}
-  Komplexní služby <br />
-  v lesním hospodářství
+  {{ data.title|raw }}
 {% endblock %}
 
 {% block description %}
-  {{ data.description }}
+  {{ data.description|raw }}
 {% endblock %}
 
 {% block content %}
@@ -21,11 +20,11 @@
           {% for block in col %}
             {% if loop.index is same as(1) %}
               <h2>
-                {{ block.value }}
+                {{ block.value|raw }}
               </h2>
             {% else %}
               <p>
-                {{ block.value }}
+                {{ block.value|raw }}
               </p>
             {% endif %}
           {% endfor %}
@@ -36,25 +35,19 @@
   <div class="about">
     <div class="about-content" id="services">
       <div class="about-text col-12 col-lg-4 col-md-12 col-sm-12 col-xl-4 col-xxl-4">
-        <h2>
-          {{ data.services.title }}
-        </h2>
-        <p>
-          {{ data.services.description }}
-        </p>
-        <a href="kontakt"><button class="btn">Kontaktujte nás</button></a>
+        {{ data.about.content|raw }}
       </div>
       <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
         {% for service in services %}
           <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-            <a href="sluzby/{{ service.title }}">
+            <a href="sluzby/{{ service.slug }}">
               <span class="number">{{ loop.index }}</span>
               <h2>
                 {{ service.title }}
               </h2>
               {% if service.excerpt %}
                 <p>
-                  {{ service.excerpt }}
+                  {{ service.excerpt|raw }}
                 </p>
               {% endif %}
             </a>
@@ -66,12 +59,13 @@
   <div class="blog-main">
     <div class="blog-main-content">
       <div class="blog-main-image col-lg-5 col-xl-5 col-xxl-5">
-        <img src="assets/images/blog-main.jpg" />
+        {% set image = image(data.blog_list.image, 516) %}
+        <img src="{{ image.src }}"
+          width="{{ image.width }}"
+          alt="{{ image.title }}" />
       </div>
       <div class="blog-main-inner col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7">
-        <h2>
-          Aktuálně se děje ..
-        </h2>
+        {{ data.blog_list.before|raw }}
         {% for post in data.posts %}
           <a href="/blog/{{ post.slug }}">
             <div class="blog-main-box">
@@ -87,16 +81,14 @@
             </div>
           </a>
         {% endfor %}
-        <a href="blog"><button class="btn light">Všechny články</button></a>
+        {{ data.blog_list.after|raw }}
       </div>
     </div>
   </div>
   <div class="work-main">
     <div class="work-main-content">
       <div class="col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7 work-main-inner">
-        <h2>
-          <small>S námi můžete růst</small>na těchto pozicích
-        </h2>
+        {{ data.positions.before|raw }}
         {% for opportunity in data.opportunities %}
           <a href="kariera#w{{ opportunity.id }}">
             <div class="work-main-box">
@@ -109,12 +101,13 @@
             </div>
           </a>
         {% endfor %}
-        <a href="kariera">
-          <button class="btn">Všechny pracovní pozice</button>
-        </a>
+        {{ data.positions.after|raw }}
       </div>
       <div class="work-main-image col-lg-5 col-xl-5 col-xxl-5">
-        <img src="assets/images/work-main.jpg" />
+        {% set image = image(data.positions.image, 516) %}
+        <img src="{{ image.src }}"
+          width="{{ image.width }}"
+          alt="{{ image.title }}" />
       </div>
     </div>
   </div>

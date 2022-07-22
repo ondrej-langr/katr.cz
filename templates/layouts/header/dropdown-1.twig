@@ -3,18 +3,6 @@
   style="display: none;"
   x-transition>
   <div id="dropdown-menu-1" class="submenu__item">
-    <div class="col-12 col-lg-3 col-md-4 col-sm-6 col-xl-3 col-xxl-3 dropdown-box">
-      <a href="blog">Aktuality</a>
-      <p>
-        Přečtěte si co je nového ve firmě
-      </p>
-    </div>
-    <div class="col-12 col-lg-3 col-md-4 col-sm-6 col-xl-3 col-xxl-3 dropdown-box">
-      <a href="galerie">Fotogalerie</a>
-      <p>
-        Prohlédněte si jak to u nás vypadá
-      </p>
-    </div>
     {% for page in allPages %}
       <div class="col-12 col-lg-3 col-md-4 col-sm-6 col-xl-3 col-xxl-3 dropdown-box">
         <a href="{{ page.slug }}">{{ page.title }}</a>

@@ -10,6 +10,7 @@ class Services extends Model
   protected $modelIcon = 'Briefcase';
   public $timestamps = false;
   protected $hasSoftDeletes = false;
+  protected $ignoreSeeding = false;
   protected $adminSettings = [
     'layout' => 'post-like',
   ];
@@ -17,7 +18,7 @@ class Services extends Model
   protected $casts = [
     'content' => 'array',
 
-    'permissions' => 'array',
+    'coeditors' => 'array',
   ];
 
   /**
@@ -47,6 +48,37 @@ class Services extends Model
     });
   }
 
+  protected $fillable = [
+    'id',
+    'title',
+    'content',
+    'slug',
+    'hero_image',
+    'excerpt',
+    'description',
+    'order',
+    'coeditors',
+    'created_by',
+    'updated_by',
+  ];
+
+  protected $with = ['hero_image'];
+
+  public function hero_image()
+  {
+    return $this->belongsTo(\Files::class, 'hero_image', 'id');
+  }
+
+  public function created_by()
+  {
+    return $this->belongsTo(\User::class, 'created_by', 'id');
+  }
+
+  public function updated_by()
+  {
+    return $this->belongsTo(\User::class, 'updated_by', 'id');
+  }
+
   protected static $tableColumns = [
     'id' => [
       'required' => false,
@@ -61,7 +93,7 @@ class Services extends Model
     'title' => [
       'required' => true,
       'editable' => true,
-      'unique' => false,
+      'unique' => true,
       'hide' => false,
       'title' => 'Title',
       'type' => 'string',
@@ -74,6 +106,7 @@ class Services extends Model
       'hide' => false,
       'title' => 'Content',
       'type' => 'json',
+      'default' => '',
     ],
 
     'slug' => [
@@ -84,6 +117,17 @@ class Services extends Model
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
+    ],
+
+    'hero_image' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'type' => 'file',
+      'title' => 'Úvodní obrázek',
+      'adminHidden' => true,
+      'typeFilter' => 'image',
     ],
 
     'excerpt' => [
@@ -115,25 +159,45 @@ class Services extends Model
       'adminHidden' => true,
     ],
 
-    'permissions' => [
+    'coeditors' => [
+      'required' => false,
+      'editable' => true,
+      'unique' => false,
+      'hide' => false,
+      'title' => 'Coeditors',
+      'type' => 'json',
+      'default' => '',
+    ],
+
+    'created_by' => [
       'required' => false,
       'editable' => false,
       'unique' => false,
       'hide' => false,
-      'title' => 'permissions',
-      'type' => 'json',
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Created by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
     ],
-  ];
 
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'excerpt',
-    'description',
-    'order',
-    'permissions',
+    'updated_by' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'multiple' => false,
+      'foreignKey' => 'id',
+      'fill' => false,
+      'title' => 'Updated by',
+      'type' => 'relationship',
+      'targetModel' => 'user',
+      'labelConstructor' => 'name',
+      'adminHidden' => true,
+    ],
   ];
 
   public function getSummary()
@@ -142,11 +206,13 @@ class Services extends Model
       'columns' => self::$tableColumns,
       'tableName' => $this->table,
       'icon' => $this->modelIcon,
+      'ignoreSeeding' => $this->ignoreSeeding,
       'hasTimestamps' => $this->timestamps,
       'hasSoftDelete' => $this->hasSoftDeletes,
       'hasOrdering' => true,
       'isDraftable' => false,
-      'hasPermissions' => true,
+      'isSharable' => true,
+      'ownable' => true,
       'admin' => $this->adminSettings,
     ];
   }

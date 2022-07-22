@@ -48,11 +48,7 @@ class Folders
         }
       }
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => $folders,
-        ]),
-      );
+      prepareJsonResponse($response, $folders);
 
       return $response->withStatus(200);
     } catch (FilesystemException $exception) {

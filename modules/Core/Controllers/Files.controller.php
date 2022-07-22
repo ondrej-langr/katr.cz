@@ -2,39 +2,39 @@
 
 namespace App\Controllers;
 
+use App\Services\FileService;
+use App\Services\ImageService;
 use DI\Container;
 use GuzzleHttp\Psr7\MimeType;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 use Illuminate\Database\Capsule\Manager as DB;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\Filesystem;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Files
 {
   private $container;
-  private $fs;
+  private Filesystem $fs;
+  private FileService $fileService;
+  private ImageService $imageService;
 
   public function __construct(Container $container)
   {
     $this->container = $container;
     $this->fs = $container->get('filesystem');
+    $this->fileService = $container->get('file-service');
+    $this->imageService = $container->get('image-service');
   }
 
   public function getInfo(
     ServerRequestInterface $request,
-    ResponseInterface $response,
-    array $args
+    ResponseInterface $response
   ): ResponseInterface {
-    $classInstance = new \Files();
+    $instance = new \Files();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => $classInstance->getSummary(),
-      ]),
-    );
+    prepareJsonResponse($response, (array) $instance->getSummary());
 
     return $response;
   }
@@ -45,12 +45,9 @@ class Files
     array $args
   ): ResponseInterface {
     try {
-      $response->getBody()->write(
-        json_encode([
-          'data' => \Files::where('id', $args['itemId'])
-            ->get()
-            ->firstOrFail(),
-        ]),
+      prepareJsonResponse(
+        $response,
+        $this->fileService->getById($args['itemId'])->toArray(),
       );
 
       return $response;
@@ -64,21 +61,11 @@ class Files
     ResponseInterface $response
   ): ResponseInterface {
     $queryParams = $request->getQueryParams();
-    $rootFromQuery = isset($queryParams['path']) ? $queryParams['path'] : '/';
+    $directoryPath = isset($queryParams['path']) ? $queryParams['path'] : '/';
 
-    // Find files by regex with provided path. This is different logic to access something with pagination
-    $finalPart = str_replace(
-      '/',
-      '\/',
-      $rootFromQuery . ($rootFromQuery !== '/' ? '/' : ''),
-    );
-
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Files::where([
-          ['filepath', 'regexp', '^' . $finalPart . '[^\/]*(\.).*$'],
-        ])->get(),
-      ]),
+    prepareJsonResponse(
+      $response,
+      $this->fileService->getManyByDirectory($directoryPath)->toArray(),
     );
 
     return $response;
@@ -91,33 +78,12 @@ class Files
     $queryParams = $request->getQueryParams();
     $page = isset($queryParams['page']) ? $queryParams['page'] : 0;
 
-    $whereQuery = [];
-
     if (isset($queryParams['where'])) {
-      $whereParam = $queryParams['where'];
-      $paramsToExtract = [];
-
-      if (is_array($whereParam)) {
-        $paramsToExtract = $whereParam;
-      } else {
-        $paramsToExtract[] = $whereParam;
-      }
-
-      foreach ($paramsToExtract as $param) {
-        $result = json_decode($param);
-
-        if (isset($result[0]) && isset($result[1]) && isset($result[2])) {
-          $whereQuery[] = [
-            $result[0],
-            $result[1],
-            str_replace('/', '\/', $result[2]),
-          ];
-        }
-      }
+      [$where] = normalizeWhereQueryParam($queryParams['where']);
     }
 
     $dataPaginated = json_decode(
-      \Files::where($whereQuery)
+      \Files::where($where ?? [])
         ->paginate(15, ['*'], 'page', $page)
         ->toJson(),
     );
@@ -139,27 +105,35 @@ class Files
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
+    $id = $args['itemId'];
+    $queryParams = $request->getQueryParams();
+
     try {
       $userId = $this->container->get('session')->get('user_id', false);
-      $fileInfo = \Files::where('id', $args['itemId'])
-        ->get()
-        ->firstOrFail();
+      $fileInfo = $this->fileService->getById($id);
 
       if ($fileInfo->private && !$userId) {
         return $response->withStatus(401);
       }
 
-      $file = $this->fs->readStream($fileInfo->filepath);
-
-      $stream = new Stream($file);
+      if (preg_match('/image\/.*/', $fileInfo->mimeType)) {
+        $imageResource = $this->imageService->getProcessed(
+          $fileInfo,
+          $queryParams,
+        );
+        $stream = new Stream($imageResource['resource']);
+      } else {
+        $stream = $this->fileService->getStream($fileInfo);
+      }
 
       return $response
         ->withHeader('Content-Type', $this->fs->mimeType($fileInfo->filepath))
-        ->withHeader('Content-Length', $this->fs->fileSize($fileInfo->filepath))
+        ->withHeader('Content-Length', $stream->getSize())
         ->withBody($stream);
     } catch (\Exception $e) {
-      echo $e->getMessage();
-      return $response->withStatus(404);
+      return $response
+        ->withStatus(500)
+        ->withHeader('Content-Description', $e->getMessage());
     }
   }
 
@@ -187,7 +161,10 @@ class Files
     if ($file->getError() !== UPLOAD_ERR_OK) {
       return $response
         ->withStatus(500)
-        ->withHeader('Content-Description', 'Upload failed');
+        ->withHeader(
+          'Content-Description',
+          'Upload failed ' . $file->getError(),
+        );
     }
 
     if (!isset($data['root'])) {
@@ -229,11 +206,7 @@ class Files
 
       DB::commit();
 
-      $response->getBody()->write(
-        json_encode([
-          'data' => $createdFile,
-        ]),
-      );
+      prepareJsonResponse($response, $createdFile->toArray());
     } catch (\Exception $e) {
       echo $e->getMessage();
 
@@ -254,13 +227,10 @@ class Files
   ): ResponseInterface {
     $parsedBody = $request->getParsedBody();
 
-    $response->getBody()->write(
-      json_encode([
-        'data' => \Files::where('id', $args['itemId'])->update(
-          $parsedBody['data'],
-        ),
-      ]),
-    );
+    $file = \Files::findOrFail($args['itemId']);
+    $file->update($parsedBody['data']);
+
+    prepareJsonResponse($response, $file->toArray());
 
     return $response;
   }
@@ -270,18 +240,9 @@ class Files
     ResponseInterface $response,
     array $args
   ): ResponseInterface {
+    $id = $args['itemId'];
     try {
-      $fileInfo = \Files::where('id', $args['itemId'])
-        ->get()
-        ->firstOrFail();
-
-      try {
-        $this->fs->delete($fileInfo->filepath);
-      } catch (FilesystemException | UnableToDeleteFile $exception) {
-        // TODO: Handle this better - db transactions?
-      }
-
-      $fileInfo->delete();
+      $this->fileService->deleteById($id);
 
       return $response->withStatus(200);
     } catch (\Exception $e) {

@@ -18,10 +18,11 @@ body > header > nav {
     line-height: 0.7;
     color: #fff;
     width: auto;
-    height: 70px;
+    height: 45px;
     background-position: left center;
     background-size: contain;
     background-repeat: no-repeat;
+    padding-left: 10px;
 
     &.white {
       display: block;
@@ -34,6 +35,11 @@ body > header > nav {
     &-wrap {
       display: flex;
       align-items: center;
+    }
+
+    @media (min-width: 575px) {
+      height: 70px;
+      padding-left: 0px;
     }
   }
 
@@ -50,10 +56,10 @@ body > header > nav {
       align-items: center;
 
       a {
-        padding: 12px 24px;
+        padding: 6px 25px 6px 0px;
+        font-size: 12px;
         font-weight: 500;
         position: relative;
-        font-size: 14px;
         transition: all 400ms ease;
 
         &.dropdown {
@@ -61,13 +67,19 @@ body > header > nav {
           .fa-solid {
             position: absolute;
             content: '';
-            width: 16px;
-            height: 16px;
-            right: 3px;
+            width: 10px;
+            height: 10px;
+            right: 12px;
             top: 4px;
             z-index: -1;
             path {
               fill: #339b30;
+            }
+
+            @media (min-width: 575px) {
+              width: 16px;
+              height: 16px;
+              right: 3px;
             }
           }
         }
@@ -75,18 +87,24 @@ body > header > nav {
         &:hover {
           color: #339b30;
         }
+
+        @media (min-width: 575px) {
+          padding: 12px 24px;
+          font-size: 14px;
+        }
       }
     }
   }
 
   // Main navigation content styling
   .nav-content {
-    width: 90%;
     max-width: 1440px;
     position: relative;
     display: flex;
     justify-content: space-between;
-    min-height: 110px;
+    min-height: 70px;
+    width: 100%;
+    padding: 5px;
 
     ul {
       li {
@@ -128,6 +146,11 @@ body > header > nav {
         }
       }
     }
+
+    @media (min-width: 575px) {
+      width: 90%;
+      min-height: 110px;
+    }
   }
 
   .submenu {
@@ -166,8 +189,12 @@ body > header > nav {
 
       .dropdown-box {
         visibility: visible;
-        padding: 25px 15px;
         transition: all 0ms 150ms;
+        padding: 12px 5px;
+
+        @media (min-width: 575px) {
+          padding: 25px 15px;
+        }
       }
     }
   }

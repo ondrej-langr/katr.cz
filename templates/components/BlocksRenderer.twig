@@ -1,37 +1,149 @@
 <div class="block-renderer"> 
   {% if blocks %}
-        {% for block in blocks %}
-          {% if block.type == 'header' %}
-            <h{{block.data.level}}>
-              {{ block.data.text|raw }}
-            </h{{block.data.level}}>
-          {% elseif block.type == 'paragraph' %}
-            <p>
-              {{ block.data.text }}
-            </p>
-          {% elseif block.type == 'image' %}
-            <img class="big-image zooming w-100"   src="/api/entry-types/files/items/{{ block.data.fileId }}/raw" />
-          {% elseif block.type == 'gallery' %}
-            <div class="gallery">
-              {% for fileId in block.data.fileIds %}
-                <img class="zooming" src="/api/entry-types/files/items/{{ fileId }}/raw" />
+    {% for block in blocks %}
+      {% if block.type == 'header' %}
+        <h{{block.data.level}}>
+          {{ block.data.text|raw }}
+        </h{{block.data.level}}>
+      {% elseif block.type == 'table' %}
+        <table class="table"> 
+          {% if block.data.withHeadings %}
+            <thead> 
+              <tr> 
+                {% for cell in block.data.content[0] %}
+                  <th scope="col">{{cell|raw}}</td> 
+                {% endfor %}
+              </tr>
+            </thead>
+          {% endif %}
+          <tbody>
+            {% if block.data.withHeadings %}
+              {% for row in block.data.content[1:] %}
+                <tr> 
+                    {% for cell in row %}
+                      <td>{{cell|raw}}</td> 
+                    {% endfor %}
+                </tr>
+              {% endfor %}
+            {% else %}
+              {% for row in block.data.content %}
+                <tr> 
+                    {% for cell in row %}
+                      <td>{{cell|raw}}</td> 
+                    {% endfor %}
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      {% elseif block.type == 'paragraph' %}
+        <p>
+          {{ block.data.text|raw }}
+        </p>
+      {% elseif block.type == 'image' %}
+        {% set fullImage = image(block.data.fileId, 1240) %}
+        {% set thumbnail = image(block.data.fileId, 1240, null, 85) %}
+        <div class="big-image w-full gallery-photoswipe">
+          <a class="w-full" href="{{ fullImage.src }}" data-pswp-width="{{fullImage.width}}" data-pswp-height="{{fullImage.height}}">
+              <img src="{{thumbnail.src}}" width="{{thumbnail.width}}" height="{{thumbnail.height}}" alt="{{ block.data.label }}" />
+              <div class="d-none hidden-caption-content">
+                {% if block.data.label %}
+                    <p class="heading">{{block.data.label}}</p>
+                {% endif %}
+                {% if block.data.description %}
+                    <p class="description">{{block.data.description}}</p>
+                {% endif %}
+              </div>
+          </a>
+        </div>
+      {% elseif block.type == 'big-gallery' %}
+         <div class="tabs">
+          {% for gallery in block.data %}
+            <input type="radio"
+              name="tabs"
+              id="tab{{ loop.index }}"
+              checked="checked" />
+            <label for="tab{{ loop.index }}">
+              {% if gallery.data.label %}
+                {{ gallery.data.label }}
+              {% else %}
+                Žádný popisek
+              {% endif %}
+            </label>
+            <div class="tab gallery-photoswipe portfolio-gallery">
+              {% for file in gallery.data.fileIds %}
+                {% set fullImage = image(file.id, 1240) %}
+                {% set thumbnail = image(file.id, 400, null, 60) %}
+                <a href="{{ fullImage.src }}"
+                  class="gallery-item"
+                  data-pswp-width="{{ fullImage.width }}"
+                  data-pswp-height="{{ fullImage.height }}">
+                  <img src="{{ thumbnail.src }}"
+                    width="{{ thumbnail.width }}"
+                    alt="{{ file.title }}" />
+                  <div class="d-none hidden-caption-content">
+                    {% if file.title %}
+                      <p class="heading">
+                        {{ file.title }}
+                      </p>
+                    {% endif %}
+                    {% if file.description %}
+                      <p class="description">
+                        {{ file.description }}
+                      </p>
+                    {% endif %}
+                  </div>
+                </a>
               {% endfor %}
             </div>
-          {% elseif block.type == 'list' %}
-            <ul>
-              {% for listItem in block.data.items %}
-                <li>{{ listItem|raw }}</li>
-              {% endfor %}
-            </ul>
-          {% elseif block.type == 'tags' %}
-            <ul class="badges">
-              {% for tag in block.data.tags %}
-                <li>{{ tag|raw }}</li>
-              {% endfor %}
-            </ul>
-          {% elseif block.type == 'buttonLink' %}
-          <div class="btn-box">
-            <a href="{{block.data.linkTo}}" target="_blank" {% if block.data.isDownload %} download {% endif %}>
+          {% endfor %}
+        </div>
+      {% elseif block.type == 'gallery' %}
+        <div class="gallery gallery-photoswipe">
+          {% for file in block.data.fileIds %}
+            {% set fullImage = image(file.id, 1240) %}
+            {% set thumbnail = image(file.id, 400, null, 60) %}
+            <a href="{{ fullImage.src }}"
+              data-pswp-width="{{ fullImage.width }}"
+              data-pswp-height="{{ fullImage.height }}">
+              <img src="{{ thumbnail.src }}"
+                width="{{ thumbnail.width }}"
+                alt="{{ file.title }}" />
+              <div class="d-none hidden-caption-content">
+                {% if file.title %}
+                  <p class="heading">
+                    {{ file.title }}
+                  </p>
+                {% endif %}
+                {% if file.description %}
+                  <p class="description">
+                    {{ file.description }}
+                  </p>
+                {% endif %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% elseif block.type == 'list' %}
+        <ul>
+          {% for listItem in block.data.items %}
+            <li>{{ listItem|raw }}</li>
+          {% endfor %}
+        </ul>
+      {% elseif block.type == 'dynamicBlock' %}
+        {{ getDynamicBlock(block.data.blockId, data)|raw }}
+      {% elseif block.type == 'tags' %}
+        <ul class="badges">
+          {% for tag in block.data.tags %}
+            <li>{{ tag|raw }}</li>
+          {% endfor %}
+        </ul>
+      {% elseif block.type == 'buttonLink' %}
+        <div class="btn-box {% if block.data.placeholderImage %}is-image{% endif %}">
+          <a href="{{block.data.linkTo}}?q=90&w=1240" title="{{block.data.label}}" {% if block.data.openOnNewTab %} target="_blank" {% endif %} {% if block.data.isDownload %} download {% endif %}>
+            {% if block.data.placeholderImage %}
+              <img class="big-image w-100" src="/api/entry-types/files/items/{{ block.data.placeholderImage }}/raw?q=70&w=400" />
+            {% else %}
               {% if block.data.isDownload %}
                 <svg xmlns="http://www.w3.org/2000/svg"
                   x="0px"
@@ -66,27 +178,49 @@
               {% else %}
                 {{block.data.linkTo}}
               {% endif %}
-            </a>
-          </div>
-          {% elseif block.type == 'columns' %}
-            <div class="d-flex">
-              {% for col in block.data.itemContent %}
-                <div class="col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-                  {% include 'components/BlocksRenderer.twig' with {blocks: col.blocks} %}
-                </div>
-              {% endfor %}
-            </div>
-          {% elseif block.type == 'embed' %}
-            {% if block.data.service == 'youtube' %}
-              <iframe width="100%"
-                height="515"
-                src="{{ block.data.embed }}"
-                title="YouTube video player"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
             {% endif %}
-          {% endif %}
-        {% endfor %}
+          </a>
+        </div>
+      {% elseif block.type == 'columns' %}
+        {% set filteredCols = block.data.itemContent|filter( v => v.blocks|length > 0 ) %}
+        {% set size = filteredCols|length %}
+
+        {% if size is same as(1) %}
+          {% set colsWrapperClassNames = "col-12" %}
+        {% elseif size is same as(2) %}
+          {% set colsWrapperClassNames = "col-12 col-sm-6" %}
+        {% elseif size is same as(3) %}
+          {% set colsWrapperClassNames = "col-12 col-md-4" %}
+        {% else %}
+          {% set colsWrapperClassNames = "col-12 col-sm-6 col-md-3" %}
+        {% endif %}
+
+        {% if size is same as(1) %}
+          {% set gutterClassName = "gx-0 gy-0" %}
+        {% elseif size is same as(2) %}
+          {% set gutterClassName = "gx-5 gy-0" %}
+        {% else %}
+          {% set gutterClassName = "gx-5 gy-0" %}
+        {% endif %}
+         
+        <div class="row {{gutterClassName}}">
+          {% for col in filteredCols %}
+            <div class="{{colsWrapperClassNames}}">
+              {% include 'components/BlocksRenderer.twig' with {blocks: col.blocks} %}
+            </div>
+          {% endfor %}
+        </div>
+      {% elseif block.type == 'embed' %}
+        {% if block.data.service == 'youtube' %}
+          <iframe width="100%"
+            height="515"
+            src="{{ block.data.embed }}"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+        {% endif %}
       {% endif %}
+    {% endfor %}
+  {% endif %}
 </div>

@@ -14,13 +14,16 @@ try {
   include_once $CORE_ROOT . '/app/libs/db.bootstrap.php';
   include_once $CORE_ROOT . '/app/bootstrap.php';
 
+
   echo '👋 Hello! Welcome to schema syncing to your database! ' . PHP_EOL;
   echo '🔧 Trying to find some schemas in modules...' . PHP_EOL;
 
   $moduleNames = BootstrapUtils::getValidModuleNames();
   $utils = new Utils();
 
+
   foreach ($moduleNames as $moduleName) {
+    
     $moduleRoot = BootstrapUtils::getModuleRoot($moduleName);
     $modelsFolderName = $PROM_OPINIONATED_SETTINGS->modules['modelsFolderName'];
     $modelsRoot = "$moduleRoot/$modelsFolderName";
@@ -29,77 +32,78 @@ try {
     if (is_dir($modelsRoot)) {
       $modelNames = $utils->autoloadModels($moduleRoot);
 
+      echo json_encode($modelNames);
+
       foreach ($modelNames as $modelName) {
-        echo "🔧 Founded model by the name of: '$modelName', trying to create table..." .
+        echo "🔧 Model has been found by the name of: '$modelName', trying to create table..." .
           PHP_EOL;
 
         $modelInstance = new $modelName();
 
         $modelSummary = $modelInstance->getSummary();
-        try {
-          // TODO: Should we delete already created database tables?
-          Capsule::schema()->dropIfExists($modelSummary->tableName);
 
-          Capsule::schema()->create($modelSummary->tableName, function (
-            $table
-          ) use ($modelSummary) {
-            /** @var \Illuminate\Database\Schema\Blueprint $table */
+        // TODO: Should we delete already created database tables?
+        Capsule::schema()->dropIfExists($modelSummary->tableName);
 
-            foreach ($modelSummary->columns as $columnKey => $column) {
-              $type = $column['type'];
-              $field = null;
+        Capsule::schema()->create($modelSummary->tableName, function (
+          $table
+        ) use ($modelSummary) {
+          /** @var \Illuminate\Database\Schema\Blueprint $table */
 
-              if ($columnKey === 'id' && $column['autoIncrement']) {
-                $field = $table->bigIncrements('id');
-              } else {
-                if ($type === 'password' || $type === 'slug') {
-                  $type = 'string';
-                } elseif ($type === 'number') {
-                  $type = 'integer';
-                }
+          foreach ($modelSummary->columns as $columnKey => $column) {
+            $type = $column['type'];
+            $field = null;
 
-                switch ($type) {
-                  case 'enum':
-                    $field = $table->$type($columnKey, $column['enum']);
-                    break;
-                  case 'string':
-                    $field = $table->$type($columnKey, 255);
-                    break;
-                  default:
-                    $field = $table->$type($columnKey);
-                    break;
-                }
+            if ($columnKey === 'id' && $column['autoIncrement']) {
+              $field = $table->bigIncrements('id');
+            } else {
+              if ($type === 'password' || $type === 'slug') {
+                $type = 'string';
+              } elseif ($type === 'number') {
+                $type = 'integer';
+              } elseif ($type === 'file' || $type === 'relationship') {
+                $type = 'bigInteger';
               }
 
-              if ($column['unique']) {
-                $field->unique();
-              }
-
-              if ($type === 'integer') {
-                $field->integer()->default(0);
-              }
-
-              if (!$column['required']) {
-                $field->nullable();
+              switch ($type) {
+                case 'enum':
+                  $field = $table->$type($columnKey, $column['enum']);
+                  break;
+                case 'string':
+                  $field = $table->$type($columnKey, 255);
+                  break;
+                default:
+                  $field = $table->$type($columnKey);
+                  break;
               }
             }
 
-            if ($modelSummary->hasTimestamps) {
-              $table->timestamps();
+            if ($column['unique']) {
+              $field->unique();
             }
 
-            if ($modelSummary->hasSoftDelete) {
-              $table->softDeletes();
+            if ($type === 'integer') {
+              $field->integer()->default(0);
             }
-          });
-        } catch (Exception $e) {
-          $tableName = $modelSummary->tableName;
-          $message = $e->getMessage();
-          throw new Exception(
-            "⛔️ An error happened during table '$tableName' creating: $message" .
-              PHP_EOL
-          );
-        }
+
+            if (!$column['required']) {
+              $field->nullable();
+            }
+
+            if (isset($column['default'])) {
+              $value = $column['default'];
+              $field->default($type === 'integer' ? intval($value) : $value);
+            }
+          }
+
+          if ($modelSummary->hasTimestamps) {
+            $table->timestamps();
+          }
+
+          if ($modelSummary->hasSoftDelete) {
+            $table->softDeletes();
+          }
+        });
       }
     }
   }
