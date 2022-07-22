@@ -3,5 +3,9 @@ RewriteBase /
 
 ErrorDocument 404 /public/index.php
 
+RewriteCond %{HTTP_HOST} ^test\.katr\.cz [NC]
+RewriteCond %{REQUEST_URI}  !^/subdoms/test/
+RewriteRule ^(.*)$ /subdoms/test/$1 [L,QSA]
+
 RewriteCond %{REQUEST_URI} !^/public
 RewriteRule (.*) public/$1 [L,QSA]
