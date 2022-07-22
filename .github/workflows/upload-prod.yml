@@ -1,0 +1,118 @@
+name: Deploy PROD SPCom
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v2
+
+      - name: 🚚 Prepare node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: 🚚 Install dependencies
+        run: npm install
+
+      - name: 🔒 Generate and write ENV variables
+        uses: actions/github-script@v5
+        env:
+          DB_NAME: '${{secrets.DB_PROD_NAME}}'
+          DB_USER: '${{secrets.DB_PROD_USER}}'
+          DB_PASS: '${{secrets.DB_PROD_PASS}}'
+
+          MAIL_USER: '${{secrets.MAIL_USER}}'
+          MAIL_PASS: '${{secrets.MAIL_PASS}}'
+          MAIL_ADDRESS: '${{secrets.MAIL_ADDRESS}}'
+
+          SECURITY_SECRET: '${{secrets.SECURITY_SECRET}}'
+          SECURITY_HCAPTCHA_SECRET: '${{secrets.SECURITY_HCAPTCHA_SECRET}}'
+        with:
+          script: |
+            const fs = require('fs');
+            const { DB_NAME, DB_USER, DB_PASS, MAIL_USER, MAIL_PASS, MAIL_ADDRESS, SECURITY_SECRET, SECURITY_HCAPTCHA_SECRET } =
+              process.env;
+
+            await new Promise((resolve, reject) =>
+              fs.writeFile(
+                '.env',
+                `
+                  # APP
+                  APP_NAME=katr_prom
+                  APP_ENV=production
+                  APP_PREFIX=
+                  APP_DEBUG=false
+                  APP_URL=https://test.katr.cz
+
+                  # Database
+                  DB_CONNECTION=mysql
+                  DB_HOST=uvdb38.active24.cz
+                  DB_PORT=3306
+                  DB_DATABASE=${DB_NAME}
+                  DB_USERNAME=${DB_USER}
+                  DB_PASSWORD=${DB_PASS}
+
+                  # Mail
+                  MAIL_HOST=email02.active24.com
+                  MAIL_PORT=465
+                  MAIL_USER=${MAIL_USER}
+                  MAIL_PASS=${MAIL_PASS}
+                  MAIL_ADDRESS=${MAIL_ADDRESS}
+
+                  # Security
+                  SECURITY_SECRET=${SECURITY_SECRET}
+                  SECURITY_HCAPTCHA_SECRET=${SECURITY_HCAPTCHA_SECRET}
+                `,
+                function (err) {
+                  if (err) return reject();
+                  resolve('');
+                }
+              )
+            );
+
+      - name: 🏗 Build the production build
+        run: npm run build
+
+      - name: Delete twig cache
+        uses: StephanThierry/ftp-delete-action@v2.1
+        with:
+          host: katr.cz
+          user: ${{ secrets.FTP_PROD_USER }}
+          password: ${{ secrets.FTP_PROD_PASS }}
+          remoteDirectories: "/cache/twig"
+          ignoreSSL: "1"
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: katr.cz
+          username: ${{ secrets.FTP_PROD_USER }}
+          password: ${{ secrets.FTP_PROD_PASS }}
+          exclude: |
+            **/.git*/**
+            .git
+            .github/**
+            **/node_modules/**
+            public/images/**
+            subdoms/**
+            subdoms
+            cache/**
+            .gitignore
+            .prettierrc.js
+            docker-compose.yml
+            Dockerfile
+            globals.d.ts
+            tsconfig.json
+            webpack.config.js
+            yarn.lock
+            
