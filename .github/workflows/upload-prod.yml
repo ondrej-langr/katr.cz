@@ -52,7 +52,7 @@ jobs:
                   APP_ENV=production
                   APP_PREFIX=
                   APP_DEBUG=false
-                  APP_URL=https://test.katr.cz
+                  APP_URL=https://katr.cz
 
                   # Database
                   DB_CONNECTION=mysql
