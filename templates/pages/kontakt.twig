@@ -8,17 +8,24 @@
   Kontakt
 {% endblock %}
 
+{% block heroImageUrl %}
+  {% if data.settings.hero_image %}
+    {% set heroImage = image(data.settings.hero_image, 1320) %}
+    {{ heroImage.src }}
+  {% endif %}
+{% endblock %}
+
 {% block content %}
   <div class="contact">
     <div class="contact-content">
       {% if (data.emailSent) %}
         {% if (data.emailSuccess) %}
           <div class="mt-n5 mb-5 alert alert-success" role="alert">
-            Vaše zpráva byla úspěšně odeslána! V nedohledné době vás budeme kontaktovat na uvedený email.
+            {{ data.settings.message_success }}
           </div>
         {% else %}
           <div class="mt-n5 mb-5 alert alert-danger" role="alert">
-            Stala se někde chyba. Zkuste to znovu za chvíli nebo nám zavolejte.
+            {{ data.settings.message_error }}
           </div>
         {% endif %}
       {% endif %}

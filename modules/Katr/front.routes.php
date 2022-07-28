@@ -246,16 +246,14 @@ $router->get('/kariera', function (
     return repairBlockContent($opportu);
   }, \Positions::all()->toArray());
 
-  $response
-    ->getBody()
-    ->write(
-      render('pages/kariera.twig', [
-        'opportunities' => $opportunities,
-        'settings' => [
-          'hero_image' => getSetting('kariera_hero_image')['content']['data'],
-        ],
-      ])
-    );
+  $response->getBody()->write(
+    render('pages/kariera.twig', [
+      'opportunities' => $opportunities,
+      'settings' => [
+        'hero_image' => getSetting('kariera_hero_image')['content']['data'],
+      ],
+    ])
+  );
 
   return $response;
 });
@@ -351,6 +349,17 @@ $router->map(['GET', 'POST'], '/kontakt', function (
       'captchafail' => isset($params['captchafail']),
       'emailSuccess' =>
         isset($params['success']) && $params['success'] === 'true',
+      'settings' => [
+        'hero_image' => getSetting('contact_page_hero_image')['content'][
+          'data'
+        ],
+        'message_success' => getSetting('contact_message_success')['content'][
+          'data'
+        ],
+        'message_error' => getSetting('contact_message_error')['content'][
+          'data'
+        ],
+      ],
     ])
   );
 
