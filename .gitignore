@@ -5,3 +5,4 @@ public/bundle
 .env
 backup
 uploads
+.database

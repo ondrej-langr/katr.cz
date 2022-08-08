@@ -11,10 +11,12 @@ use Psr\Http\Message\ServerRequestInterface;
 class Folders
 {
   private $fs;
+  private $config;
 
   public function __construct(Container $container)
   {
     $this->fs = $container->get('filesystem');
+    $this->config = $container->get('config');
   }
 
   private function listingHasContents(DirectoryListing $listing)
@@ -66,7 +68,7 @@ class Folders
     $data = $parsedBody['data'];
 
     try {
-      if (is_dir(PROM_UPLOADS_ROOT . $data['path'])) {
+      if (is_dir($this->config['fs']['uploadsPath'] . $data['path'])) {
         return $response->withStatus(409);
       }
 

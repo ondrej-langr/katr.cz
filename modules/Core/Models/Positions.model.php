@@ -1,75 +1,29 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
-
+use App\Database\Model;
+use App\Database\ModelResult;
 use Illuminate\Support\Str;
 
 class Positions extends Model
 {
-  protected $table = 'positions';
-  protected $modelIcon = 'BuildingFactory';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
-  protected $ignoreSeeding = false;
-  protected $adminSettings = [
-    'layout' => 'post-like',
-  ];
+  protected string $tableName = 'positions';
+  protected bool $timestamps = false;
+  protected bool $softDelete = false;
+  protected bool $translations = true;
 
-  protected $casts = [
+  public static array $casts = [
     'content' => 'array',
 
     'coeditors' => 'array',
   ];
 
-  /**
-   * Takes care of events
-   */
-  public static function boot()
-  {
-    parent::boot();
-
-    static::saving(function ($entry) {
-      // Take care of slugs
-      foreach (
-        array_filter(self::$tableColumns, function ($col) {
-          return $col['type'] === 'slug';
-        })
-        as $colKey => $col
-      ) {
-        if ($entry->{$col['of']}) {
-          $entry->{$colKey} = Str::slug($entry->{$col['of']});
-        }
-      }
-    });
-  }
-
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'description',
-    'coeditors',
-    'created_by',
-    'updated_by',
-  ];
-
-  public function created_by()
-  {
-    return $this->belongsTo(\User::class, 'created_by', 'id');
-  }
-
-  public function updated_by()
-  {
-    return $this->belongsTo(\User::class, 'updated_by', 'id');
-  }
-
-  protected static $tableColumns = [
+  public static array $tableColumns = [
     'id' => [
       'required' => false,
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
@@ -80,18 +34,20 @@ class Positions extends Model
       'editable' => true,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Title',
       'type' => 'string',
     ],
 
     'content' => [
-      'required' => true,
+      'required' => false,
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Content',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'slug' => [
@@ -99,6 +55,7 @@ class Positions extends Model
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
@@ -109,6 +66,7 @@ class Positions extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'type' => 'longText',
       'title' => 'Popisek',
     ],
@@ -118,9 +76,10 @@ class Positions extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'title' => 'Coeditors',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'created_by' => [
@@ -128,6 +87,7 @@ class Positions extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -143,6 +103,7 @@ class Positions extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -154,20 +115,42 @@ class Positions extends Model
     ],
   ];
 
+  static bool $ignoreSeeding = false;
+  static string $modelIcon = 'BuildingFactory';
+  static $adminSettings = [
+    'layout' => 'post-like',
+  ];
+
+  public static function beforeCreate($entry): array
+  {
+    foreach (
+      array_filter(static::$tableColumns, function ($col) {
+        return $col['type'] === 'slug';
+      })
+      as $colKey => $col
+    ) {
+      if ($entry[$col['of']]) {
+        $entry[$colKey] = Str::slug($entry[$col['of']]);
+      }
+    }
+
+    return $entry;
+  }
+
   public function getSummary()
   {
     return (object) [
-      'columns' => self::$tableColumns,
-      'tableName' => $this->table,
-      'icon' => $this->modelIcon,
-      'ignoreSeeding' => $this->ignoreSeeding,
-      'hasTimestamps' => $this->timestamps,
-      'hasSoftDelete' => $this->hasSoftDeletes,
+      'icon' => self::$modelIcon,
+      'ignoreSeeding' => self::$ignoreSeeding,
+      'admin' => self::$adminSettings,
+      'tableName' => $this->getTableName(),
+      'hasTimestamps' => $this->hasTimestamps(),
+      'hasSoftDelete' => $this->hasSoftDelete(),
+      'columns' => static::$tableColumns,
       'hasOrdering' => false,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => true,
-      'admin' => $this->adminSettings,
     ];
   }
 }

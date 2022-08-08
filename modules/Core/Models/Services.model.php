@@ -1,90 +1,29 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
-
+use App\Database\Model;
+use App\Database\ModelResult;
 use Illuminate\Support\Str;
 
 class Services extends Model
 {
-  protected $table = 'services';
-  protected $modelIcon = 'Briefcase';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
-  protected $ignoreSeeding = false;
-  protected $adminSettings = [
-    'layout' => 'post-like',
-  ];
+  protected string $tableName = 'services';
+  protected bool $timestamps = false;
+  protected bool $softDelete = false;
+  protected bool $translations = true;
 
-  protected $casts = [
+  public static array $casts = [
     'content' => 'array',
 
     'coeditors' => 'array',
   ];
 
-  /**
-   * Takes care of events
-   */
-  public static function boot()
-  {
-    parent::boot();
-
-    static::created(function ($entry) {
-      $entry->order = $entry->id;
-      $entry->save();
-    });
-
-    static::saving(function ($entry) {
-      // Take care of slugs
-      foreach (
-        array_filter(self::$tableColumns, function ($col) {
-          return $col['type'] === 'slug';
-        })
-        as $colKey => $col
-      ) {
-        if ($entry->{$col['of']}) {
-          $entry->{$colKey} = Str::slug($entry->{$col['of']});
-        }
-      }
-    });
-  }
-
-  protected $fillable = [
-    'id',
-    'title',
-    'content',
-    'slug',
-    'hero_image',
-    'excerpt',
-    'description',
-    'order',
-    'coeditors',
-    'created_by',
-    'updated_by',
-  ];
-
-  protected $with = ['hero_image'];
-
-  public function hero_image()
-  {
-    return $this->belongsTo(\Files::class, 'hero_image', 'id');
-  }
-
-  public function created_by()
-  {
-    return $this->belongsTo(\User::class, 'created_by', 'id');
-  }
-
-  public function updated_by()
-  {
-    return $this->belongsTo(\User::class, 'updated_by', 'id');
-  }
-
-  protected static $tableColumns = [
+  public static array $tableColumns = [
     'id' => [
       'required' => false,
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
@@ -95,18 +34,20 @@ class Services extends Model
       'editable' => true,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Title',
       'type' => 'string',
     ],
 
     'content' => [
-      'required' => true,
+      'required' => false,
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Content',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'slug' => [
@@ -114,6 +55,7 @@ class Services extends Model
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Zkratka',
       'type' => 'slug',
       'of' => 'title',
@@ -124,6 +66,7 @@ class Services extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'type' => 'file',
       'title' => 'Úvodní obrázek',
       'adminHidden' => true,
@@ -135,6 +78,7 @@ class Services extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'type' => 'longText',
       'title' => 'Krátký popisek',
     ],
@@ -144,6 +88,7 @@ class Services extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'type' => 'longText',
       'title' => 'Popisek',
     ],
@@ -153,6 +98,7 @@ class Services extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'Order',
       'type' => 'number',
@@ -164,9 +110,10 @@ class Services extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'title' => 'Coeditors',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'created_by' => [
@@ -174,6 +121,7 @@ class Services extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -189,6 +137,7 @@ class Services extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -200,20 +149,49 @@ class Services extends Model
     ],
   ];
 
+  static bool $ignoreSeeding = false;
+  static string $modelIcon = 'Briefcase';
+  static $adminSettings = [
+    'layout' => 'post-like',
+  ];
+
+  public static function afterCreate(ModelResult $entry): ModelResult
+  {
+    $entry->update(['order' => $entry->id]);
+
+    return $entry;
+  }
+
+  public static function beforeCreate($entry): array
+  {
+    foreach (
+      array_filter(static::$tableColumns, function ($col) {
+        return $col['type'] === 'slug';
+      })
+      as $colKey => $col
+    ) {
+      if ($entry[$col['of']]) {
+        $entry[$colKey] = Str::slug($entry[$col['of']]);
+      }
+    }
+
+    return $entry;
+  }
+
   public function getSummary()
   {
     return (object) [
-      'columns' => self::$tableColumns,
-      'tableName' => $this->table,
-      'icon' => $this->modelIcon,
-      'ignoreSeeding' => $this->ignoreSeeding,
-      'hasTimestamps' => $this->timestamps,
-      'hasSoftDelete' => $this->hasSoftDeletes,
+      'icon' => self::$modelIcon,
+      'ignoreSeeding' => self::$ignoreSeeding,
+      'admin' => self::$adminSettings,
+      'tableName' => $this->getTableName(),
+      'hasTimestamps' => $this->hasTimestamps(),
+      'hasSoftDelete' => $this->hasSoftDelete(),
+      'columns' => static::$tableColumns,
       'hasOrdering' => true,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => true,
-      'admin' => $this->adminSettings,
     ];
   }
 }

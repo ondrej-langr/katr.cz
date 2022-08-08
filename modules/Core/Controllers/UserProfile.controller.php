@@ -25,7 +25,7 @@ class UserProfile
   ): ResponseInterface {
     $user = $this->container->get('session')->get('user');
 
-    prepareJsonResponse($response, $user->toArray());
+    prepareJsonResponse($response, $user->getData());
 
     return $response;
   }
@@ -55,9 +55,8 @@ class UserProfile
       $userCannotLoginBecauseOfState = false;
 
       try {
-        $user = \Users::where('email', $args['email'])
-          ->get()
-          ->firstOrFail();
+        $user = \Users::where(['email', '=', $args['email']])->getOne();
+        $userState = $user->state;
         $passwordIsValid = $this->passService->validate(
           $args['password'],
           $user->password,
@@ -68,12 +67,12 @@ class UserProfile
         }
 
         if (
-          $user->state === 'password-reset' ||
-          $user->state === 'blocked' ||
-          $user->state === 'invited'
+          $userState === 'password-reset' ||
+          $userState === 'blocked' ||
+          $userState === 'invited'
         ) {
           $userCannotLoginBecauseOfState = true;
-          throw new \Exception("user-state-$user->state");
+          throw new \Exception("user-state-$userState");
         }
 
         $this->container->get('session')->set('user_id', $user->id);
@@ -131,7 +130,7 @@ class UserProfile
 
     $user->update($data);
 
-    prepareJsonResponse($response, $user->toArray());
+    prepareJsonResponse($response, $user->getData());
 
     return $response;
   }
@@ -163,15 +162,17 @@ class UserProfile
     }
 
     try {
-      $user = \Users::where('email', $params['email'])
-        ->where('state', '!=', 'blocked')
-        ->firstOrFail();
+      $user = \Users::where([
+        ['email', '=', $params['email']],
+        'AND',
+        ['state', '!=', 'blocked'],
+      ])->getOne();
     } catch (\Exception $e) {
       // We did not find user on provided email, but we do not want to let user know about it since we do not want to expose anything to public
       return $response;
     }
 
-    $generatedJwt = $this->jwt->generate(['id' => $user['id']]);
+    $generatedJwt = $this->jwt->generate(['id' => $user->id]);
     $themePayload = [
       'name' => $user->name,
       'email' => $user->email,
@@ -201,8 +202,9 @@ class UserProfile
     $emailService->Body = $generatedEmailContent;
 
     // User should be supposed to be in this state
-    $user->state = 'password-reset';
-    $user->save();
+    $user->update([
+      'state' => 'password-reset',
+    ]);
 
     $emailService->send();
 
@@ -228,16 +230,15 @@ class UserProfile
     $decodedArray = (array) $decodedPayload;
 
     try {
-      $user = \Users::where('id', $decodedArray['id'])
-        ->get()
-        ->firstOrFail();
+      $user = \Users::getOneById($decodedArray['id']);
     } catch (\Exception $e) {
       return $response->withStatus(404);
     }
 
-    $user->password = $this->passService->generate($newPassword);
-    $user->state = 'active';
-    $user->save();
+    $user->update([
+      'password' => $this->passService->generate($newPassword),
+      'state' => 'active',
+    ]);
 
     return $response;
   }

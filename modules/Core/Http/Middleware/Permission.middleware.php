@@ -9,7 +9,6 @@
 
 namespace App\Middleware;
 
-use Error;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use GuzzleHttp\Psr7\Response;
@@ -86,9 +85,7 @@ class Permission
       }
 
       $response = new Response();
-      $role = \UserRoles::where('id', $roleId)
-        ->first()
-        ->toArray();
+      $role = \UserRoles::getOneById($roleId)->getData();
       $modelPermissions = $role['permissions']['models'][$modelFromUrl];
       $requestMethod = $request->getMethod();
       // 'allow-everything' | 'allow-own' | false
@@ -117,7 +114,7 @@ class Permission
 
         $request = $request->withAttribute(
           'permission-only-own',
-          $requestPermissionValue === PROM_PERMISSIONS_ALLOW_OWN_KEY,
+          $requestPermissionValue === 'allow-own',
         );
       }
 

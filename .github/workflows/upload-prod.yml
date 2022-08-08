@@ -27,10 +27,6 @@ jobs:
       - name: 🔒 Generate and write ENV variables
         uses: actions/github-script@v5
         env:
-          DB_NAME: '${{secrets.DB_PROD_NAME}}'
-          DB_USER: '${{secrets.DB_PROD_USER}}'
-          DB_PASS: '${{secrets.DB_PROD_PASS}}'
-
           MAIL_USER: '${{secrets.MAIL_USER}}'
           MAIL_PASS: '${{secrets.MAIL_PASS}}'
           MAIL_ADDRESS: '${{secrets.MAIL_ADDRESS}}'
@@ -40,7 +36,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const { DB_NAME, DB_USER, DB_PASS, MAIL_USER, MAIL_PASS, MAIL_ADDRESS, SECURITY_SECRET, SECURITY_HCAPTCHA_SECRET } =
+            const { MAIL_USER, MAIL_PASS, MAIL_ADDRESS, SECURITY_SECRET, SECURITY_HCAPTCHA_SECRET } =
               process.env;
 
             await new Promise((resolve, reject) =>
@@ -53,14 +49,8 @@ jobs:
                   APP_PREFIX=
                   APP_DEBUG=false
                   APP_URL=https://katr.cz
-
-                  # Database
-                  DB_CONNECTION=mysql
-                  DB_HOST=uvdb38.active24.cz
-                  DB_PORT=3306
-                  DB_DATABASE=${DB_NAME}
-                  DB_USERNAME=${DB_USER}
-                  DB_PASSWORD=${DB_PASS}
+                  LANG='cs'
+                  MORE_LANG="en"
 
                   # Mail
                   MAIL_HOST=email02.active24.com

@@ -1,23 +1,33 @@
 <?php
 
+use DI\Container;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
-$templatesPath = $PROM_ROOT_FOLDER . '/templates';
-$cachePath = $PROM_ROOT_FOLDER . '/cache/twig';
+return function (Container $container) {
+  $config = $container->get('config');
+  $appRoot = $config['app']['root'];
+  $isDevelopment = $config['env']['development'];
+  $isDebug = $config['env']['debug'];
 
-if (!file_exists($templatesPath)) {
-  if (!mkdir($templatesPath, 0777)) {
-    throw new \Exception('Failed to create templates directory');
+  $templatesPath = $appRoot . '/templates';
+  $cachePath = $appRoot . '/cache/twig';
+
+  if (!file_exists($templatesPath)) {
+    if (!mkdir($templatesPath, 0777)) {
+      throw new \Exception('Failed to create templates directory');
+    }
   }
-}
 
-$twigLoader = new FilesystemLoader($templatesPath);
-$twig = new Environment(
-  $twigLoader,
-  !$PROM_DEVELOPMENT_MODE
-    ? [
-      'cache' => $cachePath,
-    ]
-    : [],
-);
+  $twigLoader = new FilesystemLoader($templatesPath);
+  $twig = new Environment(
+    $twigLoader,
+    !$isDebug && !$isDevelopment
+      ? [
+        'cache' => $cachePath,
+      ]
+      : [],
+  );
+
+  $container->set('twig', $twig);
+};

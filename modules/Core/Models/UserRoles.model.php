@@ -1,63 +1,29 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
-
+use App\Database\Model;
+use App\Database\ModelResult;
 use Illuminate\Support\Str;
 
 class UserRoles extends Model
 {
-  protected $table = 'userroles';
-  protected $modelIcon = 'UserExclamation';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
-  protected $ignoreSeeding = false;
-  protected $adminSettings = [
-    'layout' => 'simple',
-  ];
+  protected string $tableName = 'userroles';
+  protected bool $timestamps = false;
+  protected bool $softDelete = false;
+  protected bool $translations = false;
 
-  protected $casts = [
+  public static array $casts = [
     'permissions' => 'array',
 
     'coeditors' => 'array',
   ];
 
-  /**
-   * Takes care of events
-   */
-  public static function boot()
-  {
-    parent::boot();
-
-    static::saving(function ($entry) {
-      // Take care of slugs
-      foreach (
-        array_filter(self::$tableColumns, function ($col) {
-          return $col['type'] === 'slug';
-        })
-        as $colKey => $col
-      ) {
-        if ($entry->{$col['of']}) {
-          $entry->{$colKey} = Str::slug($entry->{$col['of']});
-        }
-      }
-    });
-  }
-
-  protected $fillable = [
-    'id',
-    'label',
-    'slug',
-    'description',
-    'permissions',
-    'coeditors',
-  ];
-
-  protected static $tableColumns = [
+  public static array $tableColumns = [
     'id' => [
       'required' => false,
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
@@ -68,6 +34,7 @@ class UserRoles extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Label',
       'type' => 'string',
     ],
@@ -77,6 +44,7 @@ class UserRoles extends Model
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Slug',
       'type' => 'slug',
       'of' => 'label',
@@ -87,6 +55,7 @@ class UserRoles extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'type' => 'longText',
       'title' => 'Popisek',
     ],
@@ -96,9 +65,10 @@ class UserRoles extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Permissions',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'coeditors' => [
@@ -106,26 +76,49 @@ class UserRoles extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'title' => 'Coeditors',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
   ];
+
+  static bool $ignoreSeeding = false;
+  static string $modelIcon = 'UserExclamation';
+  static $adminSettings = [
+    'layout' => 'simple',
+  ];
+
+  public static function beforeCreate($entry): array
+  {
+    foreach (
+      array_filter(static::$tableColumns, function ($col) {
+        return $col['type'] === 'slug';
+      })
+      as $colKey => $col
+    ) {
+      if ($entry[$col['of']]) {
+        $entry[$colKey] = Str::slug($entry[$col['of']]);
+      }
+    }
+
+    return $entry;
+  }
 
   public function getSummary()
   {
     return (object) [
-      'columns' => self::$tableColumns,
-      'tableName' => $this->table,
-      'icon' => $this->modelIcon,
-      'ignoreSeeding' => $this->ignoreSeeding,
-      'hasTimestamps' => $this->timestamps,
-      'hasSoftDelete' => $this->hasSoftDeletes,
+      'icon' => self::$modelIcon,
+      'ignoreSeeding' => self::$ignoreSeeding,
+      'admin' => self::$adminSettings,
+      'tableName' => $this->getTableName(),
+      'hasTimestamps' => $this->hasTimestamps(),
+      'hasSoftDelete' => $this->hasSoftDelete(),
+      'columns' => static::$tableColumns,
       'hasOrdering' => false,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => false,
-      'admin' => $this->adminSettings,
     ];
   }
 }

@@ -1,50 +1,28 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
+use App\Database\Model;
+use App\Database\ModelResult;
 
 class Settings extends Model
 {
-  protected $table = 'settings';
-  protected $modelIcon = 'Settings';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
-  protected $ignoreSeeding = false;
-  protected $adminSettings = [
-    'layout' => 'simple',
-  ];
+  protected string $tableName = 'settings';
+  protected bool $timestamps = false;
+  protected bool $softDelete = false;
+  protected bool $translations = true;
 
-  protected $casts = [
+  public static array $casts = [
     'content' => 'array',
 
     'coeditors' => 'array',
   ];
 
-  protected $fillable = [
-    'id',
-    'name',
-    'label',
-    'content',
-    'coeditors',
-    'created_by',
-    'updated_by',
-  ];
-
-  public function created_by()
-  {
-    return $this->belongsTo(\User::class, 'created_by', 'id');
-  }
-
-  public function updated_by()
-  {
-    return $this->belongsTo(\User::class, 'updated_by', 'id');
-  }
-
-  protected static $tableColumns = [
+  public static array $tableColumns = [
     'id' => [
       'required' => false,
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
@@ -55,6 +33,7 @@ class Settings extends Model
       'editable' => true,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'title' => 'Name',
       'type' => 'string',
     ],
@@ -64,6 +43,7 @@ class Settings extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'title' => 'Label',
       'type' => 'string',
     ],
@@ -73,9 +53,10 @@ class Settings extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'content',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'coeditors' => [
@@ -83,9 +64,10 @@ class Settings extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'title' => 'Coeditors',
       'type' => 'json',
-      'default' => '',
+      'default' => '{}',
     ],
 
     'created_by' => [
@@ -93,6 +75,7 @@ class Settings extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -108,6 +91,7 @@ class Settings extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => false,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -119,20 +103,26 @@ class Settings extends Model
     ],
   ];
 
+  static bool $ignoreSeeding = false;
+  static string $modelIcon = 'Settings';
+  static $adminSettings = [
+    'layout' => 'simple',
+  ];
+
   public function getSummary()
   {
     return (object) [
-      'columns' => self::$tableColumns,
-      'tableName' => $this->table,
-      'icon' => $this->modelIcon,
-      'ignoreSeeding' => $this->ignoreSeeding,
-      'hasTimestamps' => $this->timestamps,
-      'hasSoftDelete' => $this->hasSoftDeletes,
+      'icon' => self::$modelIcon,
+      'ignoreSeeding' => self::$ignoreSeeding,
+      'admin' => self::$adminSettings,
+      'tableName' => $this->getTableName(),
+      'hasTimestamps' => $this->hasTimestamps(),
+      'hasSoftDelete' => $this->hasSoftDelete(),
+      'columns' => static::$tableColumns,
       'hasOrdering' => false,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => true,
-      'admin' => $this->adminSettings,
     ];
   }
 }

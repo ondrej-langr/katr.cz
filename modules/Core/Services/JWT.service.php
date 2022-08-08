@@ -2,13 +2,20 @@
 
 namespace App\Services;
 
-use DateTime;
+use DI\Container;
 use Firebase\JWT\JWT as JWTWorker;
 use Firebase\JWT\Key;
 
 class JWT
 {
-  public function generate($payload, $expiration = PROM_TOKEN_LIFETIME)
+  private $config;
+
+  public function __construct(Container $container)
+  {
+    $this->config = $container->get('config');
+  }
+
+  public function generate($payload, int $expiration = null)
   {
     $now = time();
 
@@ -16,7 +23,11 @@ class JWT
       array_merge(
         [
           'iat' => $now,
-          'exp' => $now + $expiration,
+          'exp' =>
+            $now +
+            ($expiration === null
+              ? $this->config['security']['token']['lifetime']
+              : $expiration),
         ],
         $payload,
       ),

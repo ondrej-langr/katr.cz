@@ -4,7 +4,6 @@ namespace App\Services;
 
 use DI\Container;
 use Exception;
-use Files;
 use League\Flysystem\Filesystem;
 use Path;
 
@@ -12,14 +11,16 @@ class ImageService
 {
   private Filesystem $cacheFs;
   private Filesystem $fs;
+  private array $config;
 
   public function __construct(Container $container)
   {
     $this->fs = $container->get('filesystem');
+    $this->config = $container->get('config');
     $this->cacheFs = $container->get('file-cache-filesystem');
   }
 
-  public function getProcessed(Files $fileInfo, $dirtyParams = [])
+  public function getProcessed(array $fileInfo, $dirtyParams = [])
   {
     $args = [];
     if (
@@ -44,13 +45,13 @@ class ImageService
       $args['w'] = intval($dirtyParams['w']);
     }
 
-    $file = $this->fs->readStream($fileInfo->filepath);
+    $file = $this->fs->readStream($fileInfo['filepath']);
     $fileStream = $file;
 
     if (count($args)) {
       $fileName = basename(
-        $fileInfo->filepath,
-        '.' . pathinfo($fileInfo->filepath, PATHINFO_EXTENSION),
+        $fileInfo['filepath'],
+        '.' . pathinfo($fileInfo['filepath'], PATHINFO_EXTENSION),
       );
 
       $fileNameWithArgs = implode('.', [
@@ -76,7 +77,7 @@ class ImageService
 
         $imageConverted = \imagejpeg(
           $gdImageSource,
-          Path::join(PROM_FILE_CACHE_ROOT, $fileBasenameWithArgs),
+          Path::join($this->config['fs']['cachePath'], $fileBasenameWithArgs),
           $args['q'] ?? 90,
         );
 
@@ -88,6 +89,7 @@ class ImageService
       $fileStream = $this->cacheFs->readStream($fileBasenameWithArgs);
     }
 
+    $fileId = $fileInfo['id'];
     $gdImageSource = \imagecreatefromstring(stream_get_contents($fileStream));
     $imageWidth = imagesx($gdImageSource);
     $imageHeight = imagesy($gdImageSource);
@@ -102,7 +104,8 @@ class ImageService
     return [
       'resource' => $fileStream,
       'src' =>
-        PROM_URL . "/api/entry-types/files/items/$fileInfo->id/raw?$joinedArgs",
+        $this->config['app']['baseUrl'] .
+        "/api/entry-types/files/items/$fileId/raw?$joinedArgs",
       'width' => $imageWidth,
       'height' => $imageHeight,
     ];

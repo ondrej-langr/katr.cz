@@ -1,41 +1,22 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
+use App\Database\Model;
+use App\Database\ModelResult;
 
 class Users extends Model
 {
-  protected $table = 'users';
-  protected $modelIcon = 'Users';
-  public $timestamps = false;
-  protected $hasSoftDeletes = false;
-  protected $ignoreSeeding = false;
-  protected $adminSettings = [
-    'layout' => 'simple',
-  ];
+  protected string $tableName = 'users';
+  protected bool $timestamps = false;
+  protected bool $softDelete = false;
+  protected bool $translations = false;
 
-  protected $fillable = [
-    'id',
-    'name',
-    'password',
-    'email',
-    'avatar',
-    'state',
-    'role',
-  ];
-
-  public function role()
-  {
-    return $this->belongsTo(\UserRoles::class, 'role', 'id');
-  }
-
-  protected $hidden = ['password'];
-
-  protected static $tableColumns = [
+  public static array $tableColumns = [
     'id' => [
       'required' => false,
       'editable' => false,
       'unique' => true,
       'hide' => false,
+      'translations' => false,
       'autoIncrement' => true,
       'title' => 'ID',
       'type' => 'number',
@@ -46,6 +27,7 @@ class Users extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Name',
       'type' => 'string',
     ],
@@ -55,6 +37,7 @@ class Users extends Model
       'editable' => true,
       'unique' => false,
       'hide' => true,
+      'translations' => true,
       'title' => 'Password',
       'type' => 'password',
     ],
@@ -64,6 +47,7 @@ class Users extends Model
       'editable' => true,
       'unique' => true,
       'hide' => false,
+      'translations' => true,
       'title' => 'Email',
       'type' => 'string',
     ],
@@ -73,6 +57,7 @@ class Users extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'Avatar',
       'type' => 'string',
     ],
@@ -82,6 +67,7 @@ class Users extends Model
       'editable' => false,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'title' => 'State',
       'type' => 'enum',
       'enum' => ['active', 'invited', 'blocked', 'password-reset'],
@@ -92,6 +78,7 @@ class Users extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
+      'translations' => true,
       'multiple' => false,
       'foreignKey' => 'id',
       'fill' => false,
@@ -103,20 +90,26 @@ class Users extends Model
     ],
   ];
 
+  static bool $ignoreSeeding = false;
+  static string $modelIcon = 'Users';
+  static $adminSettings = [
+    'layout' => 'simple',
+  ];
+
   public function getSummary()
   {
     return (object) [
-      'columns' => self::$tableColumns,
-      'tableName' => $this->table,
-      'icon' => $this->modelIcon,
-      'ignoreSeeding' => $this->ignoreSeeding,
-      'hasTimestamps' => $this->timestamps,
-      'hasSoftDelete' => $this->hasSoftDeletes,
+      'icon' => self::$modelIcon,
+      'ignoreSeeding' => self::$ignoreSeeding,
+      'admin' => self::$adminSettings,
+      'tableName' => $this->getTableName(),
+      'hasTimestamps' => $this->hasTimestamps(),
+      'hasSoftDelete' => $this->hasSoftDelete(),
+      'columns' => static::$tableColumns,
       'hasOrdering' => false,
       'isDraftable' => false,
       'isSharable' => false,
       'ownable' => false,
-      'admin' => $this->adminSettings,
     ];
   }
 }
