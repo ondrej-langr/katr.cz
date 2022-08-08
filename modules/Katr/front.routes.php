@@ -1,16 +1,11 @@
 <?php
 
+use App\Database\Query;
+use Slim\Routing\RouteCollectorProxy as Router;
 use Psr\Http\Message\ResponseInterface;
+use App\Services\ImageService;
 use Psr\Http\Message\ServerRequestInterface;
-
-$cachedHeroImageUrl;
-$container = $app->getContainer();
-$emailService = $container->get('email');
-$twig = $container->get('twig');
-$allServices = \Services::all()->toArray();
-$settings = \Settings::orderBy('id', 'ASC')
-  ->get()
-  ->toArray();
+use Slim\App;
 
 function repairBlockContent($item)
 {
@@ -76,356 +71,376 @@ function connectGalleries($content = []): array
   return $content;
 }
 
-/**
- * basic getting of services with caching
- */
-function getServices()
-{
-  global $allServices;
+return function (App $app, Router $router) {
+  $container = $app->getContainer();
+  $emailService = $container->get('email');
+  /**
+   * @var ImageService
+   */
+  $imageService = $container->get('image-service');
+  /**
+   * @var \App\Services\FileService
+   */
+  $fileService = $container->get('file-service');
+  $twig = $container->get('twig');
+  $allServices = \Services::getMany();
+  $settings = \Settings::orderBy(['id' => 'asc'])->getMany();
 
-  if (!$allServices) {
-    $allServices = \Services::all()->toArray();
-  }
-
-  return $allServices;
-}
-
-/**
- * basic getting of services with caching
- */
-function getSettings()
-{
-  global $settings;
-
-  if (!$settings) {
-    $settings = \Settings::all()->toArray();
-  }
-
-  return $settings;
-}
-
-function getSetting($id)
-{
-  $allSettings = getSettings();
-
-  foreach ($allSettings as $val) {
-    if ($val['name'] === $id) {
-      return $val;
+  $getSetting = function ($id) use ($settings) {
+    foreach ($settings as $val) {
+      if ($val['name'] === $id) {
+        return json_decode(json_encode($val), true);
+      }
     }
-  }
-  return null;
-}
+    return null;
+  };
 
-function getDefaultHeroImageUrl()
-{
-  global $cachedHeroImageUrl;
-
-  if (!$cachedHeroImageUrl) {
-    $imageId = getSetting('default_hero_image')['content']['data'];
-    $cachedHeroImageUrl = $imageId
-      ? \Files::find($imageId)->toArray()['path']
-      : 'assets/images/header-bg2.jpg';
+  $heroImageId = $getSetting('default_hero_image')['content']['data'];
+  $heroImageUrl = 'assets/images/header-bg2.jpg';
+  if ($heroImageId) {
+    $fileInfo = $fileService->getById($heroImageId);
+    $heroImageUrl = $imageService->getProcessed($fileInfo->getData())['src'];
   }
 
-  return $cachedHeroImageUrl;
-}
+  $getMultilangField = function ($fieldName, $value) use ($container) {
+    $final = [];
+    foreach ($container->get('config')['i18n']['languages'] as $language) {
+      $final[] = [
+        Query::$TRANSLATIONS_FIELD_NAME . ".$language.$fieldName",
+        '=',
+        $value,
+      ];
+      $final[] = 'OR';
+    }
 
-/**
- * render helper
- */
-function render(string $path, array $data)
-{
-  global $twig;
+    array_pop($final);
 
-  $layoutBase = [
-    'baseUrl' => PROM_URL_BASE ? PROM_URL_BASE : '/',
-    'services' => getServices(),
-    'default_hero_image' => getDefaultHeroImageUrl(),
-    'footer' => [
-      'contacts' => getSetting('footer_contacts')['content']['data'],
-      'fakturace' => getSetting('footer_secret_items')['content']['data'],
-      'address' => getSetting('footer_address'),
-      'hot_list' => getSetting('footer_hot_list'),
-      'docs' => getSetting('footer_docs_list'),
-    ],
-    'allPages' => \Pages::onlyPublished()
-      ->where('showInMenu', true)
-      ->orderBy('order', 'ASC')
-      ->orderBy('id', 'ASC')
-      ->get()
-      ->toArray(),
-  ];
+    return $final;
+  };
 
-  return $twig->render(
-    $path,
-    array_merge($layoutBase, [
-      'data' => $data,
-    ])
-  );
-}
-
-// MAIN PAGE
-$router->get('/', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response
-) {
-  $posts = \Posts::orderByDesc('created_at')
-    ->onlyPublished()
-    ->limit(3)
-    ->get()
-    ->toArray();
-
-  $opportunities = \Positions::limit(3)
-    ->get()
-    ->toArray();
-
-  $response->getBody()->write(
-    render('pages/landing-page.twig', [
-      'seoTitle' => 'Hlavní stránka',
-      'posts' => $posts,
-      'opportunities' => $opportunities,
-      'cols' => [
-        getSetting('main_page_first_col')['content']['data'],
-        getSetting('main_page_second_col')['content']['data'],
-        getSetting('main_page_third_col')['content']['data'],
+  /**
+   * render helper
+   */
+  $render = function (string $path, array $data) use (
+    $twig,
+    $container,
+    $allServices,
+    $getSetting,
+    $heroImageUrl
+  ) {
+    $layoutBase = [
+      'baseUrl' => $container->get('config')['app']['url'],
+      'services' => $allServices,
+      'default_hero_image' => $heroImageUrl,
+      'footer' => [
+        'contacts' => $getSetting('footer_contacts')['content']['data'],
+        'fakturace' => $getSetting('footer_secret_items')['content']['data'],
+        'address' => $getSetting('footer_address'),
+        'hot_list' => $getSetting('footer_hot_list'),
+        'docs' => $getSetting('footer_docs_list'),
       ],
-      'title' => getSetting('main_page_title')['content']['data'],
-      'description' => getSetting('main_page_description')['content']['data'],
-      'about' => [
-        'content' => getSetting('main_page_about')['content']['data'],
-      ],
-      'blog_list' => [
-        'before' => getSetting('main_page_blog_list_before')['content']['data'],
-        'after' => getSetting('main_page_blog_list_after')['content']['data'],
-        'image' => getSetting('main_page_blog_list_image')['content']['data'],
-      ],
-      'positions' => [
-        'before' => getSetting('main_page_positions_before')['content']['data'],
-        'after' => getSetting('main_page_positions_after')['content']['data'],
-        'image' => getSetting('main_page_positions_image')['content']['data'],
-      ],
-    ])
-  );
+      'allPages' => \Pages::where([
+        ['showInMenu', '=', true],
+        ['is_published', '=', true],
+      ])
+        ->orderBy(['order' => 'asc', 'id' => 'asc'])
+        ->getMany(),
+    ];
 
-  return $response;
-});
+    return $twig->render(
+      $path,
+      array_merge($layoutBase, [
+        'data' => $data,
+      ])
+    );
+  };
 
-// BLOG
-$router->get('/blog/{post_slug}', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  try {
-    $postData = \Posts::where('slug', $args['post_slug'])
-      ->onlyPublished()
-      ->firstOrFail()
-      ->toArray();
-  } catch (\Exception $e) {
-    $response->getBody()->write(render('pages/404.twig', []));
+  // MAIN PAGE
+  $router->get('/', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response
+  ) use ($render, $getSetting) {
+    $posts = \Posts::where(['is_published', '=', true])
+      ->orderBy(['created_at' => 'desc'])
+      ->limit(3)
+      ->getMany();
 
-    return $response->withStatus(404);
-  }
+    $opportunities = \Positions::limit(3)->getMany();
 
-  $response
-    ->getBody()
-    ->write(
-      render('pages/blog/[blog-slug].twig', repairBlockContent($postData))
+    $response->getBody()->write(
+      $render('pages/landing-page.twig', [
+        'seoTitle' => 'Hlavní stránka',
+        'posts' => $posts,
+        'opportunities' => $opportunities,
+        'cols' => [
+          $getSetting('main_page_first_col')['content']['data'],
+          $getSetting('main_page_second_col')['content']['data'],
+          $getSetting('main_page_third_col')['content']['data'],
+        ],
+        'title' => $getSetting('main_page_title')['content']['data'],
+        'description' => $getSetting('main_page_description')['content'][
+          'data'
+        ],
+        'about' => [
+          'content' => $getSetting('main_page_about')['content']['data'],
+        ],
+        'blog_list' => [
+          'before' => $getSetting('main_page_blog_list_before')['content'][
+            'data'
+          ],
+          'after' => $getSetting('main_page_blog_list_after')['content'][
+            'data'
+          ],
+          'image' => $getSetting('main_page_blog_list_image')['content'][
+            'data'
+          ],
+        ],
+        'positions' => [
+          'before' => $getSetting('main_page_positions_before')['content'][
+            'data'
+          ],
+          'after' => $getSetting('main_page_positions_after')['content'][
+            'data'
+          ],
+          'image' => $getSetting('main_page_positions_image')['content'][
+            'data'
+          ],
+        ],
+      ])
     );
 
-  return $response;
-});
+    return $response;
+  });
 
-// KARIERA
-$router->get('/kariera', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  $opportunities = array_map(function ($opportu) {
-    return repairBlockContent($opportu);
-  }, \Positions::all()->toArray());
+  // BLOG
+  $router->get('/blog/{post_slug}', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) use ($render, $getMultilangField) {
+    try {
+      $postData = \Posts::where(
+        array_merge(
+          [['is_published', '=', true]],
+          $getMultilangField('slug', $args['post_slug'])
+        )
+      )
+        ->getOne()
+        ->getData();
+    } catch (\Exception $e) {
+      $response->getBody()->write($render('pages/404.twig', []));
 
-  $response->getBody()->write(
-    render('pages/kariera.twig', [
-      'opportunities' => $opportunities,
-      'settings' => [
-        'hero_image' => getSetting('kariera_hero_image')['content']['data'],
-      ],
-    ])
-  );
-
-  return $response;
-});
-
-// CONTACTS
-$router->map(['GET', 'POST'], '/kontakt', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response
-) use ($emailService, $twig) {
-  $params = $request->getQueryParams();
-  if ($request->getMethod() === 'POST') {
-    $data = $request->getParsedBody();
-
-    if (
-      !isset($data['h-captcha-response']) ||
-      empty($data['h-captcha-response'])
-    ) {
-      return $response
-        ->withStatus(302)
-        ->withHeader('Location', '/kontakt?captchafail=true');
+      return $response->withStatus(404);
     }
 
-    if (
-      isset($data['email']) &&
-      !empty($data['email']) &&
-      isset($data['name']) &&
-      !empty($data['name']) &&
-      isset($data['message']) &&
-      !empty($data['message'])
-    ) {
-      // Verify recaptcha
-      $captchaData = [
-        'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
-        'response' => $data['h-captcha-response'],
-      ];
+    $response
+      ->getBody()
+      ->write(
+        $render('pages/blog/[blog-slug].twig', repairBlockContent($postData))
+      );
 
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
-      curl_setopt($ch, CURLOPT_POST, true);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      $captchaResponse = curl_exec($ch);
-      $captchaResponseData = json_decode($captchaResponse);
+    return $response;
+  });
 
-      // if capcha is correct then proceed
-      if ($captchaResponseData->success) {
-        $emailService->isHtml();
-        $emailService->addAddress('sekretariat@katr.cz');
-        $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
-        $emailService->Body = $twig->render('email/contact-form.twig', [
-          'email' => $data['email'],
-          'name' => $data['name'],
-          'message' => $data['message'],
-        ]);
+  // KARIERA
+  $router->get('/kariera', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) use ($render, $getSetting) {
+    $opportunities = array_map(function ($opportu) {
+      return repairBlockContent($opportu);
+    }, \Positions::getMany());
 
-        $emailSuccess = $emailService->send();
+    $response->getBody()->write(
+      $render('pages/kariera.twig', [
+        'opportunities' => $opportunities,
+        'settings' => [
+          'hero_image' => $getSetting('kariera_hero_image')['content']['data'],
+        ],
+      ])
+    );
+
+    return $response;
+  });
+
+  // CONTACTS
+  $router->map(['GET', 'POST'], '/kontakt', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response
+  ) use ($emailService, $twig, $render, $getSetting) {
+    $params = $request->getQueryParams();
+    if ($request->getMethod() === 'POST') {
+      $data = $request->getParsedBody();
+
+      if (
+        !isset($data['h-captcha-response']) ||
+        empty($data['h-captcha-response'])
+      ) {
+        return $response
+          ->withStatus(302)
+          ->withHeader('Location', '/kontakt?captchafail=true');
       }
 
-      return $response
-        ->withStatus(302)
-        ->withHeader(
-          'Location',
-          '/kontakt?success=' . ($emailSuccess ? 'true' : 'false')
-        );
+      if (
+        isset($data['email']) &&
+        !empty($data['email']) &&
+        isset($data['name']) &&
+        !empty($data['name']) &&
+        isset($data['message']) &&
+        !empty($data['message'])
+      ) {
+        // Verify recaptcha
+        $captchaData = [
+          'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
+          'response' => $data['h-captcha-response'],
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $captchaResponse = curl_exec($ch);
+        $captchaResponseData = json_decode($captchaResponse);
+
+        // if capcha is correct then proceed
+        if ($captchaResponseData->success) {
+          $emailService->isHtml();
+          $emailService->addAddress('sekretariat@katr.cz');
+          $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
+          $emailService->Body = $twig->render('email/contact-form.twig', [
+            'email' => $data['email'],
+            'name' => $data['name'],
+            'message' => $data['message'],
+          ]);
+
+          $emailSuccess = $emailService->send();
+        }
+
+        return $response
+          ->withStatus(302)
+          ->withHeader(
+            'Location',
+            '/kontakt?success=' . ($emailSuccess ? 'true' : 'false')
+          );
+      }
     }
-  }
 
-  $contacts = \Contacts::all()->toArray();
-  $contactPositions = \Contact_positions::orderBy('order', 'ASC')
-    ->get()
-    ->toArray();
+    $contacts = \Contacts::getMany();
+    $contactPositions = \ContactPositions::orderBy([
+      'order' => 'asc',
+    ])->getMany();
 
-  $groupedContacts = [];
+    $groupedContacts = [];
 
-  foreach ($contactPositions as $contactPosition) {
-    $contactPositionName = $contactPosition['name'];
-    $groupedContacts[$contactPositionName]['label'] = $contactPositionName;
+    foreach ($contactPositions as $contactPosition) {
+      $contactPositionName = $contactPosition['name'];
+      $groupedContacts[$contactPositionName]['label'] = $contactPositionName;
 
-    foreach (
-      array_filter($contacts, function ($item) use ($contactPosition) {
-        return intval($item['category']) === intval($contactPosition['id']);
-      })
-      as $contact
+      foreach (
+        array_filter($contacts, function ($item) use ($contactPosition) {
+          return intval($item['category']) === intval($contactPosition['id']);
+        })
+        as $contact
+      ) {
+        $groupedContacts[$contactPositionName]['contacts'][] = $contact;
+      }
+    }
+
+    $response->getBody()->write(
+      $render('pages/kontakt.twig', [
+        'contactGroups' => $groupedContacts,
+        'emailSent' => isset($params['success']),
+        'captchafail' => isset($params['captchafail']),
+        'emailSuccess' =>
+          isset($params['success']) && $params['success'] === 'true',
+        'settings' => [
+          'hero_image' => $getSetting('contact_page_hero_image')['content'][
+            'data'
+          ],
+          'message_success' => $getSetting('contact_message_success')[
+            'content'
+          ]['data'],
+          'message_error' => $getSetting('contact_message_error')['content'][
+            'data'
+          ],
+        ],
+      ])
+    );
+
+    return $response;
+  });
+
+  // SERVICES
+  $router->get('/sluzby/{service_slug}', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) use ($render, $getMultilangField) {
+    $service = \Services::where(
+      $getMultilangField('slug', $args['service_slug'])
+    )->getOne();
+
+    if (!$service) {
+      $response->getBody()->write($render('pages/404.twig', []));
+
+      return $response->withStatus(404);
+    }
+
+    $response
+      ->getBody()
+      ->write(
+        $render(
+          'pages/sluzby/[service-slug].twig',
+          repairBlockContent($service->getData())
+        )
+      );
+
+    return $response;
+  });
+
+  $router->get('/{page_slug}', function (
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    $args
+  ) use ($render, $getMultilangField) {
+    try {
+      $page = \Pages::where(
+        array_merge(
+          [['is_published', '=', true]],
+          $getMultilangField('slug', $args['page_slug'])
+        )
+      )
+        ->getOne()
+        ->getData();
+    } catch (\Exception $e) {
+      $response->getBody()->write($render('pages/404.twig', []));
+
+      return $response->withStatus(404);
+    }
+
+    // TODO something more smart?
+    if (
+      str_includes(
+        json_encode(repairBlockContent($page)),
+        'blog-page-items-list'
+      )
     ) {
-      $groupedContacts[$contactPositionName]['contacts'][] = $contact;
+      $page['posts'] = \Posts::orderBy(['created_at' => 'asc'])
+        ->where(['is_published', '=', true])
+        ->getMany();
     }
-  }
 
-  $response->getBody()->write(
-    render('pages/kontakt.twig', [
-      'contactGroups' => $groupedContacts,
-      'emailSent' => isset($params['success']),
-      'captchafail' => isset($params['captchafail']),
-      'emailSuccess' =>
-        isset($params['success']) && $params['success'] === 'true',
-      'settings' => [
-        'hero_image' => getSetting('contact_page_hero_image')['content'][
-          'data'
-        ],
-        'message_success' => getSetting('contact_message_success')['content'][
-          'data'
-        ],
-        'message_error' => getSetting('contact_message_error')['content'][
-          'data'
-        ],
-      ],
-    ])
-  );
+    $response
+      ->getBody()
+      ->write(
+        $render(
+          'pages/sluzby/[service-slug].twig',
+          connectGalleries(repairBlockContent($page))
+        )
+      );
 
-  return $response;
-});
-
-// SERVICES
-$router->get('/sluzby/{service_slug}', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  $service = \Services::where('slug', $args['service_slug'])->first();
-
-  if (!$service) {
-    $response->getBody()->write(render('pages/404.twig', []));
-
-    return $response->withStatus(404);
-  }
-
-  $response
-    ->getBody()
-    ->write(
-      render(
-        'pages/sluzby/[service-slug].twig',
-        repairBlockContent($service->toArray())
-      )
-    );
-
-  return $response;
-});
-
-$router->get('/{page_slug}', function (
-  ServerRequestInterface $request,
-  ResponseInterface $response,
-  $args
-) {
-  try {
-    $page = \Pages::onlyPublished()
-      ->where('slug', $args['page_slug'])
-      ->firstOrFail()
-      ->toArray();
-  } catch (\Exception $e) {
-    $response->getBody()->write(render('pages/404.twig', []));
-
-    return $response->withStatus(404);
-  }
-
-  // TODO something more smart?
-  if (
-    str_includes(json_encode(repairBlockContent($page)), 'blog-page-items-list')
-  ) {
-    $page['posts'] = \Posts::orderByDesc('created_at')
-      ->onlyPublished()
-      ->get()
-      ->toArray();
-  }
-
-  $response
-    ->getBody()
-    ->write(
-      render(
-        'pages/sluzby/[service-slug].twig',
-        connectGalleries(repairBlockContent($page))
-      )
-    );
-
-  return $response;
-});
+    return $response;
+  });
+};
