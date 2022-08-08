@@ -49,7 +49,7 @@ jobs:
                   APP_PREFIX=
                   APP_DEBUG=false
                   APP_URL=https://test.katr.cz
-                  LANG='cs'
+                  LANGUAGE="cs"
                   MORE_LANG="en"
 
                   # Mail
