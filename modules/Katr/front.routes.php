@@ -93,7 +93,8 @@ return function (App $app, Router $router) {
   $fileService = $container->get('file-service');
   $twig = $container->get('twig');
   $allServices = \Services::getMany();
-  $settings = \Settings::orderBy(['id' => 'asc'])->getMany();
+  $settings = [];
+  $defaultLanguage = $container->get('config')['i18n']['default'];
 
   // Redirect to index even on languages
   $app->add(function (
@@ -112,8 +113,19 @@ return function (App $app, Router $router) {
     return $handler->handle($request);
   });
 
-  $getSetting = function ($id) use ($settings) {
-    foreach ($settings as $val) {
+  $getSetting = function ($id, $onLanguage = null) use ($settings) {
+    $onLanguageCode = $onLanguage == null ? 'default' : $onLanguage;
+    if (!isset($settings[$onLanguageCode])) {
+      $query = (new \Settings())->query();
+
+      if ($onLanguage) {
+        $query->setLanguage($onLanguage);
+      }
+
+      $settings[$onLanguageCode] = $query->orderBy(['id' => 'asc'])->getMany();
+    }
+
+    foreach ($settings[$onLanguageCode] as $val) {
       if ($val['name'] === $id) {
         return json_decode(json_encode($val), true);
       }
@@ -154,16 +166,29 @@ return function (App $app, Router $router) {
     $getSetting,
     $heroImageUrl
   ) {
+    $query = (new \Pages())->query();
+    if ($language) {
+      $query->setLanguage($language);
+    }
+    $menuPages = $query
+      ->where([['showInMenu', '=', true], ['is_published', '=', true]])
+      ->orderBy(['order' => 'asc', 'id' => 'asc'])
+      ->getMany();
+
     $layoutBase = [
       'baseUrl' => $container->get('config')['app']['url'],
       'services' => $allServices,
       'default_hero_image' => $heroImageUrl,
       'footer' => [
-        'contacts' => $getSetting('footer_contacts')['content']['data'],
-        'fakturace' => $getSetting('footer_secret_items')['content']['data'],
-        'address' => $getSetting('footer_address'),
-        'hot_list' => $getSetting('footer_hot_list'),
-        'docs' => $getSetting('footer_docs_list'),
+        'contacts' => $getSetting('footer_contacts', $language)['content'][
+          'data'
+        ],
+        'fakturace' => $getSetting('footer_secret_items', $language)['content'][
+          'data'
+        ],
+        'address' => $getSetting('footer_address', $language),
+        'hot_list' => $getSetting('footer_hot_list', $language),
+        'docs' => $getSetting('footer_docs_list', $language),
       ],
       'language' => $language,
       'defaultLanguage' => $container->get('config')['i18n']['default'],
@@ -173,12 +198,7 @@ return function (App $app, Router $router) {
         'en' => 'English',
         'de' => 'German',
       ],
-      'allPages' => \Pages::where([
-        ['showInMenu', '=', true],
-        ['is_published', '=', true],
-      ])
-        ->orderBy(['order' => 'asc', 'id' => 'asc'])
-        ->getMany(),
+      'allPages' => $menuPages,
     ];
 
     return $twig->render(
@@ -194,13 +214,20 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($render, $getSetting) {
-    $posts = \Posts::where(['is_published', '=', true])
+  ) use ($render, $getSetting, $defaultLanguage) {
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
+
+    $posts = \Posts::setLanguage($language)
+      ->where(['is_published', '=', true])
       ->orderBy(['created_at' => 'desc'])
       ->limit(3)
       ->getMany();
 
-    $opportunities = \Positions::limit(3)->getMany();
+    $opportunities = \Positions::setLanguage($language)
+      ->limit(3)
+      ->getMany();
 
     $response->getBody()->write(
       $render(
@@ -210,41 +237,45 @@ return function (App $app, Router $router) {
           'posts' => $posts,
           'opportunities' => $opportunities,
           'cols' => [
-            $getSetting('main_page_first_col')['content']['data'],
-            $getSetting('main_page_second_col')['content']['data'],
-            $getSetting('main_page_third_col')['content']['data'],
+            $getSetting('main_page_first_col', $language)['content']['data'],
+            $getSetting('main_page_second_col', $language)['content']['data'],
+            $getSetting('main_page_third_col', $language)['content']['data'],
           ],
-          'title' => $getSetting('main_page_title')['content']['data'],
-          'description' => $getSetting('main_page_description')['content'][
+          'title' => $getSetting('main_page_title', $language)['content'][
             'data'
           ],
+          'description' => $getSetting('main_page_description', $language)[
+            'content'
+          ]['data'],
           'about' => [
-            'content' => $getSetting('main_page_about')['content']['data'],
+            'content' => $getSetting('main_page_about', $language)['content'][
+              'data'
+            ],
           ],
           'blog_list' => [
-            'before' => $getSetting('main_page_blog_list_before')['content'][
-              'data'
-            ],
-            'after' => $getSetting('main_page_blog_list_after')['content'][
-              'data'
-            ],
-            'image' => $getSetting('main_page_blog_list_image')['content'][
-              'data'
-            ],
+            'before' => $getSetting('main_page_blog_list_before', $language)[
+              'content'
+            ]['data'],
+            'after' => $getSetting('main_page_blog_list_after', $language)[
+              'content'
+            ]['data'],
+            'image' => $getSetting('main_page_blog_list_image', $language)[
+              'content'
+            ]['data'],
           ],
           'positions' => [
-            'before' => $getSetting('main_page_positions_before')['content'][
-              'data'
-            ],
-            'after' => $getSetting('main_page_positions_after')['content'][
-              'data'
-            ],
-            'image' => $getSetting('main_page_positions_image')['content'][
-              'data'
-            ],
+            'before' => $getSetting('main_page_positions_before', $language)[
+              'content'
+            ]['data'],
+            'after' => $getSetting('main_page_positions_after', $language)[
+              'content'
+            ]['data'],
+            'image' => $getSetting('main_page_positions_image', $language)[
+              'content'
+            ]['data'],
           ],
         ],
-        $routeArgs['language']
+        $language
       )
     );
 
@@ -256,14 +287,19 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($render, $getMultilangField) {
+  ) use ($render, $getMultilangField, $defaultLanguage) {
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
+
     try {
-      $postData = \Posts::where(
-        array_merge(
-          [['is_published', '=', true]],
-          $getMultilangField('slug', $routeArgs['post_slug'])
+      $postData = \Posts::setLanguage($language)
+        ->where(
+          array_merge(
+            [['is_published', '=', true]],
+            $getMultilangField('slug', $routeArgs['post_slug'])
+          )
         )
-      )
         ->getOne()
         ->getData();
     } catch (\Exception $e) {
@@ -278,7 +314,7 @@ return function (App $app, Router $router) {
         $render(
           'pages/blog/[blog-slug].twig',
           repairBlockContent($postData),
-          $routeArgs['language']
+          $language
         )
       );
 
@@ -290,10 +326,15 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($render, $getSetting) {
+  ) use ($render, $getSetting, $defaultLanguage) {
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
+    $opportunities = \Positions::setLanguage($language)->getMany();
+
     $opportunities = array_map(function ($opportu) {
       return repairBlockContent($opportu);
-    }, \Positions::getMany());
+    }, $opportunities);
 
     $response->getBody()->write(
       $render(
@@ -301,12 +342,12 @@ return function (App $app, Router $router) {
         [
           'opportunities' => $opportunities,
           'settings' => [
-            'hero_image' => $getSetting('kariera_hero_image')['content'][
-              'data'
-            ],
+            'hero_image' => $getSetting('kariera_hero_image', $language)[
+              'content'
+            ]['data'],
           ],
         ],
-        $routeArgs['language']
+        $language
       )
     );
 
@@ -318,8 +359,11 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($emailService, $twig, $render, $getSetting) {
+  ) use ($emailService, $twig, $render, $getSetting, $defaultLanguage) {
     $params = $request->getQueryParams();
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
     if ($request->getMethod() === 'POST') {
       $data = $request->getParsedBody();
 
@@ -377,13 +421,14 @@ return function (App $app, Router $router) {
       }
     }
 
-    $contacts = \Contacts::getMany();
-    $contactPositions = \ContactPositions::orderBy([
-      'order' => 'asc',
-    ])->getMany();
+    $contacts = \Contacts::setLanguage($language)->getMany();
+    $contactPositions = \ContactPositions::setLanguage($language)
+      ->orderBy([
+        'order' => 'asc',
+      ])
+      ->getMany();
 
     $groupedContacts = [];
-
     foreach ($contactPositions as $contactPosition) {
       $contactPositionName = $contactPosition['name'];
       $groupedContacts[$contactPositionName]['label'] = $contactPositionName;
@@ -408,18 +453,19 @@ return function (App $app, Router $router) {
           'emailSuccess' =>
             isset($params['success']) && $params['success'] === 'true',
           'settings' => [
-            'hero_image' => $getSetting('contact_page_hero_image')['content'][
-              'data'
-            ],
-            'message_success' => $getSetting('contact_message_success')[
+            'hero_image' => $getSetting('contact_page_hero_image', $language)[
               'content'
             ]['data'],
-            'message_error' => $getSetting('contact_message_error')['content'][
-              'data'
-            ],
+            'message_success' => $getSetting(
+              'contact_message_success',
+              $language
+            )['content']['data'],
+            'message_error' => $getSetting('contact_message_error', $language)[
+              'content'
+            ]['data'],
           ],
         ],
-        $routeArgs['language']
+        $language
       )
     );
 
@@ -431,14 +477,12 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($render, $getMultilangField) {
-    $query = (new \Services())->query();
+  ) use ($render, $getMultilangField, $defaultLanguage) {
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
 
-    if (isset($routeArgs['language'])) {
-      $query->setLanguage($routeArgs['language']);
-    }
-
-    $service = $query
+    $service = \Services::setLanguage($language)
       ->where($getMultilangField('slug', $routeArgs['service_slug']))
       ->getOne();
 
@@ -454,7 +498,7 @@ return function (App $app, Router $router) {
         $render(
           'pages/sluzby/[service-slug].twig',
           repairBlockContent($service->getData()),
-          $routeArgs['language']
+          $language
         )
       );
 
@@ -465,15 +509,13 @@ return function (App $app, Router $router) {
     ServerRequestInterface $request,
     ResponseInterface $response,
     $routeArgs
-  ) use ($render, $getMultilangField) {
+  ) use ($render, $getMultilangField, $defaultLanguage) {
+    $language = isset($routeArgs['language'])
+      ? $routeArgs['language']
+      : $defaultLanguage;
+
     try {
-      $query = (new \Pages())->query();
-
-      if (isset($args['language'])) {
-        $query->setLanguage($args['language']);
-      }
-
-      $page = $query
+      $page = \Pages::setLanguage($language)
         ->where(
           array_merge(
             [['is_published', '=', true]],
@@ -483,9 +525,7 @@ return function (App $app, Router $router) {
         ->getOne()
         ->getData();
     } catch (\Exception $e) {
-      $response
-        ->getBody()
-        ->write($render('pages/404.twig', []), $routeArgs['language']);
+      $response->getBody()->write($render('pages/404.twig', []), $language);
 
       return $response->withStatus(404);
     }
@@ -508,7 +548,7 @@ return function (App $app, Router $router) {
         $render(
           'pages/[page-slug].twig',
           connectGalleries(repairBlockContent($page)),
-          $routeArgs['language']
+          $language
         )
       );
 
