@@ -43,7 +43,7 @@ class Settings extends Model
       'editable' => true,
       'unique' => false,
       'hide' => false,
-      'translations' => false,
+      'translations' => true,
       'title' => 'Label',
       'type' => 'string',
     ],
