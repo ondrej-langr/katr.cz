@@ -19,7 +19,7 @@ return function (Container $container) use ($PROM_ROOT_FOLDER) {
   $DEFAULT_LANGUAGE = $_ENV['LANGUAGE'] ?? 'en';
   $LANGUAGES = array_merge(
     [$DEFAULT_LANGUAGE],
-    explode(',', $_ENV['MORE_LANG'] ?? '')
+    explode(',', $_ENV['MORE_LANG'] ?? ''),
   );
 
   $config = [
@@ -43,7 +43,7 @@ return function (Container $container) use ($PROM_ROOT_FOLDER) {
     'db' => [
       'root' => joinPath($PROM_ROOT_FOLDER, '.database'),
       'storeConfig' => [
-        'auto_cache' => false,
+        'auto_cache' => !$IS_DEV_ENV,
         'cache_lifetime' => $IS_DEV_ENV ? null : 180, // Three minutes
         'timeout' => false,
         'primary_key' => 'id',
