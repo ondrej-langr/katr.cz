@@ -55,7 +55,7 @@ class Query
     if ($conflictedFields = static::existsAgainstPayload($payload)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields,
+        $conflictedFields
       );
     }
 
@@ -183,7 +183,7 @@ class Query
     }
 
     $whereConditions = json_encode(
-      $this->getQueryBuilder()->_getConditionProperties()['whereConditions'],
+      $this->getQueryBuilder()->_getConditionProperties()['whereConditions']
     );
 
     if (!str_includes($whereConditions, '["id","=",')) {
@@ -197,7 +197,7 @@ class Query
     if ($conflictedFields = $this->existsAgainstPayload($payload, $id)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields,
+        $conflictedFields
       );
     }
 
@@ -217,9 +217,28 @@ class Query
     if ($result === false) {
       throw new EntityNotFoundException();
     }
+    $result = $result[0];
+
+    if ($this->modelClass->hasTranslationsEnabled()) {
+      $newResult = [];
+
+      foreach ($this->getFieldKeyAliases() as $fieldKey => $fieldValueOrKey) {
+        if (is_int($fieldKey)) {
+          if (isset($result[$fieldValueOrKey])) {
+            $newResult[$fieldValueOrKey] = $result[$fieldValueOrKey];
+          }
+
+          continue;
+        }
+
+        $newResult[$fieldKey] = $fieldValueOrKey($result);
+      }
+
+      $result = $newResult;
+    }
 
     // We apply casts and return it via ModelResult
-    return new ModelResult($this->modelClass, static::applyCasts($result[0]));
+    return new ModelResult($this->modelClass, static::applyCasts($result));
   }
 
   /**
@@ -304,7 +323,7 @@ class Query
           break;
         default:
           throw new \Exception(
-            "Unknown castTo $castTo on field $castFieldName",
+            "Unknown castTo $castTo on field $castFieldName"
           );
           break;
       }
@@ -325,7 +344,7 @@ class Query
       $this->modelClass::getUniqueFields(),
       function ($item) use ($payload) {
         return isset($payload[$item]);
-      },
+      }
     );
 
     foreach ($filledUniqueFields as $uniqueFieldName) {
@@ -356,7 +375,7 @@ class Query
         ->where(
           $ignoreId !== null
             ? [$uniqueFilter, 'AND', ['id', '!=', $ignoreId]]
-            : $uniqueFilter,
+            : $uniqueFilter
         )
         ->getQuery()
         ->first();
