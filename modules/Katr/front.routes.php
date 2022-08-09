@@ -92,7 +92,6 @@ return function (App $app, Router $router) {
    */
   $fileService = $container->get('file-service');
   $twig = $container->get('twig');
-  $allServices = \Services::getMany();
   $settings = [];
   $defaultLanguage = $container->get('config')['i18n']['default'];
 
@@ -162,22 +161,22 @@ return function (App $app, Router $router) {
   $render = function (string $path, array $data, $language = null) use (
     $twig,
     $container,
-    $allServices,
     $getSetting,
+    $defaultLanguage,
     $heroImageUrl
   ) {
-    $query = (new \Pages())->query();
-    if ($language) {
-      $query->setLanguage($language);
-    }
-    $menuPages = $query
+    $language = $language == null ? $defaultLanguage : $language;
+
+    $menuPages = \Pages::setLanguage($language)
       ->where([['showInMenu', '=', true], ['is_published', '=', true]])
       ->orderBy(['order' => 'asc', 'id' => 'asc'])
       ->getMany();
 
+    $services = \Services::setLanguage($language)->getMany();
+
     $layoutBase = [
       'baseUrl' => $container->get('config')['app']['url'],
-      'services' => $allServices,
+      'services' => $services,
       'default_hero_image' => $heroImageUrl,
       'footer' => [
         'contacts' => $getSetting('footer_contacts', $language)['content'][
