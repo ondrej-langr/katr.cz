@@ -33,6 +33,8 @@ class Query
   public function setLanguage(string $nextLanguage)
   {
     $this->currentLanguage = $nextLanguage;
+
+    return $this;
   }
 
   /**
@@ -55,7 +57,7 @@ class Query
     if ($conflictedFields = static::existsAgainstPayload($payload)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields
+        $conflictedFields,
       );
     }
 
@@ -183,7 +185,7 @@ class Query
     }
 
     $whereConditions = json_encode(
-      $this->getQueryBuilder()->_getConditionProperties()['whereConditions']
+      $this->getQueryBuilder()->_getConditionProperties()['whereConditions'],
     );
 
     if (!str_includes($whereConditions, '["id","=",')) {
@@ -197,7 +199,7 @@ class Query
     if ($conflictedFields = $this->existsAgainstPayload($payload, $id)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields
+        $conflictedFields,
       );
     }
 
@@ -323,7 +325,7 @@ class Query
           break;
         default:
           throw new \Exception(
-            "Unknown castTo $castTo on field $castFieldName"
+            "Unknown castTo $castTo on field $castFieldName",
           );
           break;
       }
@@ -344,7 +346,7 @@ class Query
       $this->modelClass::getUniqueFields(),
       function ($item) use ($payload) {
         return isset($payload[$item]);
-      }
+      },
     );
 
     foreach ($filledUniqueFields as $uniqueFieldName) {
@@ -375,7 +377,7 @@ class Query
         ->where(
           $ignoreId !== null
             ? [$uniqueFilter, 'AND', ['id', '!=', $ignoreId]]
-            : $uniqueFilter
+            : $uniqueFilter,
         )
         ->getQuery()
         ->first();
