@@ -104,7 +104,7 @@ return function (App $app, Router $router) {
     $path = $uri->getPath();
 
     $languages = implode('|', $container->get('config')['i18n']['languages']);
-    if (preg_match("/^\/$languages$/", $path)) {
+    if (preg_match("/^\/($languages){1}$/", $path)) {
       $response = new Response();
       return $response->withStatus(301)->withHeader('Location', "$path/");
     }
