@@ -179,12 +179,8 @@ return function (App $app, Router $router) {
       'services' => $services,
       'default_hero_image' => $heroImageUrl,
       'footer' => [
-        'contacts' => $getSetting('footer_contacts', $language)['content'][
-          'data'
-        ],
-        'fakturace' => $getSetting('footer_secret_items', $language)['content'][
-          'data'
-        ],
+        'contacts' => $getSetting('footer_contacts', $language),
+        'fakturace' => $getSetting('footer_secret_items', $language),
         'address' => $getSetting('footer_address', $language),
         'hot_list' => $getSetting('footer_hot_list', $language),
         'docs' => $getSetting('footer_docs_list', $language),
