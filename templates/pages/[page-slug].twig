@@ -13,7 +13,10 @@
 {% endblock %}
 
 {% block heroImageUrl %}
-  {{ data.hero_image.path }}
+  {% if data.hero_image %}
+    {% set heroImage = image(data.hero_image, 1320) %}
+    {{ heroImage.src }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}

@@ -40,7 +40,7 @@
       <div class="about-boxes col-12 col-lg-8 col-md-12 col-sm-12 col-xl-8 col-xxl-8">
         {% for service in services %}
           <div class="about-box col-12 col-lg-4 col-md-4 col-sm-6 col-xl-4 col-xxl-4">
-            <a href="sluzby/{{ service.slug }}">
+            <a href="{{ language }}/sluzby/{{ service.slug }}">
               <span class="number">{{ loop.index }}</span>
               <h2>
                 {{ service.title }}
@@ -67,7 +67,7 @@
       <div class="blog-main-inner col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7">
         {{ data.blog_list.before|raw }}
         {% for post in data.posts %}
-          <a href="/blog/{{ post.slug }}">
+          <a href="{{ language }}/blog/{{ post.slug }}">
             <div class="blog-main-box">
               <span class="date-main">
                 {{ post.created_at|date('d.m. Y') }}
@@ -90,7 +90,7 @@
       <div class="col-12 col-lg-7 col-md-12 col-sm-12 col-xl-7 col-xxl-7 work-main-inner">
         {{ data.positions.before|raw }}
         {% for opportunity in data.opportunities %}
-          <a href="kariera#w{{ opportunity.id }}">
+          <a href="{{ language }}/kariera#w{{ opportunity.id }}">
             <div class="work-main-box">
               <h3>
                 {{ opportunity.title }}
