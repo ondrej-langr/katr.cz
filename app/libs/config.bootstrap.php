@@ -43,7 +43,7 @@ return function (Container $container) use ($PROM_ROOT_FOLDER) {
     'db' => [
       'root' => joinPath($PROM_ROOT_FOLDER, '.database'),
       'storeConfig' => [
-        'auto_cache' => !$IS_DEV_ENV,
+        'auto_cache' => false,
         'cache_lifetime' => $IS_DEV_ENV ? null : 180, // Three minutes
         'timeout' => false,
         'primary_key' => 'id',
