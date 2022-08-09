@@ -5,21 +5,30 @@ use Slim\Routing\RouteCollectorProxy as Router;
 use Psr\Http\Message\ResponseInterface;
 use App\Services\ImageService;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use GuzzleHttp\Psr7\Response;
 use Slim\App;
+
+function cleanJson($value)
+{
+  return json_decode(json_encode($value), true);
+}
 
 function repairBlockContent($item)
 {
   if (is_string($item['content'])) {
+    $content = json_decode($item['content']);
+
     return json_decode(
       json_encode(
         array_merge($item, [
-          'content' => json_decode($item['content']),
+          'content' => $content,
         ])
       ),
       true
     );
   } else {
-    return $item;
+    return json_decode(json_encode($item), true);
   }
 }
 
@@ -86,6 +95,23 @@ return function (App $app, Router $router) {
   $allServices = \Services::getMany();
   $settings = \Settings::orderBy(['id' => 'asc'])->getMany();
 
+  // Redirect to index even on languages
+  $app->add(function (
+    ServerRequestInterface $request,
+    RequestHandlerInterface $handler
+  ) use ($container) {
+    $uri = $request->getUri();
+    $path = $uri->getPath();
+
+    $languages = implode('|', $container->get('config')['i18n']['languages']);
+    if (preg_match("/^\/$languages$/", $path)) {
+      $response = new Response();
+      return $response->withStatus(301)->withHeader('Location', "$path/");
+    }
+
+    return $handler->handle($request);
+  });
+
   $getSetting = function ($id) use ($settings) {
     foreach ($settings as $val) {
       if ($val['name'] === $id) {
@@ -121,7 +147,7 @@ return function (App $app, Router $router) {
   /**
    * render helper
    */
-  $render = function (string $path, array $data) use (
+  $render = function (string $path, array $data, $language = null) use (
     $twig,
     $container,
     $allServices,
@@ -138,6 +164,14 @@ return function (App $app, Router $router) {
         'address' => $getSetting('footer_address'),
         'hot_list' => $getSetting('footer_hot_list'),
         'docs' => $getSetting('footer_docs_list'),
+      ],
+      'language' => $language,
+      'defaultLanguage' => $container->get('config')['i18n']['default'],
+      'languages' => $container->get('config')['i18n']['languages'],
+      'languageLabels' => [
+        'cs' => 'Čeština',
+        'en' => 'English',
+        'de' => 'German',
       ],
       'allPages' => \Pages::where([
         ['showInMenu', '=', true],
@@ -158,7 +192,8 @@ return function (App $app, Router $router) {
   // MAIN PAGE
   $router->get('/', function (
     ServerRequestInterface $request,
-    ResponseInterface $response
+    ResponseInterface $response,
+    $routeArgs
   ) use ($render, $getSetting) {
     $posts = \Posts::where(['is_published', '=', true])
       ->orderBy(['created_at' => 'desc'])
@@ -168,45 +203,49 @@ return function (App $app, Router $router) {
     $opportunities = \Positions::limit(3)->getMany();
 
     $response->getBody()->write(
-      $render('pages/landing-page.twig', [
-        'seoTitle' => 'Hlavní stránka',
-        'posts' => $posts,
-        'opportunities' => $opportunities,
-        'cols' => [
-          $getSetting('main_page_first_col')['content']['data'],
-          $getSetting('main_page_second_col')['content']['data'],
-          $getSetting('main_page_third_col')['content']['data'],
+      $render(
+        'pages/landing-page.twig',
+        [
+          'seoTitle' => 'Hlavní stránka',
+          'posts' => $posts,
+          'opportunities' => $opportunities,
+          'cols' => [
+            $getSetting('main_page_first_col')['content']['data'],
+            $getSetting('main_page_second_col')['content']['data'],
+            $getSetting('main_page_third_col')['content']['data'],
+          ],
+          'title' => $getSetting('main_page_title')['content']['data'],
+          'description' => $getSetting('main_page_description')['content'][
+            'data'
+          ],
+          'about' => [
+            'content' => $getSetting('main_page_about')['content']['data'],
+          ],
+          'blog_list' => [
+            'before' => $getSetting('main_page_blog_list_before')['content'][
+              'data'
+            ],
+            'after' => $getSetting('main_page_blog_list_after')['content'][
+              'data'
+            ],
+            'image' => $getSetting('main_page_blog_list_image')['content'][
+              'data'
+            ],
+          ],
+          'positions' => [
+            'before' => $getSetting('main_page_positions_before')['content'][
+              'data'
+            ],
+            'after' => $getSetting('main_page_positions_after')['content'][
+              'data'
+            ],
+            'image' => $getSetting('main_page_positions_image')['content'][
+              'data'
+            ],
+          ],
         ],
-        'title' => $getSetting('main_page_title')['content']['data'],
-        'description' => $getSetting('main_page_description')['content'][
-          'data'
-        ],
-        'about' => [
-          'content' => $getSetting('main_page_about')['content']['data'],
-        ],
-        'blog_list' => [
-          'before' => $getSetting('main_page_blog_list_before')['content'][
-            'data'
-          ],
-          'after' => $getSetting('main_page_blog_list_after')['content'][
-            'data'
-          ],
-          'image' => $getSetting('main_page_blog_list_image')['content'][
-            'data'
-          ],
-        ],
-        'positions' => [
-          'before' => $getSetting('main_page_positions_before')['content'][
-            'data'
-          ],
-          'after' => $getSetting('main_page_positions_after')['content'][
-            'data'
-          ],
-          'image' => $getSetting('main_page_positions_image')['content'][
-            'data'
-          ],
-        ],
-      ])
+        $routeArgs['language']
+      )
     );
 
     return $response;
@@ -216,13 +255,13 @@ return function (App $app, Router $router) {
   $router->get('/blog/{post_slug}', function (
     ServerRequestInterface $request,
     ResponseInterface $response,
-    $args
+    $routeArgs
   ) use ($render, $getMultilangField) {
     try {
       $postData = \Posts::where(
         array_merge(
           [['is_published', '=', true]],
-          $getMultilangField('slug', $args['post_slug'])
+          $getMultilangField('slug', $routeArgs['post_slug'])
         )
       )
         ->getOne()
@@ -236,7 +275,11 @@ return function (App $app, Router $router) {
     $response
       ->getBody()
       ->write(
-        $render('pages/blog/[blog-slug].twig', repairBlockContent($postData))
+        $render(
+          'pages/blog/[blog-slug].twig',
+          repairBlockContent($postData),
+          $routeArgs['language']
+        )
       );
 
     return $response;
@@ -246,19 +289,25 @@ return function (App $app, Router $router) {
   $router->get('/kariera', function (
     ServerRequestInterface $request,
     ResponseInterface $response,
-    $args
+    $routeArgs
   ) use ($render, $getSetting) {
     $opportunities = array_map(function ($opportu) {
       return repairBlockContent($opportu);
     }, \Positions::getMany());
 
     $response->getBody()->write(
-      $render('pages/kariera.twig', [
-        'opportunities' => $opportunities,
-        'settings' => [
-          'hero_image' => $getSetting('kariera_hero_image')['content']['data'],
+      $render(
+        'pages/kariera.twig',
+        [
+          'opportunities' => $opportunities,
+          'settings' => [
+            'hero_image' => $getSetting('kariera_hero_image')['content'][
+              'data'
+            ],
+          ],
         ],
-      ])
+        $routeArgs['language']
+      )
     );
 
     return $response;
@@ -267,7 +316,8 @@ return function (App $app, Router $router) {
   // CONTACTS
   $router->map(['GET', 'POST'], '/kontakt', function (
     ServerRequestInterface $request,
-    ResponseInterface $response
+    ResponseInterface $response,
+    $routeArgs
   ) use ($emailService, $twig, $render, $getSetting) {
     $params = $request->getQueryParams();
     if ($request->getMethod() === 'POST') {
@@ -349,24 +399,28 @@ return function (App $app, Router $router) {
     }
 
     $response->getBody()->write(
-      $render('pages/kontakt.twig', [
-        'contactGroups' => $groupedContacts,
-        'emailSent' => isset($params['success']),
-        'captchafail' => isset($params['captchafail']),
-        'emailSuccess' =>
-          isset($params['success']) && $params['success'] === 'true',
-        'settings' => [
-          'hero_image' => $getSetting('contact_page_hero_image')['content'][
-            'data'
-          ],
-          'message_success' => $getSetting('contact_message_success')[
-            'content'
-          ]['data'],
-          'message_error' => $getSetting('contact_message_error')['content'][
-            'data'
+      $render(
+        'pages/kontakt.twig',
+        [
+          'contactGroups' => $groupedContacts,
+          'emailSent' => isset($params['success']),
+          'captchafail' => isset($params['captchafail']),
+          'emailSuccess' =>
+            isset($params['success']) && $params['success'] === 'true',
+          'settings' => [
+            'hero_image' => $getSetting('contact_page_hero_image')['content'][
+              'data'
+            ],
+            'message_success' => $getSetting('contact_message_success')[
+              'content'
+            ]['data'],
+            'message_error' => $getSetting('contact_message_error')['content'][
+              'data'
+            ],
           ],
         ],
-      ])
+        $routeArgs['language']
+      )
     );
 
     return $response;
@@ -376,11 +430,17 @@ return function (App $app, Router $router) {
   $router->get('/sluzby/{service_slug}', function (
     ServerRequestInterface $request,
     ResponseInterface $response,
-    $args
+    $routeArgs
   ) use ($render, $getMultilangField) {
-    $service = \Services::where(
-      $getMultilangField('slug', $args['service_slug'])
-    )->getOne();
+    $query = (new \Services())->query();
+
+    if (isset($routeArgs['language'])) {
+      $query->setLanguage($routeArgs['language']);
+    }
+
+    $service = $query
+      ->where($getMultilangField('slug', $routeArgs['service_slug']))
+      ->getOne();
 
     if (!$service) {
       $response->getBody()->write($render('pages/404.twig', []));
@@ -393,7 +453,8 @@ return function (App $app, Router $router) {
       ->write(
         $render(
           'pages/sluzby/[service-slug].twig',
-          repairBlockContent($service->getData())
+          repairBlockContent($service->getData()),
+          $routeArgs['language']
         )
       );
 
@@ -403,19 +464,28 @@ return function (App $app, Router $router) {
   $router->get('/{page_slug}', function (
     ServerRequestInterface $request,
     ResponseInterface $response,
-    $args
+    $routeArgs
   ) use ($render, $getMultilangField) {
     try {
-      $page = \Pages::where(
-        array_merge(
-          [['is_published', '=', true]],
-          $getMultilangField('slug', $args['page_slug'])
+      $query = (new \Pages())->query();
+
+      if (isset($args['language'])) {
+        $query->setLanguage($args['language']);
+      }
+
+      $page = $query
+        ->where(
+          array_merge(
+            [['is_published', '=', true]],
+            $getMultilangField('slug', $routeArgs['page_slug'])
+          )
         )
-      )
         ->getOne()
         ->getData();
     } catch (\Exception $e) {
-      $response->getBody()->write($render('pages/404.twig', []));
+      $response
+        ->getBody()
+        ->write($render('pages/404.twig', []), $routeArgs['language']);
 
       return $response->withStatus(404);
     }
@@ -436,8 +506,9 @@ return function (App $app, Router $router) {
       ->getBody()
       ->write(
         $render(
-          'pages/sluzby/[service-slug].twig',
-          connectGalleries(repairBlockContent($page))
+          'pages/[page-slug].twig',
+          connectGalleries(repairBlockContent($page)),
+          $routeArgs['language']
         )
       );
 

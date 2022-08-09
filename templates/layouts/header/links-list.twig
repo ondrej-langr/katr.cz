@@ -15,4 +15,26 @@
     </li>
     <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kariera">Kariéra</a></li>
     <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kontakt">Kontakt</a></li>
+    <li >
+        {% set languageWithFallback = language ? language : defaultLanguage %}
+        <div class="language-picker" x-data="{ open: false }">
+            <button x-on:click="open = ! open" class="language-picker__button">
+                {% include 'components/Flag.twig' with {
+                    lang: languageWithFallback
+                } %}
+            </button>
+            <div x-show="open" x-on:click.outside="open = false" class="language-picker__menu" style="display:none;">
+                {% for iterationLanguage in languages %}
+                    <a href="{{iterationLanguage == defaultLanguage ? "" : iterationLanguage}}/" class="{% if iterationLanguage %}active{% endif %}">
+                        {% include 'components/Flag.twig' with {
+                            lang: iterationLanguage
+                        } %}
+                        <p class="ml-2">
+                            {{languageLabels[iterationLanguage]}}
+                        </p>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </li>
 </ul>

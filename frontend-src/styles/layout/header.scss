@@ -1,0 +1,37 @@
+.language-picker {
+  position: relative;
+
+  &__button {
+    background: transparent;
+    position: relative;
+    border: none;
+    padding: 0;
+
+    svg {
+      box-shadow: 0px 0px 11px 3px rgb(0 0 0 / 17%);
+      width: 25px;
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    background: white;
+    bottom: -8px;
+    right: 0;
+    transform: translateY(100%);
+    border-radius: 5px;
+    box-shadow: 0px 0px 11px 3px rgb(0 0 0 / 17%);
+
+    a {
+      padding: 5px 7px;
+      display: flex;
+      align-items: center;
+
+      p {
+        color: black;
+        margin-left: 0.8rem;
+        font-size: 1rem;
+      }
+    }
+  }
+}
