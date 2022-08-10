@@ -102,5 +102,7 @@ jobs:
             globals.d.ts
             tsconfig.json
             webpack.config.js
+            locales
+            locales/**
             yarn.lock
             
