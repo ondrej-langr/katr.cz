@@ -166,6 +166,13 @@ return function (App $app, Router $router) {
     $heroImageUrl
   ) {
     $language = $language == null ? $defaultLanguage : $language;
+    $translations = $container
+      ->get('localization-service')
+      ->getTranslations($language);
+
+    $getTranslations = function ($key) use ($translations) {
+      return isset($translations[$key]) ? $translations[$key] : $key;
+    };
 
     $menuPages = \Pages::setLanguage($language)
       ->where([['showInMenu', '=', true], ['is_published', '=', true]])
@@ -194,6 +201,15 @@ return function (App $app, Router $router) {
         'de' => 'German',
       ],
       'allPages' => $menuPages,
+      'headerLabels' => [
+        'about' => $getTranslations('O firmě'),
+        'services' => $getTranslations('Služby'),
+        'kariera' => $getTranslations('Kariéra'),
+        'contact' => $getTranslations('Kontakt'),
+        'kariera_title' => $getTranslations(
+          'Nabízíme pracovní příležitost na těchto pozicích'
+        ),
+      ],
     ];
 
     return $twig->render(

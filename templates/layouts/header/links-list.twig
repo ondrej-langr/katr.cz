@@ -3,18 +3,18 @@
         <a  class="dropdown link" 
             href="!#" 
             x-on:click.prevent="currrentSubmenu='dropdown-menu-1'">
-            O firmě <i class="fa-solid fa-plus"></i>
+            {{ headerLabels.about }} <i class="fa-solid fa-plus"></i>
         </a>
     </li>
     <li x-on:mouseover="currrentSubmenu='dropdown-menu-2'" x-on:mouseleave="currrentSubmenu=false" :class="{'active': currrentSubmenu=='dropdown-menu-2'}">
         <a  class="dropdown link" 
             href="!#" 
             x-on:click.prevent="currrentSubmenu='dropdown-menu-2'">
-            Služby <i class="fa-solid fa-plus"></i>
+            {{ headerLabels.services }} <i class="fa-solid fa-plus"></i>
         </a>
     </li>
-    <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kariera">Kariéra</a></li>
-    <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kontakt">Kontakt</a></li>
+    <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kariera">{{ headerLabels.kariera }}</a></li>
+    <li x-on:mouseleave="currrentSubmenu=false"><a href="{{ language }}/kontakt">{{ headerLabels.contact }}</a></li>
     <li >
         {% set languageWithFallback = language ? language : defaultLanguage %}
         <div class="language-picker" x-data="{ open: false }">
