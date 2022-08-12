@@ -36,7 +36,7 @@ class Permission
       // format all model names to be all in lowercase
       array_map(function ($modelName) {
         return strtolower($modelName);
-      }, $this->loadedModels)
+      }, $this->loadedModels),
     );
     if ($modelIndex === false) {
       return false;
@@ -108,14 +108,14 @@ class Permission
             break;
           default:
             throw new \Exception(
-              '[permissionMiddleware]: Unexpected request method'
+              '[permissionMiddleware]: Unexpected request method',
             );
             break;
         }
 
         $request = $request->withAttribute(
           'permission-only-own',
-          $requestPermissionValue === 'allow-own'
+          $requestPermissionValue === 'allow-own',
         );
       }
 
@@ -125,7 +125,7 @@ class Permission
           $response,
           [],
           'Your user role is not sufficient',
-          'role-not-sufficient'
+          'role-not-sufficient',
         );
 
         return $response
