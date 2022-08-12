@@ -50,7 +50,7 @@ return function (App $app) {
   $container->set('file-service', new \App\Services\FileService($container));
   $container->set(
     'localization-service',
-    new \App\Services\Localization($container)
+    new \App\Services\Localization($container),
   );
 
   // Add twig app extension
