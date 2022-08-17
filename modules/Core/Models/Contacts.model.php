@@ -102,6 +102,17 @@ class Contacts extends Model
       'default' => '{}',
     ],
 
+    'order' => [
+      'required' => false,
+      'editable' => false,
+      'unique' => false,
+      'hide' => false,
+      'autoIncrement' => true,
+      'title' => 'Order',
+      'type' => 'number',
+      'adminHidden' => true,
+    ],
+
     'created_by' => [
       'required' => false,
       'editable' => false,
@@ -151,7 +162,7 @@ class Contacts extends Model
       'hasTimestamps' => $this->hasTimestamps(),
       'hasSoftDelete' => $this->hasSoftDelete(),
       'columns' => static::$tableColumns,
-      'hasOrdering' => false,
+      'hasOrdering' => true,
       'isDraftable' => false,
       'isSharable' => true,
       'ownable' => true,
