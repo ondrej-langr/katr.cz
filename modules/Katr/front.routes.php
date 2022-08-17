@@ -432,7 +432,9 @@ return function (App $app, Router $router) {
       }
     }
 
-    $contacts = \Contacts::setLanguage($language)->getMany();
+    $contacts = \Contacts::setLanguage($language)
+      ->orderBy(['order' => 'asc', 'id' => 'asc'])
+      ->getMany();
     $contactPositions = \ContactPositions::setLanguage($language)
       ->orderBy(['order' => 'asc', 'id' => 'asc'])
       ->getMany();
