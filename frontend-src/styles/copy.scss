@@ -1542,6 +1542,19 @@ form h2 {
   position: relative;
 }
 
+.service-content,
+.blog-post-content {
+  a {
+    font-weight: 600;
+    text-decoration: underline;
+    color: #339b30;
+
+    &:hover {
+      color: #2b7a29;
+    }
+  }
+}
+
 .blog-post h1 {
   color: #000;
   text-align: center;
