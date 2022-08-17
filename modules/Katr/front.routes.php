@@ -434,9 +434,7 @@ return function (App $app, Router $router) {
 
     $contacts = \Contacts::setLanguage($language)->getMany();
     $contactPositions = \ContactPositions::setLanguage($language)
-      ->orderBy([
-        'order' => 'asc',
-      ])
+      ->orderBy(['order' => 'asc', 'id' => 'asc'])
       ->getMany();
 
     $groupedContacts = [];
