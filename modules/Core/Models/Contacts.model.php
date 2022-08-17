@@ -14,6 +14,13 @@ class Contacts extends Model
     'coeditors' => 'array',
   ];
 
+  public static function afterCreate(ModelResult $entry): ModelResult
+  {
+    $entry->update(['order' => $entry->id]);
+
+    return $entry;
+  }
+
   public static array $tableColumns = [
     'id' => [
       'required' => false,
@@ -111,6 +118,7 @@ class Contacts extends Model
       'title' => 'Order',
       'type' => 'number',
       'adminHidden' => true,
+      'translations' => false,
     ],
 
     'created_by' => [
