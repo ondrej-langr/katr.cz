@@ -179,7 +179,9 @@ return function (App $app, Router $router) {
       ->orderBy(['order' => 'asc', 'id' => 'asc'])
       ->getMany();
 
-    $services = \Services::setLanguage($language)->getMany();
+    $services = \Services::setLanguage($language)
+      ->orderBy(['order' => 'asc', 'id' => 'asc'])
+      ->getMany();
 
     $layoutBase = [
       'baseUrl' => $container->get('config')['app']['url'],
