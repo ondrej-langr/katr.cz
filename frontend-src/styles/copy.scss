@@ -1540,7 +1540,11 @@ form h2 {
   flex-wrap: wrap;
   flex-direction: column;
   position: relative;
-  a {
+}
+
+.service-content,
+.blog-post-content {
+  a:not(.ignore) {
     font-weight: 600;
     text-decoration: underline;
     color: #339b30;
