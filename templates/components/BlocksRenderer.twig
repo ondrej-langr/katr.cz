@@ -62,7 +62,10 @@
             <input type="radio"
               name="tabs"
               id="tab{{ loop.index }}"
-              checked="checked" />
+              {% if loop.index is same as(1) %}
+              checked="checked" 
+              {% endif %}
+            />
             <label for="tab{{ loop.index }}">
               {% if gallery.data.label %}
                 {{ gallery.data.label }}
