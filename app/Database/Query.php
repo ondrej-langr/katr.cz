@@ -58,7 +58,7 @@ class Query
     if ($conflictedFields = static::existsAgainstPayload($payload)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields,
+        $conflictedFields
       );
     }
 
@@ -186,7 +186,7 @@ class Query
     }
 
     $whereConditions = json_encode(
-      $this->getQueryBuilder()->_getConditionProperties()['whereConditions'],
+      $this->getQueryBuilder()->_getConditionProperties()['whereConditions']
     );
 
     if (!str_includes($whereConditions, '["id","=",')) {
@@ -200,7 +200,7 @@ class Query
     if ($conflictedFields = $this->existsAgainstPayload($payload, $id)) {
       throw new EntityDuplicateException(
         'This item already exists',
-        $conflictedFields,
+        $conflictedFields
       );
     }
 
@@ -335,7 +335,7 @@ class Query
           break;
         default:
           throw new \Exception(
-            "Unknown castTo $castTo on field $castFieldName",
+            "Unknown castTo $castTo on field $castFieldName"
           );
           break;
       }
@@ -356,7 +356,7 @@ class Query
       $this->modelClass::getUniqueFields(),
       function ($item) use ($payload) {
         return isset($payload[$item]);
-      },
+      }
     );
 
     foreach ($filledUniqueFields as $uniqueFieldName) {
@@ -387,7 +387,7 @@ class Query
         ->where(
           $ignoreId !== null
             ? [$uniqueFilter, 'AND', ['id', '!=', $ignoreId]]
-            : $uniqueFilter,
+            : $uniqueFilter
         )
         ->getQuery()
         ->first();
@@ -447,13 +447,26 @@ class Query
   protected function getFieldKeyAliases()
   {
     if (!$this->modelClass->hasTranslationsEnabled()) {
-      return $this->modelClass::getFieldKeys();
+      $keys = $this->modelClass::getFieldKeys();
+
+      if ($this->modelClass->hasTimestamps()) {
+        $keys = array_merge($keys, ['updated_at', 'created_at']);
+      }
+
+      return $keys;
     }
 
     [
       $neutralFields,
       $intlFields,
     ] = $this->modelClass::getInternationalizedFields();
+
+    if ($this->modelClass->hasTimestamps()) {
+      $neutralFields = array_merge($neutralFields, [
+        'updated_at',
+        'created_at',
+      ]);
+    }
 
     $fieldKeys = $neutralFields;
     $translationsFieldName = static::$TRANSLATIONS_FIELD_NAME;
