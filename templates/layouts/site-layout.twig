@@ -16,6 +16,10 @@
     <meta name="description" content="Katr" />
     <meta name="author" content="digivisible.cz" />
 
+    {% if 'test.katr.cz' in baseUrl %}
+      <meta name="robots" content="noindex,nofollow" />
+    {% endif %}
+
     {# Bundle files #}
     <link rel="stylesheet" href="bundle/root.css" />
     <script defer src="bundle/index.js"></script>
