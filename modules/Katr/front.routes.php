@@ -550,7 +550,8 @@ return function (App $app, Router $router) {
         'blog-page-items-list'
       )
     ) {
-      $page['posts'] = \Posts::orderBy(['created_at' => 'desc'])
+      $page['posts'] = \Posts::setLanguage($language)
+        ->orderBy(['created_at' => 'desc'])
         ->where(['is_published', '=', true])
         ->getMany();
     }
