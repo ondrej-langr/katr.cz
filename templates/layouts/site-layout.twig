@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="/assets/images/logo_katr_white.png" />
 
     {# Info #}
     <title>
@@ -16,12 +17,22 @@
     <meta name="description" content="Katr" />
     <meta name="author" content="digivisible.cz" />
 
+    {% if 'test.katr.cz' in baseUrl %}
+      <meta name="robots" content="noindex,nofollow" />
+    {% endif %}
+
     {# Bundle files #}
     <link rel="stylesheet" href="bundle/root.css" />
     <script defer src="bundle/index.js"></script>
 
     {# hCaptcha #}
-    <script src="https://js.hcaptcha.com/1/api.js?hl=cs" async defer></script>
+    <script src="https://js.hcaptcha.com/1/api.js?hl={{
+      language
+        ? language
+        : defaultLanguage
+      }}"
+      async
+      defer></script>
 
     {# Fonts #}
     <link rel="stylesheet"
