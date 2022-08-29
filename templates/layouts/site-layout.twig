@@ -26,7 +26,13 @@
     <script defer src="bundle/index.js"></script>
 
     {# hCaptcha #}
-    <script src="https://js.hcaptcha.com/1/api.js?hl=cs" async defer></script>
+    <script src="https://js.hcaptcha.com/1/api.js?hl={{
+      language
+        ? language
+        : defaultLanguage
+      }}"
+      async
+      defer></script>
 
     {# Fonts #}
     <link rel="stylesheet"

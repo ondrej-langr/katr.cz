@@ -24,8 +24,8 @@
                 } %}
             </button>
             <div x-show="open" x-on:click.outside="open = false" class="language-picker__menu" style="display:none;">
-                {% for iterationLanguage in languages %}
-                    <a href="{{iterationLanguage == defaultLanguage ? "" : iterationLanguage}}/" class="{% if iterationLanguage %}active{% endif %}">
+                {% for iterationLanguage, url in languageSwitcher.options %}
+                    <a href="{{ url }}" class="{% if iterationLanguage %}active{% endif %}">
                         {% include 'components/Flag.twig' with {
                             lang: iterationLanguage
                         } %}

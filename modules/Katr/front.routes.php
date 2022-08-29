@@ -158,14 +158,16 @@ return function (App $app, Router $router) {
   /**
    * render helper
    */
-  $render = function (string $path, array $data, $language = null) use (
-    $twig,
-    $container,
-    $getSetting,
-    $defaultLanguage,
-    $heroImageUrl
-  ) {
+  $render = function (
+    ServerRequestInterface $request,
+    string $path,
+    array $data,
+    $language = null
+  ) use ($twig, $container, $getSetting, $defaultLanguage, $heroImageUrl) {
     $language = $language == null ? $defaultLanguage : $language;
+    $defaultLanguage = $container->get('config')['i18n']['default'];
+    $currentUri = $request->getUri()->getPath();
+    $languages = $container->get('config')['i18n']['languages'];
     $translations = $container
       ->get('localization-service')
       ->getTranslations($language);
@@ -183,7 +185,31 @@ return function (App $app, Router $router) {
       ->orderBy(['order' => 'asc', 'id' => 'asc'])
       ->getMany();
 
+    $languageSwitcherOptions = [];
+    foreach ($languages as $iterationLanguage) {
+      $currentLanguagePrefix = "/$language/";
+
+      // if we have language set in url
+      if (str_includes($currentUri, $currentLanguagePrefix)) {
+        $languageSwitcherOptions[$iterationLanguage] = str_replace(
+          $currentLanguagePrefix,
+          "/$iterationLanguage/",
+          $currentUri
+        );
+      } else {
+        if ($iterationLanguage == $defaultLanguage) {
+          $languageSwitcherOptions[$iterationLanguage] = $currentUri;
+        } else {
+          $languageSwitcherOptions[$iterationLanguage] =
+            $iterationLanguage . $currentUri;
+        }
+      }
+    }
+
     $layoutBase = [
+      'request' => [
+        'uri' => $currentUri,
+      ],
       'baseUrl' => $container->get('config')['app']['url'],
       'services' => $services,
       'default_hero_image' => $heroImageUrl,
@@ -195,8 +221,11 @@ return function (App $app, Router $router) {
         'docs' => $getSetting('footer_docs_list', $language),
       ],
       'language' => $language,
-      'defaultLanguage' => $container->get('config')['i18n']['default'],
-      'languages' => $container->get('config')['i18n']['languages'],
+      'defaultLanguage' => $defaultLanguage,
+      'languages' => $languages,
+      'languageSwitcher' => [
+        'options' => $languageSwitcherOptions,
+      ],
       'languageLabels' => [
         'cs' => 'Čeština',
         'en' => 'English',
@@ -244,6 +273,7 @@ return function (App $app, Router $router) {
 
     $response->getBody()->write(
       $render(
+        $request,
         'pages/landing-page.twig',
         [
           'seoTitle' => 'Hlavní stránka',
@@ -316,7 +346,9 @@ return function (App $app, Router $router) {
         ->getOne()
         ->getData();
     } catch (\Exception $e) {
-      $response->getBody()->write($render('pages/404.twig', []));
+      $response
+        ->getBody()
+        ->write($render($request, 'pages/404.twig', [], $language));
 
       return $response->withStatus(404);
     }
@@ -325,6 +357,7 @@ return function (App $app, Router $router) {
       ->getBody()
       ->write(
         $render(
+          $request,
           'pages/blog/[blog-slug].twig',
           repairBlockContent($postData),
           $language
@@ -351,6 +384,7 @@ return function (App $app, Router $router) {
 
     $response->getBody()->write(
       $render(
+        $request,
         'pages/kariera.twig',
         [
           'opportunities' => $opportunities,
@@ -458,6 +492,7 @@ return function (App $app, Router $router) {
 
     $response->getBody()->write(
       $render(
+        $request,
         'pages/kontakt.twig',
         [
           'contactGroups' => $groupedContacts,
@@ -476,6 +511,26 @@ return function (App $app, Router $router) {
             'message_error' => $getSetting('contact_message_error', $language)[
               'content'
             ]['data'],
+          ],
+          'form' => [
+            'text' => [
+              'cs' => [
+                'title' => 'Napište nám',
+                'name' => 'Jméno',
+                'message' => 'Zpráva',
+                'send' => 'Odeslat',
+                'captchafail' =>
+                  'Zapoměli jste vyplnit kontrolu před roboty. Vyplňte a pošlete znovu, prosím.',
+              ],
+              'en' => [
+                'title' => 'Contact us',
+                'name' => 'Name',
+                'message' => 'Message',
+                'send' => 'Send',
+                'captchafail' =>
+                  'Captcha check failed or you forgot to complete it. Please check it and try again.',
+              ],
+            ],
           ],
         ],
         $language
@@ -500,7 +555,9 @@ return function (App $app, Router $router) {
       ->getOne();
 
     if (!$service) {
-      $response->getBody()->write($render('pages/404.twig', []));
+      $response
+        ->getBody()
+        ->write($render($request, 'pages/404.twig', [], $language));
 
       return $response->withStatus(404);
     }
@@ -509,6 +566,7 @@ return function (App $app, Router $router) {
       ->getBody()
       ->write(
         $render(
+          $request,
           'pages/sluzby/[service-slug].twig',
           repairBlockContent($service->getData()),
           $language
@@ -538,7 +596,9 @@ return function (App $app, Router $router) {
         ->getOne()
         ->getData();
     } catch (\Exception $e) {
-      $response->getBody()->write($render('pages/404.twig', []), $language);
+      $response
+        ->getBody()
+        ->write($render($request, 'pages/404.twig', []), $language);
 
       return $response->withStatus(404);
     }
@@ -560,6 +620,7 @@ return function (App $app, Router $router) {
       ->getBody()
       ->write(
         $render(
+          $request,
           'pages/[page-slug].twig',
           connectGalleries(repairBlockContent($page)),
           $language
