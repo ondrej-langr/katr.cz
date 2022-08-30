@@ -18,11 +18,11 @@
 
   # HTTP >> HTTPS 
   RewriteCond %{HTTPS} !=on
-  RewriteCond %{HTTP_HOST} !=localhost:8080
+  RewriteCond %{HTTP_HOST} !=localhost:3001
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
   ## non www to www
-  RewriteCond %{HTTP_HOST} !=localhost:8080
+  RewriteCond %{HTTP_HOST} !=localhost:3001
   RewriteCond %{HTTP_HOST} !^test\.
   RewriteCond %{HTTP_HOST} !^www\.
   RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R=301]
