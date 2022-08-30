@@ -65,7 +65,7 @@ class Query
     [
       $neutralFields,
       $intlFields,
-    ] = $this->modelClass::getInternationalizedFields();
+    ] = $this->modelClass->getInternationalizedFields();
     if ($this->modelClass->hasTranslationsEnabled()) {
       $formattedPayload = [];
 
@@ -351,7 +351,7 @@ class Query
     $index = 1;
     $translationsFieldName = static::$TRANSLATIONS_FIELD_NAME;
     $currentLanguageKey = $this->currentLanguage;
-    $intlFields = $this->modelClass::getInternationalizedFields()[1];
+    $intlFields = $this->modelClass->getInternationalizedFields()[1];
     $filledUniqueFields = array_filter(
       $this->modelClass::getUniqueFields(),
       function ($item) use ($payload) {
@@ -420,7 +420,7 @@ class Query
       return $payload;
     }
 
-    $intlFields = $this->modelClass::getInternationalizedFields()[1];
+    $intlFields = $this->modelClass->getInternationalizedFields()[1];
     $translationsFieldName = static::$TRANSLATIONS_FIELD_NAME;
     $currentLanguageKey = $this->currentLanguage;
 
@@ -447,26 +447,13 @@ class Query
   protected function getFieldKeyAliases()
   {
     if (!$this->modelClass->hasTranslationsEnabled()) {
-      $keys = $this->modelClass::getFieldKeys();
-
-      if ($this->modelClass->hasTimestamps()) {
-        $keys = array_merge($keys, ['updated_at', 'created_at']);
-      }
-
-      return $keys;
+      return $this->modelClass->getFieldKeys();
     }
 
     [
       $neutralFields,
       $intlFields,
-    ] = $this->modelClass::getInternationalizedFields();
-
-    if ($this->modelClass->hasTimestamps()) {
-      $neutralFields = array_merge($neutralFields, [
-        'updated_at',
-        'created_at',
-      ]);
-    }
+    ] = $this->modelClass->getInternationalizedFields();
 
     $fieldKeys = $neutralFields;
     $translationsFieldName = static::$TRANSLATIONS_FIELD_NAME;
