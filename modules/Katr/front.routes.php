@@ -241,6 +241,7 @@ return function (App $app, Router $router) {
           'Nabízíme pracovní příležitost na těchto pozicích'
         ),
       ],
+      'translations' => $translations,
     ];
 
     return $twig->render(
