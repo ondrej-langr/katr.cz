@@ -285,38 +285,20 @@ return function (App $app, Router $router) {
             $getSetting('main_page_second_col', $language)['content']['data'],
             $getSetting('main_page_third_col', $language)['content']['data'],
           ],
-          'title' => $getSetting('main_page_title', $language)['content'][
-            'data'
-          ],
-          'description' => $getSetting('main_page_description', $language)[
-            'content'
-          ]['data'],
+          'title' => $getSetting('main_page_title', $language)['content']['data'],
+          'description' => $getSetting('main_page_description', $language)['content']['data'],
           'about' => [
-            'content' => $getSetting('main_page_about', $language)['content'][
-              'data'
-            ],
+            'content' => $getSetting('main_page_about', $language)['content']['data'],
           ],
           'blog_list' => [
-            'before' => $getSetting('main_page_blog_list_before', $language)[
-              'content'
-            ]['data'],
-            'after' => $getSetting('main_page_blog_list_after', $language)[
-              'content'
-            ]['data'],
-            'image' => $getSetting('main_page_blog_list_image', $language)[
-              'content'
-            ]['data'],
+            'before' => $getSetting('main_page_blog_list_before', $language)['content']['data'],
+            'after' => $getSetting('main_page_blog_list_after', $language)['content']['data'],
+            'image' => $getSetting('main_page_blog_list_image', $language)['content']['data'],
           ],
           'positions' => [
-            'before' => $getSetting('main_page_positions_before', $language)[
-              'content'
-            ]['data'],
-            'after' => $getSetting('main_page_positions_after', $language)[
-              'content'
-            ]['data'],
-            'image' => $getSetting('main_page_positions_image', $language)[
-              'content'
-            ]['data'],
+            'before' => $getSetting('main_page_positions_before', $language)['content']['data'],
+            'after' => $getSetting('main_page_positions_after', $language)['content']['data'],
+            'image' => $getSetting('main_page_positions_image', $language)['content']['data'],
           ],
         ],
         $language
@@ -390,9 +372,7 @@ return function (App $app, Router $router) {
         [
           'opportunities' => $opportunities,
           'settings' => [
-            'hero_image' => $getSetting('kariera_hero_image', $language)[
-              'content'
-            ]['data'],
+            'hero_image' => $getSetting('kariera_hero_image', $language)['content']['data'],
           ],
         ],
         $language
@@ -481,12 +461,10 @@ return function (App $app, Router $router) {
       $contactPositionName = $contactPosition['name'];
       $groupedContacts[$contactPositionName]['label'] = $contactPositionName;
 
-      foreach (
-        array_filter($contacts, function ($item) use ($contactPosition) {
-          return intval($item['category']) === intval($contactPosition['id']);
-        })
-        as $contact
-      ) {
+      foreach (array_filter($contacts, function ($item) use ($contactPosition) {
+        return intval($item['category']) === intval($contactPosition['id']);
+      })
+        as $contact) {
         $groupedContacts[$contactPositionName]['contacts'][] = $contact;
       }
     }
@@ -500,18 +478,14 @@ return function (App $app, Router $router) {
           'emailSent' => isset($params['success']),
           'captchafail' => isset($params['captchafail']),
           'emailSuccess' =>
-            isset($params['success']) && $params['success'] === 'true',
+          isset($params['success']) && $params['success'] === 'true',
           'settings' => [
-            'hero_image' => $getSetting('contact_page_hero_image', $language)[
-              'content'
-            ]['data'],
+            'hero_image' => $getSetting('contact_page_hero_image', $language)['content']['data'],
             'message_success' => $getSetting(
               'contact_message_success',
               $language
             )['content']['data'],
-            'message_error' => $getSetting('contact_message_error', $language)[
-              'content'
-            ]['data'],
+            'message_error' => $getSetting('contact_message_error', $language)['content']['data'],
           ],
           'form' => [
             'text' => [
@@ -521,7 +495,7 @@ return function (App $app, Router $router) {
                 'message' => 'Zpráva',
                 'send' => 'Odeslat',
                 'captchafail' =>
-                  'Zapoměli jste vyplnit kontrolu před roboty. Vyplňte a pošlete znovu, prosím.',
+                'Zapoměli jste vyplnit kontrolu před roboty. Vyplňte a pošlete znovu, prosím.',
               ],
               'en' => [
                 'title' => 'Contact us',
@@ -529,7 +503,7 @@ return function (App $app, Router $router) {
                 'message' => 'Message',
                 'send' => 'Send',
                 'captchafail' =>
-                  'Captcha check failed or you forgot to complete it. Please check it and try again.',
+                'Captcha check failed or you forgot to complete it. Please check it and try again.',
               ],
             ],
           ],
