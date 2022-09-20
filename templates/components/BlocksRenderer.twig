@@ -83,7 +83,7 @@
                   data-pswp-height="{{ fullImage.height }}">
                   <img src="{{ thumbnail.src }}"
                     width="{{ thumbnail.width }}"
-                    alt="{{ file.title }}" />
+                    alt="{{ file.title }}" loading="lazy" />
                   <div class="d-none hidden-caption-content">
                     {% if file.title %}
                       <p class="heading">
@@ -111,7 +111,7 @@
               data-pswp-height="{{ fullImage.height }}">
               <img src="{{ thumbnail.src }}"
                 width="{{ thumbnail.width }}"
-                alt="{{ file.title }}" />
+                alt="{{ file.title }}" loading="lazy" />
               <div class="d-none hidden-caption-content">
                 {% if file.title %}
                   <p class="heading">
