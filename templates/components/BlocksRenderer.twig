@@ -61,12 +61,12 @@
           {% for gallery in block.data %}
             <input type="radio"
               name="tabs"
-              id="tab{{ loop.index }}"
+              id="tabs-tab--{{ gallery.id }}"
               {% if loop.index is same as(1) %}
               checked="checked" 
               {% endif %}
             />
-            <label for="tab{{ loop.index }}">
+            <label for="tabs-tab--{{ gallery.id }}">
               {% if gallery.data.label %}
                 {{ gallery.data.label }}
               {% else %}
