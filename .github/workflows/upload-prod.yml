@@ -48,7 +48,7 @@ jobs:
                   APP_ENV=production
                   APP_PREFIX=
                   APP_DEBUG=false
-                  APP_URL=https://katr.cz
+                  APP_URL=https://www.katr.cz
                   LANGUAGE="cs"
                   MORE_LANG="en"
 
