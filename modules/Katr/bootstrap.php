@@ -3,6 +3,7 @@
 
 use DI\Container;
 use PromCMS\Core\Config;
+use PromCMS\Core\Models\Settings;
 use PromCMS\Core\Services\LocalizationService;
 use PromCMS\Core\Utils;
 use Slim\App;
@@ -22,7 +23,7 @@ function getOption($id, $onLanguage = null)
   $onLanguageCode = $onLanguage == null ? 'default' : $onLanguage;
 
   if (!isset($settings[$onLanguageCode])) {
-    $query = (new \Settings())->query();
+    $query = (new Settings())->query();
 
     if ($onLanguage) {
       $query->setLanguage($onLanguage);
@@ -46,7 +47,7 @@ function getMultilangField(string $fieldName, $value, array $languages)
   foreach ($languages as $language) {
     $final[] = [
       \PromCMS\Core\Database\Query::$TRANSLATIONS_FIELD_NAME .
-      ".$language.$fieldName",
+        ".$language.$fieldName",
       '=',
       $value,
     ];

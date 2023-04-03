@@ -120,6 +120,18 @@ class Contacts extends Model
       'type' => 'string',
     ],
 
+    'order' => [
+      'title' => 'Order',
+      'hide' => false,
+      'required' => false,
+      'unique' => false,
+      'editable' => false,
+      'translations' => false,
+      'admin' => ['isHidden' => true, 'editor' => ['placement' => 'main']],
+      'type' => 'number',
+      'autoIncrement' => true,
+    ],
+
     'coeditors' => [
       'title' => 'Coeditors',
       'hide' => false,
@@ -133,18 +145,6 @@ class Contacts extends Model
         'fieldType' => 'jsonEditor',
       ],
       'type' => 'json',
-    ],
-
-    'order' => [
-      'title' => 'Order',
-      'hide' => false,
-      'required' => false,
-      'unique' => false,
-      'editable' => false,
-      'translations' => false,
-      'admin' => ['isHidden' => true, 'editor' => ['placement' => 'main']],
-      'type' => 'number',
-      'autoIncrement' => true,
     ],
 
     'created_by' => [
@@ -181,6 +181,8 @@ class Contacts extends Model
   ];
 
   static bool $ignoreSeeding = false;
+
+  static string $title = 'Kontakty';
 
   static string $modelIcon = 'Phone';
   static $adminSettings = [];

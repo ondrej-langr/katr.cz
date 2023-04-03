@@ -9,10 +9,11 @@
   ],
   "require": {
     "twig/intl-extra": "^3.5",
-    "prom-cms/core": "^0.6.2",
+    "prom-cms/core": "^0.6.5",
     "rakit/validation": "^1.4",
     "ext-json": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "middlewares/trailing-slash": "^2.0"
   },
   "require-dev": {
     "fakerphp/faker": "^1.9.1"

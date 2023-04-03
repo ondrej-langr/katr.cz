@@ -119,6 +119,8 @@ class ContactPositions extends Model
 
   static bool $ignoreSeeding = false;
 
+  static string $title = 'Pozice kontaktů';
+
   static string $modelIcon = 'Speakerphone';
   static $adminSettings = [];
 

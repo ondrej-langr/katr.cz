@@ -3,7 +3,7 @@ cache
 vendor
 public/bundle
 .env
-.temp/
+.temp/log.txt
 Views
 backup
 uploads

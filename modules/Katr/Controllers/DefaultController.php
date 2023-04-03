@@ -88,7 +88,7 @@ class DefaultController
 
     $twig->render(
       $response,
-      'pages/kariera.twig',
+      '@modules:katr/pages/kariera.twig',
       array_merge(getDefaultLayoutData($language, $request, $this->container), [
         'data' => [
           'opportunities' => $opportunities,

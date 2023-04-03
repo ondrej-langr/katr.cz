@@ -42,7 +42,7 @@ class Pages extends Model
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
-        'fieldType' => 'normal',
+        'fieldType' => 'heading',
       ],
       'type' => 'string',
     ],
@@ -57,13 +57,13 @@ class Pages extends Model
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
-        'fieldType' => 'jsonEditor',
+        'fieldType' => 'blockEditor',
       ],
       'type' => 'json',
     ],
 
     'slug' => [
-      'title' => 'Zkratka',
+      'title' => 'Slug',
       'hide' => false,
       'required' => false,
       'unique' => true,
@@ -81,7 +81,7 @@ class Pages extends Model
       'unique' => false,
       'editable' => true,
       'translations' => false,
-      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'main']],
+      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'aside']],
       'type' => 'boolean',
       'default' => false,
     ],
@@ -95,7 +95,7 @@ class Pages extends Model
       'translations' => false,
       'admin' => [
         'isHidden' => false,
-        'editor' => ['placement' => 'main'],
+        'editor' => ['placement' => 'aside'],
         'fieldType' => 'normal',
       ],
       'type' => 'file',
@@ -110,7 +110,7 @@ class Pages extends Model
       'unique' => false,
       'editable' => true,
       'translations' => true,
-      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'main']],
+      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'aside']],
       'type' => 'longText',
     ],
 
@@ -121,7 +121,7 @@ class Pages extends Model
       'unique' => false,
       'editable' => true,
       'translations' => true,
-      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'main']],
+      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'aside']],
       'type' => 'longText',
     ],
 
@@ -197,6 +197,8 @@ class Pages extends Model
   ];
 
   static bool $ignoreSeeding = false;
+
+  static string $title = 'Stránky';
 
   static string $modelIcon = 'Notebook';
   static $adminSettings = [];

@@ -42,7 +42,7 @@ class Positions extends Model
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
-        'fieldType' => 'normal',
+        'fieldType' => 'heading',
       ],
       'type' => 'string',
     ],
@@ -57,13 +57,13 @@ class Positions extends Model
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
-        'fieldType' => 'jsonEditor',
+        'fieldType' => 'blockEditor',
       ],
       'type' => 'json',
     ],
 
     'slug' => [
-      'title' => 'Zkratka',
+      'title' => 'Slug',
       'hide' => false,
       'required' => false,
       'unique' => true,
@@ -83,6 +83,18 @@ class Positions extends Model
       'translations' => true,
       'admin' => ['isHidden' => false, 'editor' => ['placement' => 'main']],
       'type' => 'longText',
+    ],
+
+    'order' => [
+      'title' => 'Order',
+      'hide' => false,
+      'required' => false,
+      'unique' => false,
+      'editable' => false,
+      'translations' => false,
+      'admin' => ['isHidden' => true, 'editor' => ['placement' => 'main']],
+      'type' => 'number',
+      'autoIncrement' => true,
     ],
 
     'coeditors' => [
@@ -135,8 +147,17 @@ class Positions extends Model
 
   static bool $ignoreSeeding = false;
 
+  static string $title = 'Pozice';
+
   static string $modelIcon = 'BuildingFactory';
   static $adminSettings = [];
+
+  public static function afterCreate(ModelResult $entry): ModelResult
+  {
+    $entry->update(['order' => $entry->id]);
+
+    return $entry;
+  }
 
   public static function beforeCreate($entry): array
   {
@@ -167,7 +188,7 @@ class Positions extends Model
       'hasTimestamps' => $this->hasTimestamps(),
       'hasSoftDelete' => $this->hasSoftDelete(),
       'ownable' => true,
-      'hasOrdering' => false,
+      'hasOrdering' => true,
       'isDraftable' => false,
       'isSharable' => true,
     ];

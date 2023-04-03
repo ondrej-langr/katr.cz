@@ -1467,9 +1467,9 @@
     php-parser "^3.1.3"
 
 "@prom-cms/admin@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@prom-cms/admin/-/admin-0.9.0.tgz#4c7faa689f73afbe67ff8830301d27f7d4fcb80d"
-  integrity sha512-fJkUaB7M1kSAzB35gGvR0uEBt5x/TBqhlEXQuZWD6LrrNKRoGUmq3b5f7kFcZHBBxOXEQKT0zgZ6q/rZ6iSMtQ==
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@prom-cms/admin/-/admin-0.9.1.tgz#f6d2b6cda0234e7314ed29e673b3dceb2b5cef8b"
+  integrity sha512-IZliRfkpuRfnIbjoauYWjYXkniAnnnIy8/7zwReVreUtuWxjV0FMpv15BCSTcqb42LndjCGQwCORocI/nX1Ijw==
   dependencies:
     "@calumk/editorjs-columns" "^0.2.4"
     "@editorjs/editorjs" "^2.26.5"
@@ -1566,10 +1566,10 @@
     lodash.kebabcase "^4.1.1"
     zod "^3.20.2"
 
-"@prom-cms/vite-plugin@^0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@prom-cms/vite-plugin/-/vite-plugin-0.6.2.tgz#43a75b75d71f98fe8443e004748ed20a477b8ccf"
-  integrity sha512-lSJCrZvIPsifR8Pr5G9CdHAuYjqdCaqQg+LQ05b6YJfq28XdSK77GDG4zXJ+SIsGhha0WcuEqnHwKKPMcunDGw==
+"@prom-cms/vite-plugin@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@prom-cms/vite-plugin/-/vite-plugin-0.6.3.tgz#f6da184bc8d76e999c670f5325fe73713e1be40b"
+  integrity sha512-VeU1/VxfXAqq+C1GmgB6THk01g8vToRrp4J/tpN4c01CKKCFUxagGXfKc/8eI+2fCBUY+yUUIbsU2EMD1sIqZw==
   dependencies:
     execa "^6.1.0"
     fs-extra "^10.0.0"
