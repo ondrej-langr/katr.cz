@@ -1,6 +1,7 @@
 {
   "project": {
     "name": "Katr prom",
+    "url": "https://katr.cz",
     "security": {
       "roles": [
         {
@@ -8,10 +9,10 @@
           "name": "Editor",
           "modelPermissions": {
             "posts": {
-              "c": false,
-              "r": false,
-              "u": true,
-              "d": false
+              "c": 0,
+              "r": 0,
+              "u": "allow-everything",
+              "d": 0
             }
           }
         }

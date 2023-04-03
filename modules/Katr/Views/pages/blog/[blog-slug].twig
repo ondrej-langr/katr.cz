@@ -1,0 +1,25 @@
+{% extends '@modules:katr/layouts/site-layout.twig' %}
+
+{% block seoTitle %}
+  Blog post
+{% endblock %}
+
+{% block content %}
+  <div class="blog-post">
+    <div class="blog-post-content">
+      <span class="date-main">{{ data.created_at|date('d.m. Y') }}</span>
+      <h1>
+        {{ data.title }}
+      </h1>
+      {% if data.description %}
+        <p class="headline-small">
+          {{ data.description }}
+        </p>
+      {% endif %}
+      <hr />
+      {% include '@modules:katr/components/BlocksRenderer.twig' with {
+        blocks: data.content.blocks
+      } %}
+    </div>
+  </div>
+{% endblock %}

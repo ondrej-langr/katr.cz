@@ -3,6 +3,8 @@ cache
 vendor
 public/bundle
 .env
+.temp/
+Views
 backup
 uploads
 locales
