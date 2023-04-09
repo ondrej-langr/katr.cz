@@ -51,6 +51,35 @@
           }
         }
       },
+      "dotations": {
+        "title": "Dotace",
+        "tableName": "dotations",
+        "icon": "ReportMoney",
+        "columns": {
+          "date": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Datum"
+          },
+          "title": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Pozice"
+          },
+          "file": {
+            "type": "file",
+            "title": "Soubor",
+            "translations": false,
+            "admin": {
+              "isHidden": true
+            }
+          }
+        }
+      },
       "pages": {
         "title": "Stránky",
         "softDelete": false,
@@ -91,6 +120,7 @@
             "adminHidden": true,
             "typeFilter": "image",
             "admin": {
+              "fieldType": "big-image",
               "editor": {
                 "placement": "aside"
               }
@@ -180,6 +210,7 @@
             "adminHidden": true,
             "typeFilter": "image",
             "admin": {
+              "fieldType": "big-image",
               "editor": {
                 "placement": "aside"
               }

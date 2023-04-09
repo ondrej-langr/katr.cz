@@ -97,7 +97,6 @@ class DefaultController
           ],
         ],
       ]),
-      $language
     );
 
     return $response;
@@ -143,8 +142,17 @@ class DefaultController
         ->orderBy(['created_at' => 'desc'])
         ->where(['is_published', '=', true])
         ->getMany();
-    }
+    } else if (str_includes(
+      json_encode(repairBlockContent($page)),
+      'dotation-items-list'
+    )) {
+      $page['dotationList'] = \Dotations::setLanguage($language)
+        ->orderBy(['created_at' => 'desc'])
+        ->getMany();
 
+        echo count($page['dotationList']);
+    }
+ 
     $twig->render(
       $response,
       '@modules:katr/pages/[page-slug].twig',

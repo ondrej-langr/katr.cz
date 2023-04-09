@@ -40,7 +40,6 @@ class ServicesController
         $response,
         '@modules:katr/pages/404.twig',
         [],
-        $language
       );
 
       return $response->withStatus(404);

@@ -12,9 +12,11 @@ use Slim\App;
  * If current haystack includes needle.
  * Polyfil of php8 str_includes
  */
-function str_includes($haystack, $needle)
-{
-  return strpos($haystack, $needle) !== false;
+if (!function_exists("str_includes")) {
+  function str_includes(string $toSearch, string $text)
+  {
+    return strpos($toSearch, $text) !== false;
+  }
 }
 
 $settings = [];

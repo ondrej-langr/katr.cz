@@ -4,7 +4,7 @@ vendor
 public/bundle
 .env
 .temp/log.txt
-Views
+/Views
 backup
 uploads
 locales

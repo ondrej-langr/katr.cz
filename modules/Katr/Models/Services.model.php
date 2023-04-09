@@ -84,7 +84,7 @@ class Services extends Model
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'aside'],
-        'fieldType' => 'normal',
+        'fieldType' => 'big-image',
       ],
       'type' => 'file',
       'multiple' => false,

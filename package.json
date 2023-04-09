@@ -1,5 +1,5 @@
 {
-  "name": "bvvinarstvi",
+  "name": "katr.cz",
   "version": "0.1.0",
   "description": "",
   "license": "MIT",
@@ -11,7 +11,7 @@
   "devDependencies": {
     "@prettier/plugin-php": "^0.19.4",
     "@prom-cms/vite-plugin": "^0.6.3",
-    "@prom-cms/cli": "^0.17.1",
+    "@prom-cms/cli": "^0.17.2",
     "prettier": "^2",
     "prettier-plugin-twig-melody": "^0.4.6",
     "typescript": "^4.9.5",

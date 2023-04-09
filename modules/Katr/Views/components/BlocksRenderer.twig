@@ -134,7 +134,7 @@
           {% endfor %}
         </ul>
       {% elseif block.type == 'dynamicBlock' %}
-        {{ getDynamicBlock(block.data.blockId, data|merge({'language': language}))|raw }}
+        {{ getDynamicBlock('@modules:katr/dynamic-blocks/' ~ block.data.blockId, data|merge({'language': language}))|raw }}
       {% elseif block.type == 'tags' %}
         <ul class="badges">
           {% for tag in block.data.tags %}
