@@ -1,6 +1,7 @@
 {
   "project": {
     "name": "Katr prom",
+    "url": "https://katr.cz",
     "security": {
       "roles": [
         {
@@ -8,10 +9,10 @@
           "name": "Editor",
           "modelPermissions": {
             "posts": {
-              "c": false,
-              "r": false,
-              "u": true,
-              "d": false
+              "c": 0,
+              "r": 0,
+              "u": "allow-everything",
+              "d": 0
             }
           }
         }
@@ -21,6 +22,7 @@
   "database": {
     "models": {
       "posts": {
+        "title": "Články",
         "softDelete": false,
         "timestamp": true,
         "sorting": true,
@@ -31,46 +33,8 @@
         "tableName": "posts",
         "intl": true,
         "icon": "Archive",
+        "preset": "post",
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "title": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Title",
-            "type": "string"
-          },
-          "content": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Content",
-            "type": "json",
-            "default": "{}"
-          },
-          "slug": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Zkratka",
-            "type": "slug",
-            "of": "title"
-          },
           "description": {
             "required": false,
             "editable": true,
@@ -78,74 +42,46 @@
             "hide": false,
             "translations": true,
             "type": "longText",
-            "title": "Popisek"
-          },
-          "is_published": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Is published",
-            "type": "boolean"
-          },
-          "order": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "Order",
-            "type": "number",
-            "adminHidden": true
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           }
-        },
-        "admin": {
-          "layout": "post-like"
+        }
+      },
+      "dotations": {
+        "title": "Dotace",
+        "tableName": "dotations",
+        "icon": "ReportMoney",
+        "columns": {
+          "date": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Datum"
+          },
+          "title": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Pozice"
+          },
+          "file": {
+            "type": "file",
+            "title": "Soubor",
+            "translations": false,
+            "admin": {
+              "isHidden": true
+            }
+          }
         }
       },
       "pages": {
+        "title": "Stránky",
         "softDelete": false,
         "timestamp": true,
         "sorting": true,
@@ -156,46 +92,8 @@
         "tableName": "pages",
         "intl": true,
         "icon": "Notebook",
+        "preset": "post",
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "title": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Title",
-            "type": "string"
-          },
-          "content": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Content",
-            "type": "json",
-            "default": "{}"
-          },
-          "slug": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Zkratka",
-            "type": "slug",
-            "of": "title"
-          },
           "showInMenu": {
             "required": false,
             "editable": true,
@@ -204,7 +102,12 @@
             "translations": false,
             "type": "boolean",
             "title": "Zobrazit v menu",
-            "default": false
+            "default": false,
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           },
           "hero_image": {
             "required": false,
@@ -215,7 +118,13 @@
             "type": "file",
             "title": "Úvodní obrázek",
             "adminHidden": true,
-            "typeFilter": "image"
+            "typeFilter": "image",
+            "admin": {
+              "fieldType": "big-image",
+              "editor": {
+                "placement": "aside"
+              }
+            }
           },
           "excerpt": {
             "required": false,
@@ -224,7 +133,12 @@
             "hide": false,
             "translations": true,
             "type": "longText",
-            "title": "Krátký popisek"
+            "title": "Krátký popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           },
           "description": {
             "required": false,
@@ -233,77 +147,20 @@
             "hide": false,
             "translations": true,
             "type": "longText",
-            "title": "Popisek"
-          },
-          "is_published": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Is published",
-            "type": "boolean"
-          },
-          "order": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "Order",
-            "type": "number",
-            "adminHidden": true
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           }
-        },
-        "admin": {
-          "layout": "post-like"
         }
       },
       "positions": {
+        "title": "Pozice",
         "softDelete": false,
         "timestamp": false,
-        "sorting": false,
+        "sorting": true,
         "sharable": true,
         "draftable": false,
         "ignoreSeeding": false,
@@ -312,46 +169,8 @@
         "intl": true,
         "icon": "BuildingFactory",
         "permissions": false,
+        "preset": "post",
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "title": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Title",
-            "type": "string"
-          },
-          "content": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Content",
-            "type": "json",
-            "default": "{}"
-          },
-          "slug": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Zkratka",
-            "type": "slug",
-            "of": "title"
-          },
           "description": {
             "required": false,
             "editable": true,
@@ -360,46 +179,6 @@
             "translations": true,
             "type": "longText",
             "title": "Popisek"
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
           }
         },
         "admin": {
@@ -407,6 +186,7 @@
         }
       },
       "services": {
+        "title": "Služby",
         "softDelete": false,
         "timestamp": false,
         "sorting": true,
@@ -417,46 +197,8 @@
         "tableName": "services",
         "intl": true,
         "icon": "Briefcase",
+        "preset": "post",
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "title": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Title",
-            "type": "string"
-          },
-          "content": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Content",
-            "type": "json",
-            "default": "{}"
-          },
-          "slug": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Zkratka",
-            "type": "slug",
-            "of": "title"
-          },
           "hero_image": {
             "required": false,
             "editable": true,
@@ -466,7 +208,13 @@
             "type": "file",
             "title": "Úvodní obrázek",
             "adminHidden": true,
-            "typeFilter": "image"
+            "typeFilter": "image",
+            "admin": {
+              "fieldType": "big-image",
+              "editor": {
+                "placement": "aside"
+              }
+            }
           },
           "excerpt": {
             "required": false,
@@ -475,7 +223,12 @@
             "hide": false,
             "translations": true,
             "type": "longText",
-            "title": "Krátký popisek"
+            "title": "Krátký popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           },
           "description": {
             "required": false,
@@ -484,65 +237,17 @@
             "hide": false,
             "translations": true,
             "type": "longText",
-            "title": "Popisek"
-          },
-          "order": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "Order",
-            "type": "number",
-            "adminHidden": true
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
           }
-        },
-        "admin": {
-          "layout": "post-like"
         }
       },
       "contacts": {
+        "title": "Kontakty",
         "softDelete": false,
         "timestamp": false,
         "sorting": true,
@@ -552,22 +257,9 @@
         "ownable": true,
         "tableName": "contacts",
         "intl": true,
-        "admin": {
-          "layout": "simple"
-        },
         "icon": "Phone",
         "permissions": false,
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
           "position": {
             "required": true,
             "editable": true,
@@ -626,84 +318,21 @@
             "translations": true,
             "type": "string",
             "title": "Email"
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "order": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "autoIncrement": true,
-            "title": "Order",
-            "type": "number",
-            "adminHidden": true
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
           }
         }
       },
       "contactPositions": {
+        "title": "Pozice kontaktů",
         "softDelete": false,
         "timestamp": false,
         "sorting": true,
         "sharable": true,
         "draftable": false,
-        "ignoreSeeding": false,
         "ownable": true,
         "tableName": "contactPositions",
         "intl": true,
-        "admin": {
-          "layout": "simple"
-        },
         "icon": "Speakerphone",
         "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
           "name": {
             "required": true,
             "editable": true,
@@ -723,422 +352,6 @@
             "of": "name",
             "title": "Slug",
             "adminHidden": true
-          },
-          "order": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "Order",
-            "type": "number",
-            "adminHidden": true
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          }
-        }
-      },
-      "files": {
-        "softDelete": false,
-        "timestamp": true,
-        "sorting": false,
-        "sharable": false,
-        "draftable": false,
-        "ignoreSeeding": true,
-        "ownable": true,
-        "tableName": "files",
-        "intl": false,
-        "icon": "Folder",
-        "admin": {
-          "layout": "simple"
-        },
-        "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "filename": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Filename",
-            "type": "string"
-          },
-          "description": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Description",
-            "type": "string"
-          },
-          "filepath": {
-            "required": true,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Filepath",
-            "type": "string"
-          },
-          "private": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Is private",
-            "type": "boolean"
-          },
-          "mimeType": {
-            "required": true,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Mime type",
-            "type": "string"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          }
-        }
-      },
-      "settings": {
-        "softDelete": false,
-        "timestamp": false,
-        "sorting": false,
-        "sharable": true,
-        "draftable": false,
-        "ignoreSeeding": false,
-        "ownable": true,
-        "tableName": "settings",
-        "intl": true,
-        "admin": {
-          "layout": "simple"
-        },
-        "icon": "Settings",
-        "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "name": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "title": "Name",
-            "type": "string"
-          },
-          "label": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Label",
-            "type": "string"
-          },
-          "content": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "content",
-            "type": "json",
-            "default": "{}"
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          },
-          "created_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Created by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          },
-          "updated_by": {
-            "required": false,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "title": "Updated by",
-            "type": "relationship",
-            "targetModel": "user",
-            "labelConstructor": "name",
-            "adminHidden": true
-          }
-        }
-      },
-      "userRoles": {
-        "softDelete": false,
-        "timestamp": false,
-        "sorting": false,
-        "sharable": true,
-        "draftable": false,
-        "ignoreSeeding": false,
-        "ownable": false,
-        "tableName": "userroles",
-        "intl": false,
-        "admin": {
-          "layout": "simple"
-        },
-        "icon": "UserExclamation",
-        "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "label": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Label",
-            "type": "string"
-          },
-          "slug": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Slug",
-            "type": "slug",
-            "of": "label"
-          },
-          "description": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "type": "longText",
-            "title": "Popisek"
-          },
-          "permissions": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Permissions",
-            "type": "json",
-            "default": "{}"
-          },
-          "coeditors": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": false,
-            "title": "Coeditors",
-            "type": "json",
-            "default": "{}"
-          }
-        }
-      },
-      "users": {
-        "softDelete": false,
-        "timestamp": false,
-        "sorting": false,
-        "sharable": false,
-        "draftable": false,
-        "ignoreSeeding": false,
-        "ownable": false,
-        "tableName": "users",
-        "intl": false,
-        "admin": {
-          "layout": "simple"
-        },
-        "icon": "Users",
-        "columns": {
-          "id": {
-            "required": false,
-            "editable": false,
-            "unique": true,
-            "hide": false,
-            "translations": false,
-            "autoIncrement": true,
-            "title": "ID",
-            "type": "number"
-          },
-          "name": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Name",
-            "type": "string"
-          },
-          "password": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": true,
-            "translations": true,
-            "title": "Password",
-            "type": "password"
-          },
-          "email": {
-            "required": true,
-            "editable": true,
-            "unique": true,
-            "hide": false,
-            "translations": true,
-            "title": "Email",
-            "type": "string"
-          },
-          "avatar": {
-            "required": false,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "Avatar",
-            "type": "string"
-          },
-          "state": {
-            "required": true,
-            "editable": false,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "title": "State",
-            "type": "enum",
-            "enum": [
-              "active",
-              "invited",
-              "blocked",
-              "password-reset"
-            ]
-          },
-          "role": {
-            "required": true,
-            "editable": true,
-            "unique": false,
-            "hide": false,
-            "translations": true,
-            "multiple": false,
-            "foreignKey": "id",
-            "fill": false,
-            "type": "relationship",
-            "targetModel": "userRoles",
-            "title": "Role",
-            "adminHidden": true,
-            "labelConstructor": "label"
           }
         }
       }

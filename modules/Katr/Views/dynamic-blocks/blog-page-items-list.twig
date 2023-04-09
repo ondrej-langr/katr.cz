@@ -1,0 +1,11 @@
+{% for post in posts %}
+  <a href="{{ language }}/blog/{{ post.slug }}" class="ignore">
+    <div class="blog-box">
+      <h3>
+        {{ post.title }}
+      </h3>
+      <span class="date-main">{{ post.created_at|date('d.m. Y') }}</span>
+      <button class="btn">{% include '@modules:katr/components/ArrowRight.twig' %}</button>
+    </div>
+  </a>
+{% endfor %}
