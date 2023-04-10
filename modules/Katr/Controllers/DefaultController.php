@@ -79,7 +79,7 @@ class DefaultController
     array $routeArgs
   ): ResponseInterface {
     $language = $this->getCurrentLanguage($request, $routeArgs);
-    $opportunities = \Positions::setLanguage($language)->getMany();
+    $opportunities = \Positions::setLanguage($language)->orderBy(['order' => 'asc', 'id' => 'asc'])->getMany();
     $twig = $this->container->get(\Slim\Views\Twig::class);
 
     $opportunities = array_map(function ($opportu) {
