@@ -1,11 +1,11 @@
 {% extends '@modules:katr/layouts/site-layout.twig' %}
 
 {% block seoTitle %}
-  {{translations["Kontakt"]}}
+  {{translations["Kontakt"]|default("Kontakt")}}
 {% endblock %}
 
 {% block title %}
-  {{translations["Kontakt"]}}
+  {{translations["Kontakt"]|default("Kontakt")}}
 {% endblock %}
 
 {% block heroImageUrl %}
@@ -70,20 +70,20 @@
       </div>
     </div>
      {% set languageWithFallback = language ? language : defaultLanguage %}
-     {% set translations = data.form.text[languageWithFallback] %}
+     {% set customTranslations = form.text[languageWithFallback] %}
     <div class="form-content">
       <form role="form" method="POST">
         <h2>
-          {{ translations.title }}
+          {{ customTranslations.title }}
         </h2>
         <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around left">
-          <label for="name">{{ translations.name }} *</label>
+          <label for="name">{{ customTranslations.name }} *</label>
           <input required type="text"
             class="form-control"
             id="name"
             name="name"
             autocomplete="name"
-            placeholder="{{ translations.name }}"
+            placeholder="{{ customTranslations.name }}"
             aria-describedby="name" />
           <label for="email">E-mail *</label>
           <input required type="email"
@@ -95,7 +95,7 @@
             aria-describedby="email" />
         </div>
         <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around right">
-          <label for="message" class="form-label">{{ translations.message }}  *</label>
+          <label for="message" class="form-label">{{ customTranslations.message }}  *</label>
           <textarea required class="form-control" name="message" id="message" rows="6" ></textarea>
         </div>
         <div class="col-12">
@@ -103,10 +103,10 @@
         </div>
         {% if (data.captchafail) %}
           <div class="col-12 mb-3 alert alert-danger" role="alert">
-            {{ translations.captchafail }}
+            {{ customTranslations.captchafail }}
           </div>
         {% endif %}
-        <button type="submit" class="btn">{{ translations.send }}</button>
+        <button type="submit" class="btn">{{ customTranslations.send }}</button>
       </form>
     </div>
   </div>
