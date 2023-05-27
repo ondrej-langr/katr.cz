@@ -149,8 +149,6 @@ class DefaultController
       $page['dotationList'] = \Dotations::setLanguage($language)
         ->orderBy(['created_at' => 'desc'])
         ->getMany();
-
-        echo count($page['dotationList']);
     }
  
     $twig->render(
