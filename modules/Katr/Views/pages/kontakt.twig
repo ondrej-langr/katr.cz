@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block heroImageUrl %}
-  {% if data.settings.hero_image %}
-    {% set heroImage = image(data.settings.hero_image, 1320) %}
+  {% if settings.hero_image %}
+    {% set heroImage = image(settings.hero_image, 1320) %}
     {{ heroImage.src }}
   {% endif %}
 {% endblock %}
@@ -18,19 +18,19 @@
 {% block content %}
   <div class="contact">
     <div class="contact-content">
-      {% if (data.emailSent) %}
-        {% if (data.emailSuccess) %}
+      {% if (emailSent) %}
+        {% if (emailSuccess) %}
           <div class="mt-n5 mb-5 alert alert-success" role="alert">
-            {{ data.settings.message_success }}
+            {{ settings.message_success }}
           </div>
         {% else %}
           <div class="mt-n5 mb-5 alert alert-danger" role="alert">
-            {{ data.settings.message_error }}
+            {{ settings.message_error }}
           </div>
         {% endif %}
       {% endif %}
       <div class="tabs">
-        {% for group in data.contactGroups %}
+        {% for group in contactGroups %}
           <input type="radio" name="tabs" id="tab{{ loop.index }}" {% if loop.index is same as(1) %} checked="checked" {% endif %} />
           <label for="tab{{ loop.index }}">{{ group.label }}</label>
           <div class="tab">
@@ -101,7 +101,7 @@
         <div class="col-12">
           <div class="h-captcha" data-sitekey="c9efc57f-acc2-46a0-a19d-53e4b684e8ce"></div>
         </div>
-        {% if (data.captchafail) %}
+        {% if (captchafail) %}
           <div class="col-12 mb-3 alert alert-danger" role="alert">
             {{ customTranslations.captchafail }}
           </div>
