@@ -1,16 +1,12 @@
 {% for dotation in dotationList %}
-  <div class="blog-box"
-    style="align-items:center;flex-direction:row;flex-wrap:nowrap;">
+  <div class="blog-box dotations">
     <div>
-      <span style="font-size:24px" class="date-main">
-        {{ dotation.date|date('d.m. Y') }}
-      </span>
-      <h3 style="margin-top:0">
+      <span class="date-main">{{ dotation.date|date('d.m. Y') }}</span>
+      <h3>
         {{ dotation.title }}
       </h3>
     </div>
-    <a style="padding: 0 20px;flex:none;"
-      href="api/entry-types/files/items/{{ dotation.file }}/raw">
+    <a class="link" href="api/entry-types/files/items/{{ dotation.file }}/raw">
       Zobrazit soubor
     </a>
   </div>

@@ -1,1 +1,47 @@
 @import './styles/index.scss';
+
+.blog-box.dotations {
+  align-items: start;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  padding-right: 0;
+
+  .link {
+    flex: none;
+    white-space: nowrap;
+    font-size: 15px;
+  }
+
+  .date-main {
+    font-size: 15px;
+  }
+
+  h3 {
+    margin-top: 0;
+    font-size: 23px;
+    overflow-wrap: break-word;
+    margin-bottom: 0;
+  }
+
+  @media screen and (min-width: 650px) {
+    flex-direction: row;
+    align-items: center;
+
+    .link {
+      padding: 0 20px;
+    }
+
+    h3 {
+      font-size: 35px;
+      margin-bottom: 15px;
+    }
+
+    .date-main {
+      font-size: 24px;
+    }
+
+    .link {
+      font-size: 16px;
+    }
+  }
+}
