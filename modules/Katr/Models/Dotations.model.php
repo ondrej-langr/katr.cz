@@ -70,6 +70,18 @@ class Dotations extends Model
       'type' => 'file',
       'multiple' => false,
     ],
+
+    'openInNewTab' => [
+      'title' => 'Otevřít soubor v novém okně',
+      'hide' => false,
+      'required' => false,
+      'unique' => false,
+      'editable' => true,
+      'translations' => true,
+      'admin' => ['isHidden' => false, 'editor' => ['placement' => 'main']],
+      'type' => 'boolean',
+      'default' => false,
+    ],
   ];
 
   static bool $ignoreSeeding = false;

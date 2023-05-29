@@ -6,7 +6,7 @@
         {{ dotation.title }}
       </h3>
     </div>
-    <a class="link" href="api/entry-types/files/items/{{ dotation.file }}/raw">
+    <a class="link" href="api/entry-types/files/items/{{ dotation.file }}/raw" {% if (dotation.openInNewTab) %} target="_blank" {% endif %} rel="noopener noreferrer">
       Zobrazit soubor
     </a>
   </div>

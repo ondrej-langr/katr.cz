@@ -77,6 +77,11 @@
             "admin": {
               "isHidden": true
             }
+          },
+          "openInNewTab": {
+            "type": "boolean",
+            "title": "Otevřít soubor v novém okně",
+            "default": false
           }
         }
       },
