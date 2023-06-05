@@ -1,0 +1,32 @@
+<header>
+    <nav class="{% if title is not defined %}dark{% endif %}">
+        <div class="nav-content" x-data="{ currrentSubmenu: false }">
+            <a href="{{ language }}/" class="logo-wrap">
+                <img src="assets/images/katr-logo.svg" class="logo" />
+                <img src="assets/images/katr-logo-white.svg"
+                    class="logo white" />
+            </a>
+            {% include '@modules:katr/layouts/header/links-list.twig' %}
+            <div class="submenu toggled" @mouseleave="currrentSubmenu=false">
+                {% include '@modules:katr/layouts/header/dropdown-1.twig' %}
+                {% include '@modules:katr/layouts/header/dropdown-2.twig' %}
+            </div>
+        </div>
+    </nav>
+    {% if title is defined %}
+    <div class="header-content {% if description is not defined and title is defined %}smaller{% endif %}">
+        <img src="{{ heroImageUrl|replace({"\n": "", "\r": "", "\t": ""})|length > 3 ? heroImageUrl : default_hero_image }}" class="header-content__image" />
+        <div class="header-content__overlay"></div>
+        <div class="header-content__text">
+            <h1 style="max-width:850px">
+                {{ title|raw }}
+            </h1>
+            {% if description is defined %}
+                <p>
+                    {{ description|raw }}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</header>

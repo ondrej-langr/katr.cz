@@ -1,0 +1,17 @@
+{% for dotation in dotationList %}
+  <div class="blog-box dotations">
+    <div>
+      <span class="date-main">{{ dotation.date|date('d.m. Y') }}</span>
+      <h3>
+        {{ dotation.title }}
+      </h3>
+    </div>
+    <a class="link" href="api/entry-types/files/items/{{ dotation.file }}/raw" {% if (dotation.openInNewTab) %} target="_blank" {% endif %} rel="noopener noreferrer">
+      Zobrazit soubor
+    </a>
+  </div>
+{% endfor %}
+
+{% if (dotationList|length) == 0 %}
+  Zatím žádné dotace
+{% endif %}

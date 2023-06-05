@@ -1,0 +1,30 @@
+{% extends '@modules:katr/layouts/site-layout.twig' %}
+
+{% block seoTitle %}
+  {{ data.title }}
+{% endblock %}
+
+{% block title %}
+  {{ data.title }}
+{% endblock %}
+
+{% block description %}
+  {{ data.description }}
+{% endblock %}
+
+{% block heroImageUrl %}
+  {% if data.hero_image %}
+    {% set heroImage = image(data.hero_image, 1320) %}
+    {{ heroImage.src }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class="service">
+    <div class="service-content">
+      {% include '@modules:katr/components/BlocksRenderer.twig' with {
+        blocks: data.content.blocks
+      } %}
+    </div>
+  </div>
+{% endblock %}

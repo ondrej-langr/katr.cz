@@ -1,4 +1,4 @@
-import './styles/index.scss'
+import './index.scss'
 import '@fortawesome/fontawesome-free/js/all'
 import { initNavLogic } from './navigation'
 import Zooming from 'zooming'
