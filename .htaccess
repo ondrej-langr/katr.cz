@@ -5,3 +5,7 @@ ErrorDocument 404 /public/index.php
 
 RewriteCond %{REQUEST_URI} !^/public
 RewriteRule (.*) public/$1 [L,QSA]
+
+RewriteCond %{HTTP_HOST} ^katr.cz$ [NC]
+RewriteCond %{HTTP_HOST} !^test.katr.cz$ [NC]
+RewriteRule (.*) https://www.katr.cz/$1 [R=301,L] 
