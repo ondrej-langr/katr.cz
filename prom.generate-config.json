@@ -302,7 +302,7 @@
             "editable": true,
             "unique": false,
             "hide": false,
-            "translations": false,
+            "translations": true,
             "type": "string",
             "title": "Telefon"
           },
@@ -311,7 +311,7 @@
             "editable": true,
             "unique": false,
             "hide": false,
-            "translations": false,
+            "translations": true,
             "type": "string",
             "title": "Druhý telefon"
           },

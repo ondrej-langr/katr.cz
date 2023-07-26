@@ -81,7 +81,7 @@ class Contacts extends Model
       'required' => false,
       'unique' => false,
       'editable' => true,
-      'translations' => false,
+      'translations' => true,
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
@@ -96,7 +96,7 @@ class Contacts extends Model
       'required' => false,
       'unique' => false,
       'editable' => true,
-      'translations' => false,
+      'translations' => true,
       'admin' => [
         'isHidden' => false,
         'editor' => ['placement' => 'main'],
