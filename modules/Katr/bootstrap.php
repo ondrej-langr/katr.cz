@@ -2,7 +2,7 @@
 // In this file you can tell what this module contains or have here something that should be loaded before your models, routes, ..etc
 
 use DI\Container;
-use Slim\Psr7\Response;
+use GuzzleHttp\Psr7\Response;
 use PromCMS\Core\Config;
 use PromCMS\Core\Models\Settings;
 use PromCMS\Core\Services\LocalizationService;
