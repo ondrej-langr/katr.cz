@@ -2,9 +2,12 @@
 // In this file you can tell what this module contains or have here something that should be loaded before your models, routes, ..etc
 
 use DI\Container;
+use Slim\Psr7\Response;
 use PromCMS\Core\Config;
 use PromCMS\Core\Models\Settings;
 use PromCMS\Core\Services\LocalizationService;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use PromCMS\Core\Utils;
 use Slim\App;
 
@@ -234,6 +237,22 @@ function connectGalleries($content = []): array
 return function (App $app) {
   $container = $app->getContainer();
   $utils = $container->get(Utils::class);
+
+  $beforeMiddleware = function (Request $request, RequestHandler $handler) {
+    $response = $handler->handle($request);
+
+    // redirect to www everytime
+    if ($request->getUri()->getHost() === "katr.cz") {
+      $response = new Response(302);
+      $uri = $request->getUri()->withHost("www.katr.cz")->withPort(null);
+
+      return $response->withHeader("Location", $uri->__toString());
+    }
+
+    return $response;
+  };
+
+  $app->add($beforeMiddleware);
 
   $utils->autoloadControllers(__DIR__);
 };
