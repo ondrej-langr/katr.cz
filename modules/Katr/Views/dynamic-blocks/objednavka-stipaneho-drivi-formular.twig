@@ -1,0 +1,178 @@
+{% set languageWithFallback = language ? language : defaultLanguage %}
+{% set labels = stipaneDrivi.form.text[languageWithFallback] %}
+{% set form = stipaneDrivi.form %}
+
+<div class="my-5">
+  <form role="form"
+    hx-post="/{{ language }}/sluzby/stipane-drivy/objednavka"
+    hx-swap="outerHTML">
+    {% if success %}
+      <h2 class="text-center">
+        {{ labels.thankYou }}
+      </h2>
+    {% else %}
+      <h2>
+        {{ labels.title }}
+      </h2>
+      <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around left">
+        <label for="name">{{ labels.name }} *</label>
+        <input required
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          autocomplete="name"
+          placeholder="{{ labels.name }}"
+          aria-describedby="name"
+          value="{{ form.defaultValues.name }}" />
+        <small class="form-error">{{ form.errorMessages['name'] }}</small>
+
+        <label for="address">{{ labels.address }} *</label>
+        <input required
+          type="text"
+          class="form-control"
+          id="address"
+          name="address"
+          autocomplete="address"
+          placeholder="{{ labels.address }}"
+          aria-describedby="name"
+          value="{{ form.defaultValues.address }}" />
+        <small class="form-error">{{ form.errorMessages.address }}</small>
+
+        <label for="telephone">Telefon *</label>
+        <input required
+          type="tel"
+          autocomplete="tel"
+          class="form-control"
+          id="telephone"
+          name="telephone"
+          placeholder="+420123456789"
+          aria-describedby="telephone"
+          value="{{ form.defaultValues.telephone }}" />
+        <small class="form-error">{{ form.errorMessages.telephone }}</small>
+
+        <label for="email">E-mail *</label>
+        <input required
+          type="email"
+          autocomplete="email"
+          class="form-control"
+          id="email"
+          name="email"
+          placeholder="E-mail"
+          aria-describedby="email"
+          value="{{ form.defaultValues.email }}" />
+        <small class="form-error">{{ form.errorMessages['email'] }}</small>
+      </div>
+      <div class="col-12 col-lg-6 col-md-6 col-sm-12 col-xl-6 col-xxl-6 input-around right">
+        <label for="type-of-wood">{{ labels.options.typeOfWood }} *</label>
+        <select required class="form-control" name="type-of-wood">
+          <option value="">
+            {{ labels.options.default }}
+          </option>
+          {% for option in stipaneDrivi.form.options.typeOfWood %}
+            <option {{
+              form.defaultValues['type-of-wood'] == option.value
+                ? 'selected'
+                : ''
+              }}
+              value="{{ option.value }}">
+              {{ option.value }}
+            </option>
+          {% endfor %}
+        </select>
+        <small class="form-error">
+          {{ form.errorMessages['type-of-wood'] }}
+        </small>
+
+        <label for="length-of-wood">{{ labels.options.lengths }} *</label>
+        <select required class="form-control" name="length-of-wood">
+          <option value="">
+            {{ labels.options.default }}
+          </option>
+          {% for option in stipaneDrivi.form.options.lengths %}
+            <option {{
+              form.defaultValues['length-of-wood'] == option.value
+                ? 'selected'
+                : ''
+              }}
+              value="{{ option.value }}">
+              {{ option.value }}
+            </option>
+          {% endfor %}
+        </select>
+        <small class="form-error">
+          {{ form.errorMessages['length-of-wood'] }}
+        </small>
+
+        <div class="d-sm-flex justify-content-between">
+          <div class="col-sm-8">
+            <label for="pieces-of-wood">{{ labels.options.pieces }} *</label>
+            <select required class="form-control" name="pieces-of-wood">
+              <option value="">
+                {{ labels.options.default }}
+              </option>
+              {% for option in stipaneDrivi.form.options.pieces %}
+                <option {{
+                  form.defaultValues['pieces-of-wood'] == option.value
+                    ? 'selected'
+                    : ''
+                  }}
+                  value="{{ option.value }}">
+                  {{ option.value }}
+                </option>
+              {% endfor %}
+            </select>
+            <small class="form-error">
+              {{ form.errorMessages['pieces-of-wood'] }}
+            </small>
+          </div>
+          <div class="col-sm-3">
+            <label for="unit-of-wood">{{ labels.options.unit }} *</label>
+            <select required class="form-control" name="unit-of-wood">
+              <option value="">
+                {{ labels.options.default }}
+              </option>
+              {% for option in stipaneDrivi.form.options.unit %}
+                <option {{
+                  form.defaultValues['unit-of-wood'] == option.value
+                    ? 'selected'
+                    : ''
+                  }}
+                  value="{{ option.value }}">
+                  {{ option.value }}
+                </option>
+              {% endfor %}
+            </select>
+            <small class="form-error">
+              {{ form.errorMessages['unit-of-wood'] }}
+            </small>
+          </div>
+        </div>
+
+        <label for="note">{{ labels.note }}</label>
+        <textarea class="form-control" name="note" id="note" rows="6">{{ form.defaultValues.note }}</textarea>
+        <small class="form-error">{{ form.errorMessages.note }}</small>
+      </div>
+      <div class="col-12 mt-4">
+        <div class="h-captcha"
+          data-sitekey="c9efc57f-acc2-46a0-a19d-53e4b684e8ce"></div>
+      </div>
+
+      {% if form.errorMessages['h-captcha-response'] %}
+        <div class="col-12 mb-3 alert alert-danger" role="alert">
+          {{ form.errorMessages['h-captcha-response'] }}
+        </div>
+      {% endif %}
+
+
+      <div class="d-flex flex-wrap col-12 align-items-center justify-items-center gap-4 mt-4">
+        <button type="submit" class="btn mt-0">{{ labels.send }}</button>
+
+        <div class="d-block">
+          <input required type="checkbox" id="gdpr" name="gdpr"  />
+          <label class="inline mb-0" for="gdpr">{{ labels.gdpr.consent}}</label>
+        </div>
+      </div>
+    {% endif %}
+  </form>
+</div>

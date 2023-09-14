@@ -1,0 +1,43 @@
+<p>
+  <b>Dobrý den,</b>
+</p>
+<p>
+  Na stránce katr.cz byla provedena objednávka štípaného dříví s těmito údaji:
+</p>
+
+<br />
+<p>
+  Kontaktní údaje
+</p>
+<ul>
+  <li>Jméno: {{ data.name }}</li>
+  <li>Adresa: {{ data.address }}</li>
+  <li>Telefon: {{ data.telephone }}</li>
+  <li>Email: {{ data.email }}</li>
+</ul>
+
+<br />
+<p>
+  Poptávaný sortiment
+</p>
+<ul>
+  <li>Dřevina: {{ data['type-of-wood'] }}</li>
+  <li>Délka: {{ data['length-of-wood'] }}</li>
+  <li>Množství: {{ data['pieces-of-wood'] }}</li>
+  <li>Jednotky: {{ data['unit-of-wood'] }}</li>
+</ul>
+
+<br />
+<p>
+  Poznámka
+</p>
+
+<ul>
+  <li>{{ data.note }}</li>
+</ul>
+
+<br /><br />
+
+<p>
+  Hezký den
+</p>

@@ -23,6 +23,7 @@
     "alpinejs": "^3.12.0",
     "bootstrap": "^5.2.3",
     "find-config": "^1.0.0",
+    "htmx.org": "^1.9.5",
     "photoswipe": "^5.3.7",
     "zooming": "^2.1.1"
   },

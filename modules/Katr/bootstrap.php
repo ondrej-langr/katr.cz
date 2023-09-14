@@ -22,6 +22,23 @@ if (!function_exists("str_includes")) {
   }
 }
 
+function checkCaptcha ($captcha) {
+  $captchaData = [
+    'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
+    'response' => $captcha,
+  ];
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $captchaResponse = curl_exec($ch);
+  $captchaResponseData = json_decode($captchaResponse);
+
+  return $captchaResponseData->success;
+}
+
 $settings = [];
 function getOption($id, $onLanguage = null)
 {

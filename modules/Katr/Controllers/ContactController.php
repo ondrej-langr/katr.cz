@@ -50,22 +50,8 @@ class ContactController
         isset($data['message']) &&
         !empty($data['message'])
       ) {
-        // Verify recaptcha
-        $captchaData = [
-          'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
-          'response' => $data['h-captcha-response'],
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $captchaResponse = curl_exec($ch);
-        $captchaResponseData = json_decode($captchaResponse);
-
         // if capcha is correct then proceed
-        if ($captchaResponseData->success) {
+        if (checkCaptcha($data['h-captcha-response'])) {
           $emailService->isHtml();
           $emailService->addAddress('sekretariat@katr.cz');
           $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
