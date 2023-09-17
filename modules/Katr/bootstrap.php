@@ -29,6 +29,7 @@ function checkCaptcha ($captcha, $returnResponse = false) {
   ];
 
   $ch = curl_init();
+  file_put_contents(__DIR__ . "/text.txt", $_ENV['SECURITY_HCAPTCHA_SECRET']);
   curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
   curl_setopt($ch, CURLOPT_POST, true);
   curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
