@@ -5,7 +5,7 @@ use Rakit\Validation\Validator;
 
 function filterEmpty ($array) {
     return array_filter($array, function ($value) {
-        return is_string($value) && strlen($value) > 0;
+        return is_string($value["value"]) && strlen($value["value"]) > 0;
     });
 }
 
