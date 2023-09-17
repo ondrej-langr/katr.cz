@@ -3,6 +3,12 @@
 use DI\Container;
 use Rakit\Validation\Validator;
 
+function filterEmpty ($array) {
+    return array_filter($array, function ($value) {
+        return is_string($value) && strlen($value) > 0;
+    });
+}
+
 function getTimberComponentData($language)
 {
     $lengthsOptions = (getOption('stipane_drivi-delky', $language) ?? ['content' => ['data' => []]])['content']['data'];
@@ -13,10 +19,10 @@ function getTimberComponentData($language)
     return [
         'form' => [
             'options' => [
-                'typeOfWood' => $typeOfWoodOptions,
-                'lengths' => $lengthsOptions,
-                'pieces' => $piecesOptions,
-                'unit' => $unitOptions,
+                'typeOfWood' => filterEmpty($typeOfWoodOptions),
+                'lengths' => filterEmpty($lengthsOptions),
+                'pieces' => filterEmpty($piecesOptions),
+                'unit' => filterEmpty($unitOptions),
             ],
             'text' => [
                 'cs' => [
