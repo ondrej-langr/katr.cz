@@ -22,7 +22,7 @@ if (!function_exists("str_includes")) {
   }
 }
 
-function checkCaptcha ($captcha) {
+function checkCaptcha ($captcha, $returnResponse = false) {
   $captchaData = [
     'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
     'response' => $captcha,
@@ -35,6 +35,10 @@ function checkCaptcha ($captcha) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $captchaResponse = curl_exec($ch);
   $captchaResponseData = json_decode($captchaResponse);
+
+  if ($returnResponse) {
+    return $captchaResponse;
+  }
 
   return $captchaResponseData->success;
 }
