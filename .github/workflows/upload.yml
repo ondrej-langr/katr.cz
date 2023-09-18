@@ -53,7 +53,7 @@ jobs:
                   MORE_LANG="en"
 
                   # Mail
-                  MAIL_HOST=email02.active24.com
+                  MAIL_HOST=email.active24.com
                   MAIL_PORT=465
                   MAIL_USER=${MAIL_USER}
                   MAIL_PASS=${MAIL_PASS}
