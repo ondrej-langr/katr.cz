@@ -154,8 +154,14 @@
         <small class="form-error">{{ form.errorMessages.note }}</small>
       </div>
       <div class="col-12 mt-4">
-        <div class="h-captcha"
-          data-sitekey="c9efc57f-acc2-46a0-a19d-53e4b684e8ce"></div>
+        {% set captchaId = random() %}
+        <div id="captcha-{{captchaId}}"></div>
+
+        <script type="text/javascript">
+          hcaptcha.render('captcha-{{captchaId}}', {
+            sitekey: "c9efc57f-acc2-46a0-a19d-53e4b684e8ce",
+          });
+        </script>
       </div>
 
       {% if form.errorMessages['h-captcha-response'] %}
