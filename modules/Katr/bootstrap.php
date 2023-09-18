@@ -22,24 +22,19 @@ if (!function_exists("str_includes")) {
   }
 }
 
-function checkCaptcha ($captcha, $returnResponse = false) {
+function isCaptchaResponseValid ($captcha) {
   $captchaData = [
     'secret' => $_ENV['SECURITY_HCAPTCHA_SECRET'],
     'response' => $captcha,
   ];
 
   $ch = curl_init();
-  file_put_contents(__DIR__ . "/text.txt", $_ENV['SECURITY_HCAPTCHA_SECRET']);
   curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/siteverify');
   curl_setopt($ch, CURLOPT_POST, true);
   curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($captchaData));
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $captchaResponse = curl_exec($ch);
   $captchaResponseData = json_decode($captchaResponse);
-
-  if ($returnResponse) {
-    return $captchaResponse;
-  }
 
   return $captchaResponseData->success;
 }

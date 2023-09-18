@@ -149,8 +149,9 @@ class ServicesController
           'email' => 'Musí být validní emailová adresa',
           'name:regex' => 'Celé jméno, prosím',
         ] : []);
+        $hcaptchaResponse = $data['h-captcha-response'] ?? '';
         $schemaFailed = $validateResult->fails();
-        $captchaFailed = isset($data['h-captcha-response']) ? checkCaptcha($data['h-captcha-response']) : false;
+        $captchaFailed = $hcaptchaResponse ? !isCaptchaResponseValid($hcaptchaResponse) : true;
 
         if ($schemaFailed || $captchaFailed) {
             $twig->render(
@@ -160,7 +161,7 @@ class ServicesController
                     'stipaneDrivi' => array_merge($componentData["stipaneDrivi"], [
                       "form" => array_merge($componentData["stipaneDrivi"]['form'], [
                         'defaultValues' => $data,
-                        'errorMessages' => array_merge($validateResult->errors()->firstOfAll(), $captchaFailed ? ['h-captcha-response' => 'Špatná captcha (' . (isset($data['h-captcha-response']) ? checkCaptcha($data['h-captcha-response'], true) : "isnotset"). ')' ] : []),
+                        'errorMessages' => array_merge($validateResult->errors()->firstOfAll(), $captchaFailed ? ['h-captcha-response' => 'Špatná captcha' ] : []),
                       ])
                     ]),
                 ]),

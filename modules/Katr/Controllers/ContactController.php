@@ -51,7 +51,7 @@ class ContactController
         !empty($data['message'])
       ) {
         // if capcha is correct then proceed
-        if (checkCaptcha($data['h-captcha-response'])) {
+        if (isCaptchaResponseValid($data['h-captcha-response'])) {
           $emailService->isHtml();
           $emailService->addAddress('sekretariat@katr.cz');
           $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
