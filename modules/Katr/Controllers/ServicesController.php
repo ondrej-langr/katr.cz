@@ -28,7 +28,7 @@ function getTimberComponentData($language)
                 'cs' => [
                     'title' => 'Objednávkový formulář štípaného dříví',
                     'name' => 'Jméno',
-                    'address' => 'Adresa Dodání',
+                    'address' => 'Adresa dodání',
                     'note' => 'Poznámka',
                     'send' => 'Odeslat',
                     'thankYou' => 'Děkujeme za Váš zájem. Brzo Vás budeme kontaktovat.',
