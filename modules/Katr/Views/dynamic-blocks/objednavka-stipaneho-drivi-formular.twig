@@ -1,15 +1,23 @@
 {% set languageWithFallback = language ? language : defaultLanguage %}
 {% set labels = stipaneDrivi.form.text[languageWithFallback] %}
 {% set form = stipaneDrivi.form %}
+{% set formId = random() %}
 
 <div class="my-5">
   <form role="form"
     hx-post="/{{ language }}/sluzby/stipane-drivy/objednavka"
     hx-swap="outerHTML">
     {% if success %}
-      <h2 class="text-center">
+      <h2 class="text-center" id="thank-you-message-{{formId}}">
         {{ labels.thankYou }}
       </h2>
+      <script>
+        document.getElementById("thank-you-message-{{formId}}").scrollIntoView({
+          inline: 'center',
+          block: 'center',
+          behavior: 'smooth'
+        });
+      </script>
     {% else %}
       <h2>
         {{ labels.title }}
@@ -154,11 +162,10 @@
         <small class="form-error">{{ form.errorMessages.note }}</small>
       </div>
       <div class="col-12 mt-4">
-        {% set captchaId = random() %}
-        <div id="captcha-{{captchaId}}"></div>
+        <div id="captcha-{{formId}}"></div>
 
         <script type="text/javascript">
-          hcaptcha.render('captcha-{{captchaId}}', {
+          hcaptcha.render('captcha-{{ formId }}', {
             sitekey: "c9efc57f-acc2-46a0-a19d-53e4b684e8ce",
           });
         </script>
