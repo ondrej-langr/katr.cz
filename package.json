@@ -5,14 +5,15 @@
   "license": "MIT",
   "scripts": {
     "build": "vite build --emptyOutDir",
-    "sync-cms": "npx @prom-cms/cli generate-cms --skip=*,!models,!admin",
+    "prom:update": "npx @prom-cms/cli project update",
     "dev": "vite"
   },
   "devDependencies": {
-    "@prettier/plugin-php": "^0.19.4",
-    "@prom-cms/vite-plugin": "^0.6.3",
-    "@prom-cms/cli": "^0.19.3",
-    "prettier": "^2",
+    "@prettier/plugin-php": "^0.20.1",
+    "@prom-cms/vite-plugin": "^0.7.0",
+    "@prom-cms/cli": "^0.20.2",
+    "@prom-cms/admin": "^0.12.3",
+    "prettier": "^3",
     "prettier-plugin-twig-melody": "^0.4.6",
     "typescript": "^4.9.5",
     "vite": "^3",
@@ -23,6 +24,7 @@
     "alpinejs": "^3.12.0",
     "bootstrap": "^5.2.3",
     "find-config": "^1.0.0",
+    "htmx.org": "^1.9.5",
     "photoswipe": "^5.3.7",
     "zooming": "^2.1.1"
   },

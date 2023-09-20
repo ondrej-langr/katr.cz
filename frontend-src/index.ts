@@ -2,6 +2,7 @@ import './index.scss'
 import '@fortawesome/fontawesome-free/js/all'
 import { initNavLogic } from './navigation'
 import Zooming from 'zooming'
+import 'htmx.org'
 import { lightbox } from './lib/photoswipe'
 
 declare global {

@@ -131,25 +131,20 @@ class DefaultController
       return $response->withStatus(404);
     }
 
+    $pageAsJson = json_encode(repairBlockContent($page));
     // TODO something more smart?
-    if (
-      str_includes(
-        json_encode(repairBlockContent($page)),
-        'blog-page-items-list'
-      )
-    ) {
+    if (str_includes($pageAsJson, 'blog-page-items-list')) {
       $page['posts'] = \Posts::setLanguage($language)
         ->orderBy(['created_at' => 'desc'])
         ->where(['is_published', '=', true])
         ->getMany();
-    } else if (str_includes(
-      json_encode(repairBlockContent($page)),
-      'dotation-items-list'
-    )) {
+    } 
+   
+    if (str_includes($pageAsJson, 'dotation-items-list')) {
       $page['dotationList'] = \Dotations::setLanguage($language)
         ->orderBy(['created_at' => 'desc'])
         ->getMany();
-    }
+    } 
  
     $twig->render(
       $response,

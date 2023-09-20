@@ -1,0 +1,365 @@
+{
+  "project": {
+    "name": "Katr prom",
+    "url": "https://katr.cz",
+    "security": {
+      "roles": [
+        {
+          "hasAccessToAdmin": true,
+          "name": "Editor",
+          "modelPermissions": {
+            "posts": {
+              "c": 0,
+              "r": 0,
+              "u": "allow-everything",
+              "d": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "database": {
+    "models": {
+      "posts": {
+        "title": "Články",
+        "softDelete": false,
+        "timestamp": true,
+        "sorting": true,
+        "sharable": true,
+        "draftable": true,
+        "ignoreSeeding": false,
+        "ownable": true,
+        "tableName": "posts",
+        "intl": true,
+        "icon": "Archive",
+        "preset": "post",
+        "columns": {
+          "description": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          }
+        }
+      },
+      "dotations": {
+        "title": "Dotace",
+        "tableName": "dotations",
+        "icon": "ReportMoney",
+        "columns": {
+          "date": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Datum"
+          },
+          "title": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "type": "string",
+            "title": "Pozice"
+          },
+          "file": {
+            "type": "file",
+            "title": "Soubor",
+            "translations": false,
+            "admin": {
+              "isHidden": true
+            }
+          },
+          "openInNewTab": {
+            "type": "boolean",
+            "title": "Otevřít soubor v novém okně",
+            "default": false
+          }
+        }
+      },
+      "pages": {
+        "title": "Stránky",
+        "softDelete": false,
+        "timestamp": true,
+        "sorting": true,
+        "sharable": true,
+        "draftable": true,
+        "ignoreSeeding": false,
+        "ownable": true,
+        "tableName": "pages",
+        "intl": true,
+        "icon": "Notebook",
+        "preset": "post",
+        "columns": {
+          "showInMenu": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": false,
+            "type": "boolean",
+            "title": "Zobrazit v menu",
+            "default": false,
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          },
+          "hero_image": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": false,
+            "type": "file",
+            "title": "Úvodní obrázek",
+            "adminHidden": true,
+            "typeFilter": "image",
+            "admin": {
+              "fieldType": "big-image",
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          },
+          "excerpt": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Krátký popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          },
+          "description": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          }
+        }
+      },
+      "positions": {
+        "title": "Pozice",
+        "softDelete": false,
+        "timestamp": false,
+        "sorting": true,
+        "sharable": true,
+        "draftable": false,
+        "ignoreSeeding": false,
+        "ownable": true,
+        "tableName": "positions",
+        "intl": true,
+        "icon": "BuildingFactory",
+        "permissions": false,
+        "preset": "post",
+        "columns": {
+          "description": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Popisek"
+          }
+        },
+        "admin": {
+          "layout": "post-like"
+        }
+      },
+      "services": {
+        "title": "Služby",
+        "softDelete": false,
+        "timestamp": false,
+        "sorting": true,
+        "sharable": true,
+        "draftable": false,
+        "ignoreSeeding": false,
+        "ownable": true,
+        "tableName": "services",
+        "intl": true,
+        "icon": "Briefcase",
+        "preset": "post",
+        "columns": {
+          "hero_image": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": false,
+            "type": "file",
+            "title": "Úvodní obrázek",
+            "adminHidden": true,
+            "typeFilter": "image",
+            "admin": {
+              "fieldType": "big-image",
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          },
+          "excerpt": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Krátký popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          },
+          "description": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "longText",
+            "title": "Popisek",
+            "admin": {
+              "editor": {
+                "placement": "aside"
+              }
+            }
+          }
+        }
+      },
+      "contacts": {
+        "title": "Kontakty",
+        "softDelete": false,
+        "timestamp": false,
+        "sorting": true,
+        "sharable": true,
+        "draftable": false,
+        "ignoreSeeding": false,
+        "ownable": true,
+        "tableName": "contacts",
+        "intl": true,
+        "icon": "Phone",
+        "permissions": false,
+        "columns": {
+          "position": {
+            "required": true,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Pozice"
+          },
+          "category": {
+            "required": true,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": false,
+            "multiple": false,
+            "foreignKey": "id",
+            "fill": false,
+            "type": "relationship",
+            "labelConstructor": "name",
+            "targetModel": "contactPositions",
+            "title": "Kategorie"
+          },
+          "name": {
+            "required": true,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Jméno"
+          },
+          "first_telephone": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Telefon"
+          },
+          "second_telephone": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Druhý telefon"
+          },
+          "email": {
+            "required": false,
+            "editable": true,
+            "unique": false,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Email"
+          }
+        }
+      },
+      "contactPositions": {
+        "title": "Pozice kontaktů",
+        "softDelete": false,
+        "timestamp": false,
+        "sorting": true,
+        "sharable": true,
+        "draftable": false,
+        "ownable": true,
+        "tableName": "contactPositions",
+        "intl": true,
+        "icon": "Speakerphone",
+        "columns": {
+          "name": {
+            "required": true,
+            "editable": true,
+            "unique": true,
+            "hide": false,
+            "translations": true,
+            "type": "string",
+            "title": "Název"
+          },
+          "slug": {
+            "required": false,
+            "editable": false,
+            "unique": true,
+            "hide": false,
+            "translations": true,
+            "type": "slug",
+            "of": "name",
+            "title": "Slug",
+            "adminHidden": true
+          }
+        }
+      }
+    }
+  }
+}
