@@ -186,15 +186,16 @@ function cleanJson($value)
 }
 
 
-$specialContentKeys = [
-    '{logo-mastercard}' => '<img src="/assets/images/logo-mastercard.png" width="40" height="31" title="MasterCard Logo" style="margin: 0 7px" />',
-    '{logo-maestro}' => '<img src="/assets/images/logo-maestro.png" width="40" height="31" title="Maestro Logo" style="margin: 0 7px" />',
-    '{logo-visa}' => '<img src="/assets/images/logo-visa.png" width="48" height="19" title="Visa Logo" style="margin: 0 7px" />',
-];
 function replaceSpecialContent($content) {
     if ($content === false) {
         return false;
     }
+
+    $specialContentKeys = [
+        '{logo-mastercard}' => '<img src="/assets/images/logo-mastercard.png" width="40" height="31" title="MasterCard Logo" style="margin: 0 7px" />',
+        '{logo-maestro}' => '<img src="/assets/images/logo-maestro.png" width="40" height="31" title="Maestro Logo" style="margin: 0 7px" />',
+        '{logo-visa}' => '<img src="/assets/images/logo-visa.png" width="48" height="19" title="Visa Logo" style="margin: 0 7px" />',
+    ];
 
     $newContent = $content;
     foreach ($specialContentKeys as $key => $value) {
