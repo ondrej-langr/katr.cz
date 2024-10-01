@@ -185,21 +185,39 @@ function cleanJson($value)
   return json_decode(json_encode($value), true);
 }
 
+
+$specialContentKeys = [
+    '{logo-mastercard}' => '<img src="/assets/images/logo-mastercard.png" width="40" height="31" title="MasterCard Logo" style="margin: 0 7px" />',
+    '{logo-maestro}' => '<img src="/assets/images/logo-maestro.png" width="40" height="31" title="Maestro Logo" style="margin: 0 7px" />',
+    '{logo-visa}' => '<img src="/assets/images/logo-visa.png" width="48" height="19" title="Visa Logo" style="margin: 0 7px" />',
+];
+function replaceSpecialContent(string|false $content) {
+    if ($content === false) {
+        return false;
+    }
+
+    $newContent = $content;
+    foreach ($specialContentKeys as $key => $value) {
+        $newContent = str_replace($key, $value, $newContent);
+    }
+    return $newContent;
+}
+
 function repairBlockContent($item)
 {
   if (is_string($item['content'])) {
     $content = json_decode($item['content']);
 
     return json_decode(
-      json_encode(
+      replaceSpecialContent(json_encode(
         array_merge($item, [
           'content' => $content,
         ])
-      ),
+      )),
       true
     );
   } else {
-    return json_decode(json_encode($item), true);
+    return json_decode(replaceSpecialContent(json_encode($item)), true);
   }
 }
 
