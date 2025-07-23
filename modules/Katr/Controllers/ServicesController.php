@@ -40,7 +40,7 @@ function getTimberComponentData($language)
                         'unit' => 'Jednotky',
                     ],
                     'gdpr' => [
-                        'consent' => "Souhlasím se zpracováním údajů"
+                        'consent' => "Souhlasím se zpracováním údajů a obchodními podmínkam"
                     ]
                 ],
                 // TODO: translate
