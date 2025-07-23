@@ -10,3 +10,4 @@ backup
 uploads
 locales
 .database
+.DS_Store
