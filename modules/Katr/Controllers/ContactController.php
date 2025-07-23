@@ -64,6 +64,17 @@ class ContactController
             ]);
 
           $emailSuccess = $emailService->send();
+
+          if ($emailSuccess) {
+            $emailService->isHtml();
+            $emailService->addAddress($data['email']);
+            $emailService->Subject = 'Děkujeme za objednávku na katr.cz';
+            $emailService->Body = $twig
+                ->getEnvironment()
+                ->render('@modules:katr/email/contact-form-confirm.twig', []);
+
+            $emailService->send();
+          }
         }
 
         return $response
