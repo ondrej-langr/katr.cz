@@ -52,29 +52,34 @@ class ContactController
       ) {
         // if capcha is correct then proceed
         if (isCaptchaResponseValid($data['h-captcha-response'])) {
+            $recipient = $data['email'];
+            $recipientAdmin = 'sekretariat@katr.cz';
+          
+
           $emailService->isHtml();
-          $emailService->addAddress('sekretariat@katr.cz');
+          $emailService->setFrom('sekretariat@katr.cz', 'Katr.cz');
+          $emailService->addAddress($recipientAdmin);
           $emailService->Subject = 'Nový dotaz v kontaktním formuláři katr.cz';
           $emailService->Body = $twig
             ->getEnvironment()
             ->render('@modules:katr/email/contact-form.twig', [
-              'email' => $data['email'],
+              'email' => $recipient,
               'name' => $data['name'],
               'message' => $data['message'],
             ]);
 
           $emailSuccess = $emailService->send();
 
-          if ($emailSuccess) {
             $emailService->isHtml();
-            $emailService->addAddress($data['email']);
+            $emailService->clearAllRecipients();    
+            $emailService->setFrom('sekretariat@katr.cz', 'Katr.cz');
+            $emailService->addAddress($recipient);
             $emailService->Subject = 'Děkujeme za objednávku na katr.cz';
             $emailService->Body = $twig
                 ->getEnvironment()
                 ->render('@modules:katr/email/contact-form-confirm.twig', []);
-
+    
             $emailService->send();
-          }
         }
 
         return $response
