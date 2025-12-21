@@ -176,6 +176,16 @@ class ServicesController
         $emailService->Body = $twig->getEnvironment()->render('@modules:katr/email/timber-form.twig', [ "data" => $data ]);
         $emailService->send();
 
+        $emailService->isHtml();
+        $emailService->clearAllRecipients();
+        $emailService->setFrom('sekretariat@katr.cz', 'Katr.cz');
+        $emailService->addAddress($data['email']);
+        $emailService->Subject = 'Děkujeme za objednávku na katr.cz';
+        $emailService->Body = $twig
+            ->getEnvironment()
+            ->render('@modules:katr/email/timber-form-confirm.twig', []);
+        $emailService->send();
+
         $twig->render($response, $componentPath, array_merge($componentData, [
           "success" => true
         ]));

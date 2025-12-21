@@ -54,7 +54,7 @@ class ContactController
         if (isCaptchaResponseValid($data['h-captcha-response'])) {
             $recipient = $data['email'];
             $recipientAdmin = 'sekretariat@katr.cz';
-          
+
 
           $emailService->isHtml();
           $emailService->setFrom('sekretariat@katr.cz', 'Katr.cz');
@@ -71,14 +71,14 @@ class ContactController
           $emailSuccess = $emailService->send();
 
             $emailService->isHtml();
-            $emailService->clearAllRecipients();    
+            $emailService->clearAllRecipients();
             $emailService->setFrom('sekretariat@katr.cz', 'Katr.cz');
             $emailService->addAddress($recipient);
-            $emailService->Subject = 'Děkujeme za objednávku na katr.cz';
+            $emailService->Subject = 'Potvrzení odeslaného dotazu na katr.cz';
             $emailService->Body = $twig
                 ->getEnvironment()
                 ->render('@modules:katr/email/contact-form-confirm.twig', []);
-    
+
             $emailService->send();
         }
 
